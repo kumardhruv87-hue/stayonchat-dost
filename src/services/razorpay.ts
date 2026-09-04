@@ -13,9 +13,9 @@ import { whatsappService } from './whatsapp.js';
 
 dotenv.config();
 
-const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
-const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || '';
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_TY25t7Ul2SDY2v';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'adoI8E18s8hax1YxiQg34azF';
+const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || 'dost_rzp_secure_webhook_2026';
 
 // Razorpay client instance (lazily initialized if keys present)
 let rzp: Razorpay | null = null;
