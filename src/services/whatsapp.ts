@@ -65,7 +65,7 @@ export const whatsappService = {
     bodyText: string,
     buttons: WhatsAppButton[],
     headerText?: string,
-    footerText: string = 'MunshiJi • stayonchat.com'
+    footerText: string = 'AI DOST • stayonchat.com'
   ): Promise<boolean> {
     try {
       const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
@@ -276,7 +276,7 @@ export const whatsappService = {
     } catch (error: any) {
       // If template not yet verified or active session exists, fallback to text message
       console.warn('Template send failed, falling back to direct text:', error.response?.data?.error?.message || error.message);
-      const fallbackText = `⚠️ *MunshiJi Expiry Alert*\n\nBhaiya, aapka *${docTitle}* agle *${daysLeft} din* (${expiryDate}) mein expire ho raha hai.\n\nWaqt rehte renew kar lijiye taaki kisi fine ya nuksaan se bacha ja sake! 🙏`;
+      const fallbackText = `⚠️ AI DOST Expiry Alert 🤖✨\n\nDhruv ji, aapka ${docTitle} agle ${daysLeft} din (${expiryDate}) mein expire ho raha hai.\n\nWaqt rehte renew kar lijiye taaki kisi fine ya pareshani se bacha ja sake. 🙏`;
       return await this.sendTextMessage(to, fallbackText);
     }
   },
