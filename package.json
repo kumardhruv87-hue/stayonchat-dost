@@ -1,0 +1,43 @@
+{
+  "name": "munshiji",
+  "version": "1.0.0",
+  "description": "WhatsApp-first AI Digital Locker & Personal Butler (stayonchat.com)",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test:extraction": "tsx src/tests/test-extraction.ts"
+  },
+  "keywords": [
+    "whatsapp",
+    "ai",
+    "gemini",
+    "locker",
+    "munshiji",
+    "stayonchat",
+    "ocr",
+    "reminders"
+  ],
+  "author": "stayonchat.com",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "@supabase/supabase-js": "^2.49.1",
+    "axios": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "razorpay": "^2.9.5",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.9",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
