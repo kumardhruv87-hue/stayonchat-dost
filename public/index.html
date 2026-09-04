@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="hi" class="scroll-smooth">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MunshiJi (मुंशी जी) — Aapka WhatsApp Digital Locker | stayonchat.com</title>
-  <meta name="description" content="MunshiJi aapka AI WhatsApp locker hai. Bill, warranty card, RC, PUC aur insurance ki photo bhejo, expiry se pehle WhatsApp par alert pao." />
+  <title>DOST 🤖 — India's Friendliest WhatsApp AI Companion | stayonchat.com</title>
+  <meta name="description" content="DOST is your all-in-one AI friend on WhatsApp. Encrypted document & PDF locker, instant voice reminders, daily 6 AM astro & safety guidance, and a caring companion." />
+  <link rel="icon" type="image/jpeg" href="/images/dost-logo.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rozha+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -23,11 +24,12 @@
               800: '#065f46',
               900: '#064e3b',
             },
-            jinn: '#6366f1',
+            dostTeal: '#0d9488',
+            dostAmber: '#f59e0b',
           },
           fontFamily: {
             sans: ['Plus Jakarta Sans', 'sans-serif'],
-            serif: ['Rozha One', 'serif'],
+            display: ['Outfit', 'sans-serif'],
           }
         }
       }
@@ -35,147 +37,141 @@
   </script>
   <style>
     .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(229, 231, 235, 0.8);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .hero-gradient {
+      background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, rgba(245, 158, 11, 0.05) 40%, rgba(255, 255, 255, 0) 70%);
     }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-emerald-500 selection:text-white">
 
+  <!-- ================= TOP NOTIFICATION BAR ================= -->
+  <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-amber-600 text-white text-xs py-2 px-4 text-center font-medium">
+    ✨ Meet <span class="font-bold">DOST</span> — India's 1st All-in-One AI Companion on WhatsApp. <a href="https://wa.me/15556681690?text=Hi%20DOST" class="underline ml-1 font-bold hover:text-amber-200">Start Free on WhatsApp &rarr;</a>
+  </div>
+
   <!-- ================= NAVBAR ================= -->
   <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-2 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-xl shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-          🧞‍♂️
-        </div>
+      <a href="#" class="flex items-center gap-3 group">
+        <img src="/images/dost-logo.jpg" alt="DOST Mascot" class="w-10 h-10 rounded-full object-cover shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform" />
         <div>
-          <span class="text-xl font-extrabold tracking-tight text-slate-900">Munshi<span class="text-emerald-600">Ji</span></span>
-          <span class="text-xs block text-slate-400 font-medium -mt-1">by stayonchat.com</span>
+          <span class="text-xl font-extrabold tracking-tight font-display text-slate-900">DOST <span class="text-emerald-600">🤖✨</span></span>
+          <span class="text-[11px] block text-slate-400 font-medium -mt-1">by stayonchat.com</span>
         </div>
       </a>
       <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-        <a href="#features" class="hover:text-emerald-600 transition-colors">Kaise Kaam Karta Hai</a>
+        <a href="#features" class="hover:text-emerald-600 transition-colors">Features</a>
+        <a href="#how-it-works" class="hover:text-emerald-600 transition-colors">How It Works</a>
         <a href="#pricing" class="hover:text-emerald-600 transition-colors">Plans & Pricing</a>
-        <a href="#security" class="hover:text-emerald-600 transition-colors">Privacy Pledge</a>
+        <a href="#security" class="hover:text-emerald-600 transition-colors">Security & Privacy</a>
         <a href="#faq" class="hover:text-emerald-600 transition-colors">FAQ</a>
       </div>
-      <a href="https://wa.me/15556681690?text=Hi%20MunshiJi" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-600/25 transition-all hover:shadow-emerald-600/40">
-        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.058.376-.058c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-        <span>WhatsApp par Shuru Karein</span>
-      </a>
+      <div>
+        <a href="https://wa.me/15556681690?text=Hi%20DOST" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow-md shadow-emerald-600/20 hover:bg-emerald-700 hover:shadow-lg transition-all active:scale-95">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
+          <span>Chat on WhatsApp</span>
+        </a>
+      </div>
     </div>
   </nav>
 
   <!-- ================= HERO SECTION ================= -->
-  <section class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
-    <div class="absolute inset-0 bg-gradient-to-b from-emerald-50/60 via-slate-50 to-white -z-10"></div>
+  <section class="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden hero-gradient">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid lg:grid-cols-12 gap-12 items-center">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
-        <!-- Left Text -->
+        <!-- Left Hero Copy -->
         <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100/80 text-emerald-800 text-xs font-bold uppercase tracking-wider">
-            <span>🧞‍♂️ India's First AI WhatsApp Locker</span>
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            NO APP DOWNLOAD • 100% ON WHATSAPP
           </div>
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
-            Aapka Digital <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Munshi.</span><br/>
-            Kaagaz sambhale, waqt pe yaad dilaye.
+          
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-slate-900 leading-[1.12]">
+            Your AI Best Friend &amp; <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Life Guard</span> on WhatsApp.
           </h1>
-          <p class="text-lg sm:text-xl text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto lg:mx-0">
-            Bill, Warranty Card, Car/Bike RC, Doctor ka Parcha ya LIC Policy — Bas photo khicho aur WhatsApp par bhej do. Expiry se 30 din pehle MunshiJi khud alert bhejega taaki <span class="font-bold text-slate-800">fine aur nuksaan zero</span> rahe!
+          
+          <p class="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            Store critical documents &amp; PDFs with bank-grade safety, set instant voice reminders, receive personalized 6 AM astro &amp; driving guidance, and chat with a wise, caring friend anytime.
           </p>
+
+          <!-- CTAs -->
           <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-            <a href="https://wa.me/15556681690?text=Hi%20MunshiJi" target="_blank" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base shadow-xl shadow-emerald-600/30 hover:shadow-emerald-600/40 hover:-translate-y-0.5 transition-all text-center flex items-center justify-center gap-3">
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.058.376-.058c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-              <span>Muft Shuru Karein (15 Files Free)</span>
+            <a href="https://wa.me/15556681690?text=Hi%20DOST" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-emerald-600 text-white font-bold text-base shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 hover:scale-[1.02] active:scale-95 transition-all">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
+              <span>Say "Hi" on WhatsApp</span>
             </a>
-            <a href="#pricing" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-base border border-slate-300 transition-all text-center">
-              Pricing Dekhein (₹149/saal)
-            </a>
+            <div class="text-xs text-slate-500 flex items-center gap-2">
+              <span class="text-emerald-600 font-bold">✓ 15 Files Free Forever</span>
+              <span>•</span>
+              <span>No Credit Card</span>
+            </div>
           </div>
-          <div class="flex items-center justify-center lg:justify-start gap-6 pt-4 text-xs font-semibold text-slate-500">
-            <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Zero App Download
-            </span>
-            <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> AES-256 Encrypted
-            </span>
-            <span class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> No Credit Card
-            </span>
+
+          <!-- Trust Badges -->
+          <div class="pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-500 font-medium">
+            <div class="flex items-center gap-1.5">
+              <span class="text-emerald-600 text-base">🛡️</span>
+              <span>AES-256 Bit Encryption</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-emerald-600 text-base">⚖️</span>
+              <span>DPDP Act 2023 Compliant</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-emerald-600 text-base">🚫</span>
+              <span>Zero Spam / No Sales Calls</span>
+            </div>
           </div>
         </div>
 
-        <!-- Right WhatsApp Chat Mockup -->
+        <!-- Right Hero: Lovable Mascot + Live WhatsApp Simulator -->
         <div class="lg:col-span-5 relative">
-          <div class="w-full max-w-sm mx-auto bg-slate-900 rounded-[2.5rem] p-3 shadow-2xl shadow-slate-900/30 ring-1 ring-slate-800">
-            <div class="bg-[#efeae2] rounded-[2rem] overflow-hidden flex flex-col h-[520px] text-xs">
-              
-              <!-- Chat Header -->
-              <div class="bg-[#075e54] text-white px-4 py-3 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-emerald-700 flex items-center justify-center text-lg shadow-inner">
-                  🧞‍♂️
+          <div class="relative mx-auto max-w-sm rounded-[2.5rem] bg-slate-900 p-4 shadow-2xl shadow-emerald-950/20 border-4 border-slate-800">
+            <div class="w-24 h-4 bg-slate-800 rounded-full mx-auto mb-3"></div>
+            <div class="bg-emerald-800 -mx-4 -mt-3 px-4 py-3 text-white flex items-center gap-3 rounded-t-[2rem]">
+              <img src="/images/dost-logo.jpg" alt="DOST" class="w-10 h-10 rounded-full border-2 border-emerald-400 object-cover" />
+              <div class="flex-1">
+                <div class="font-bold text-sm flex items-center gap-1">
+                  <span>DOST 🤖✨</span>
+                  <span class="text-[10px] bg-emerald-600 px-1.5 py-0.5 rounded text-white">Verified</span>
                 </div>
-                <div>
-                  <h4 class="font-bold text-sm leading-tight">MunshiJi 🧞‍♂️</h4>
-                  <p class="text-[10px] text-emerald-200">Online • stayonchat.com</p>
+                <div class="text-[11px] text-emerald-200 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                  <span>online • stayonchat.com</span>
                 </div>
               </div>
+            </div>
 
-              <!-- Chat Messages Body -->
-              <div class="flex-1 p-3 space-y-3 overflow-y-auto font-sans">
-                <!-- User photo send -->
-                <div class="flex justify-end">
-                  <div class="bg-[#dcf8c6] rounded-xl p-2 max-w-[80%] shadow-sm space-y-1">
-                    <div class="bg-slate-200 rounded-lg h-24 flex items-center justify-center text-slate-500 font-bold text-[11px] border border-slate-300">
-                      📄 Havells Mixer Bill.jpg
-                    </div>
-                    <p class="text-[9px] text-slate-400 text-right">10:24 AM ✓✓</p>
-                  </div>
-                </div>
-
-                <!-- Bot Instant Reply -->
-                <div class="flex justify-start">
-                  <div class="bg-white rounded-xl p-2.5 max-w-[88%] shadow-sm space-y-1.5 border border-slate-200">
-                    <p class="font-bold text-emerald-800">✅ Hukum, kaagaz darj kar liya gaya hai! 🧞‍♂️</p>
-                    <p class="text-[11px] text-slate-700">📌 <b>Item:</b> Havells Grinder Mixer<br/>
-                    🏢 <b>Brand:</b> Havells India<br/>
-                    ⏳ <b>Warranty Expiry:</b> <span class="bg-emerald-100 text-emerald-800 font-bold px-1 rounded">18 Oct 2027</span></p>
-                    <p class="text-[10px] text-slate-500">⏰ Maine reminder lock kar diya hai. Expiry se 30, 7 aur 1 din pehle main khud WhatsApp alert bhej dunga!</p>
-                    <p class="text-[9px] text-slate-400 text-right">10:24 AM</p>
-                  </div>
-                </div>
-
-                <!-- User Search Query -->
-                <div class="flex justify-end">
-                  <div class="bg-[#dcf8c6] rounded-xl px-3 py-1.5 max-w-[75%] shadow-sm">
-                    <p class="text-[11px] text-slate-800">Mera RC bhej</p>
-                    <p class="text-[9px] text-slate-400 text-right">11:05 AM ✓✓</p>
-                  </div>
-                </div>
-
-                <!-- Bot Instant Search Result -->
-                <div class="flex justify-start">
-                  <div class="bg-white rounded-xl p-2 max-w-[85%] shadow-sm space-y-1 border border-slate-200">
-                    <div class="bg-slate-200 rounded-lg h-20 flex items-center justify-center text-slate-600 font-bold text-[11px]">
-                      🚗 Swift_Dzire_RC.jpg
-                    </div>
-                    <p class="text-[10px] text-slate-700 font-semibold">Swift Dzire VXi • DL-01-AB-1234<br/><span class="text-emerald-700">PUC Valid Till: 15 Nov 2026</span></p>
-                    <p class="text-[9px] text-slate-400 text-right">11:05 AM</p>
-                  </div>
-                </div>
-
+            <div class="bg-[#efeae2] -mx-4 p-4 space-y-3 text-[13px] min-h-[360px] rounded-b-[2rem] overflow-hidden flex flex-col justify-end">
+              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[88%] space-y-1">
+                <p class="font-semibold text-emerald-800 text-xs">DOST 🤖</p>
+                <p class="text-slate-800 text-xs">Namaste! Main hoon aapka <b>DOST</b>. Koi bhi bill, RC, ya dawai ka parcha bhej do — mangte hi original file wapas bhej dunga! ✨</p>
               </div>
 
-              <!-- Input bar mockup -->
-              <div class="bg-[#f0f2f5] px-3 py-2 flex items-center gap-2 border-t border-slate-200">
-                <span class="text-slate-400 text-base">📎</span>
-                <div class="flex-1 bg-white rounded-full px-3 py-1 text-slate-400 text-[11px]">Type a message...</div>
-                <div class="w-7 h-7 rounded-full bg-[#00a884] flex items-center justify-center text-white text-xs">🎙️</div>
+              <div class="bg-[#d9fdd3] p-2 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-slate-800 text-xs">
+                <p>Bhai kal subah 10 baje mummy ki BP goli ka yaad dila dena 💊</p>
               </div>
 
+              <div class="bg-white p-2 rounded-2xl rounded-tl-none shadow-sm max-w-[88%] space-y-1 text-xs">
+                <p class="text-slate-800">⏰ <b>Reminder locked!</b> Kal subah 10 AM ping kar dunga. Tu tension mat le!</p>
+              </div>
+
+              <div class="bg-[#d9fdd3] p-2 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-slate-800 text-xs">
+                <p>Mera PAN card bhej do</p>
+              </div>
+
+              <div class="bg-white p-2 rounded-2xl rounded-tl-none shadow-sm max-w-[88%] space-y-1 border-l-4 border-emerald-500 text-xs">
+                <div class="flex items-center gap-2 bg-emerald-50 p-1.5 rounded text-[11px] font-bold text-emerald-800">
+                  <span>📄</span>
+                  <span>PAN_Card_Dhruv.jpg (Original)</span>
+                </div>
+                <p class="text-[10px] text-slate-600">Bhai, aapka PAN card mil gaya! 0.1s mein ready. 🧞‍♂️</p>
+              </div>
             </div>
           </div>
         </div>
@@ -184,197 +180,235 @@
     </div>
   </section>
 
-  <!-- ================= WHY MUNSHIJI (PROBLEM VS SOLUTION) ================= -->
-  <section id="features" class="py-16 bg-white border-y border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto space-y-4">
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Hindustan mein kaagaz khone par har saal hazaron ka nuksaan hota hai
-        </h2>
-        <p class="text-base sm:text-lg text-slate-600">
-          DigiLocker sirf sarkari kaagaz rakhta hai. Google Drive ek digital kabristan hai jahan bill dhoondhna namumkin hai. MunshiJi aapke rozmarra ke kaagzat ka bodyguard hai.
-        </p>
+  <!-- ================= 4 SUPERPOWERS ================= -->
+  <section id="features" class="py-20 bg-white border-t border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      
+      <div class="text-center max-w-2xl mx-auto space-y-4">
+        <h2 class="text-xs font-extrabold uppercase tracking-widest text-emerald-600">The All-in-One Life Companion</h2>
+        <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-slate-900">Everything you need, right in your WhatsApp</h3>
+        <p class="text-slate-600 text-base">No logins, no passwords to forget, and no apps eating your phone memory.</p>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-8 mt-12">
-        <!-- Feature 1 -->
-        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all space-y-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold">
-            🚗
-          </div>
-          <h3 class="text-xl font-bold text-slate-900">Traffic Fine & Penalty Zero</h3>
-          <p class="text-sm text-slate-600 leading-relaxed">
-            PUC expire hone par <b>₹10,000 ka challan</b> kat sakta hai. Car insurance lapse hone par No-Claim Bonus (NCB) chala jaata hai. MunshiJi expiry se 30, 7 aur 1 din pehle WhatsApp par khud bolta hai.
-          </p>
-        </div>
-
-        <!-- Feature 2 -->
-        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all space-y-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold">
-            🔌
-          </div>
-          <h3 class="text-xl font-bold text-slate-900">Appliance Free Warranty Rescue</h3>
-          <p class="text-sm text-slate-600 leading-relaxed">
-            Mixer, AC, Fridge ya Mobile kharab hone par service center bill maangta hai. Bill na milne par ₹3,000 jeb se lagte hain. MunshiJi ko sirf "Havells" likho, 1 second mein asli bill samne!
-          </p>
-        </div>
-
-        <!-- Feature 3 -->
-        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all space-y-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold">
-            📝
-          </div>
-          <h3 class="text-xl font-bold text-slate-900">Doctor ka Ganda Parcha Bhi Padhe</h3>
-          <p class="text-sm text-slate-600 leading-relaxed">
-            Google Gemini Vision AI handwritten doctor prescriptions, local mechanic ke kachhe bill aur blur photos ko bhi 98% accuracy ke saath padh kar details darj kar leta hai.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ================= PUBLIC PRICING (SABKO EK JAISA) ================= -->
-  <section id="pricing" class="py-20 bg-slate-50">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-2xl mx-auto space-y-3">
-        <span class="text-emerald-700 font-bold text-xs uppercase tracking-wider bg-emerald-100 px-3 py-1 rounded-full">Transparent Pricing</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Ek Menu, Sabke Liye Ek Price. Koi Chhupa Khel Nahi.
-        </h2>
-        <p class="text-slate-600 text-sm sm:text-base">
-          Na koi auto-debit, na trial ke baad khud katne wala dhokha. Saal mein ek baar, shanti saal bhar.
-        </p>
-      </div>
-
-      <div class="grid md:grid-cols-4 gap-6 mt-14">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         
-        <!-- FREE PLAN -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 flex flex-col justify-between hover:shadow-xl transition-all">
-          <div class="space-y-4">
-            <h3 class="text-xl font-bold text-slate-900">Free Pack</h3>
-            <p class="text-xs text-slate-500">Shuruat karne aur test karne ke liye</p>
-            <div class="text-3xl font-extrabold text-slate-900">₹0 <span class="text-xs font-normal text-slate-400">/ lifetime</span></div>
-            <ul class="space-y-2.5 text-xs text-slate-600 pt-4 border-t border-slate-100">
-              <li class="flex items-center gap-2">✓ <b>15 files</b> encrypted storage</li>
-              <li class="flex items-center gap-2">✓ Instant WhatsApp search (0 ms)</li>
-              <li class="flex items-center gap-2">✓ 1 free expiry reminder trial</li>
-              <li class="flex items-center gap-2">✓ Photo + PDF support</li>
-            </ul>
+        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5 transition-all space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-2xl">
+            📁
           </div>
-          <a href="https://wa.me/15556681690?text=Hi%20MunshiJi" target="_blank" class="mt-8 w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center transition-colors">
-            Muft Shuru Karein
-          </a>
+          <h4 class="text-xl font-bold font-display text-slate-900">Original Document &amp; PDF Vault</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Send bills, RC, insurance, PUC, or doctor prescriptions. Whenever you need them, DOST sends back the <b>exact original PDF or image</b> in seconds.
+          </p>
         </div>
 
-        <!-- YAAD PLAN (POPULAR) -->
-        <div class="bg-gradient-to-b from-emerald-900 to-slate-900 text-white rounded-3xl p-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 ring-2 ring-emerald-500">
-          <div class="absolute -top-3.5 right-6 bg-emerald-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow">
-            Sabse Popular
+        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5 transition-all space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-2xl">
+            ⏰
           </div>
-          <div class="space-y-4">
-            <h3 class="text-xl font-bold text-emerald-400">Yaad Plan</h3>
-            <p class="text-xs text-slate-300">Challan aur warranty lapse se complete mukti</p>
-            <div class="text-3xl font-extrabold text-white">₹149 <span class="text-xs font-normal text-slate-300">/ 1 saal</span></div>
-            <p class="text-[11px] text-emerald-300 font-medium">Sirf ₹12.40 per mahina</p>
-            <ul class="space-y-2.5 text-xs text-slate-200 pt-4 border-t border-slate-700">
-              <li class="flex items-center gap-2">✓ <b>50 files</b> locker space</li>
-              <li class="flex items-center gap-2">✓ <b>20 automated reminders</b> / saal</li>
-              <li class="flex items-center gap-2">✓ 30, 7 aur 1 din pehle WhatsApp alert</li>
-              <li class="flex items-center gap-2">✓ Handwritten bills & prescriptions</li>
-              <li class="flex items-center gap-2">✓ Asli Photo wapas bhejta hai</li>
-            </ul>
-          </div>
-          <a href="https://wa.me/15556681690?text=Hi%20MunshiJi,%20mujhe%20Yaad%20Plan%20chahiye" target="_blank" class="mt-8 w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs text-center shadow-lg shadow-emerald-500/30 transition-all">
-            Yaad Plan Le Lo (₹149)
-          </a>
+          <h4 class="text-xl font-bold font-display text-slate-900">Voice &amp; Text Reminders</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Never miss mummy's medicines, credit card dues, or car servicing. Just speak or text naturally: <i>"Remind me tomorrow at 9 AM"</i> and DOST will ping you.
+          </p>
         </div>
 
-        <!-- GHAR PLAN -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 flex flex-col justify-between hover:shadow-xl transition-all">
-          <div class="space-y-4">
-            <h3 class="text-xl font-bold text-slate-900">Ghar Plan</h3>
-            <p class="text-xs text-slate-500">Poore parivaar ke kaagaz ek jagah</p>
-            <div class="text-3xl font-extrabold text-slate-900">₹399 <span class="text-xs font-normal text-slate-400">/ 1 saal</span></div>
-            <ul class="space-y-2.5 text-xs text-slate-600 pt-4 border-t border-slate-100">
-              <li class="flex items-center gap-2">✓ <b>200 files</b> storage</li>
-              <li class="flex items-center gap-2">✓ <b>4 Log (Maa, Papa, Spouse, Aap)</b></li>
-              <li class="flex items-center gap-2">✓ <b>Unlimited</b> automated reminders</li>
-              <li class="flex items-center gap-2">✓ "Saari expiry ek list" feature</li>
-              <li class="flex items-center gap-2">✓ Priority WhatsApp response</li>
-            </ul>
+        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5 transition-all space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center text-2xl">
+            🌅
           </div>
-          <a href="https://wa.me/15556681690?text=Hi%20MunshiJi,%20mujhe%20Ghar%20Plan%20chahiye" target="_blank" class="mt-8 w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs text-center transition-colors">
-            Ghar Plan Chunein
-          </a>
+          <h4 class="text-xl font-bold font-display text-slate-900">Daily 6 AM Astro Guide</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Share your birth date once. Every morning at 6:00 AM, receive personalized planetary energy, driving cautions, lucky hours, and positive morning vibes.
+          </p>
         </div>
 
-        <!-- VAULT PLAN -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 flex flex-col justify-between hover:shadow-xl transition-all">
-          <div class="space-y-4">
-            <h3 class="text-xl font-bold text-slate-900">Vault Plan</h3>
-            <p class="text-xs text-slate-500">Property, Investments & CA Access</p>
-            <div class="text-3xl font-extrabold text-slate-900">₹799 <span class="text-xs font-normal text-slate-400">/ 1 saal</span></div>
-            <ul class="space-y-2.5 text-xs text-slate-600 pt-4 border-t border-slate-100">
-              <li class="flex items-center gap-2">✓ <b>500 files</b> storage</li>
-              <li class="flex items-center gap-2">✓ Family + CA read-only web link</li>
-              <li class="flex items-center gap-2">✓ Unlimited reminders</li>
-              <li class="flex items-center gap-2">✓ <b>WarisPath Kit Priority Access</b></li>
-              <li class="flex items-center gap-2">✓ Dedicated Relationship Munshi</li>
-            </ul>
+        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/5 transition-all space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-teal-100 flex items-center justify-center text-2xl">
+            💬
           </div>
-          <a href="https://wa.me/15556681690?text=Hi%20MunshiJi,%20mujhe%20Vault%20Plan%20chahiye" target="_blank" class="mt-8 w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center transition-colors">
-            Vault Plan Chunein
-          </a>
+          <h4 class="text-xl font-bold font-display text-slate-900">Samajhdaar Dost Chat</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Not a robotic corporate AI. A mature, caring, street-smart companion who chats in English, Hindi, or Hinglish, offering sensible advice and a listening ear.
+          </p>
         </div>
 
       </div>
+
     </div>
   </section>
 
-  <!-- ================= SECURITY & ETHICAL PLEDGE ================= -->
-  <section id="security" class="py-16 bg-white border-t border-slate-200">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-      <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl mx-auto">
-        🛡️
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how-it-works" class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      
+      <div class="text-center max-w-2xl mx-auto space-y-4">
+        <h2 class="text-xs font-extrabold uppercase tracking-widest text-emerald-600">Simplicity First</h2>
+        <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-slate-900">How to use DOST in 3 easy steps</h3>
       </div>
-      <h2 class="text-3xl font-extrabold text-slate-900">MunshiJi ka Privacy & Imaan Vachan</h2>
-      <p class="text-slate-600 text-base leading-relaxed">
-        Hindustan mein kaagaz sirf data nahi, parivaar ki izzat aur mehnat ki kamai hote hain. Hum kisi corporate ad network ko aapka data nahi bechte.
-      </p>
-      <div class="grid sm:grid-cols-3 gap-6 pt-6 text-left">
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">🔒 AES-256 GCM Encryption</h4>
-          <p class="text-xs text-slate-600">Aapki photo cloud par save hone se pehle military-grade encrypt hoti hai. Koi insaan use nahi dekh sakta.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4 relative">
+          <span class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm">1</span>
+          <h4 class="text-xl font-bold font-display text-slate-900">Say "Hi" on WhatsApp</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">Click any green button on this page or save DOST's official number to start the conversation instantly.</p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">🚫 Zero Model Training</h4>
-          <p class="text-xs text-slate-600">Aapke PAN card ya bills se kisi public AI model ko train nahi kiya jaata. Aapka locker sirf aapka hai.</p>
+
+        <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4 relative">
+          <span class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm">2</span>
+          <h4 class="text-xl font-bold font-display text-slate-900">Choose Your Language</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">Select English, Hindi, or Hinglish with a single tap. DOST remembers your preference and adapts seamlessly.</p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">🤝 No Telecalling Spam</h4>
-          <p class="text-xs text-slate-600">Hum kabhi loan ya insurance bechne ke liye phone nahi karte. Sirf wahi alert bhejte hain jo aapne maanga ho.</p>
+
+        <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4 relative">
+          <span class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm">3</span>
+          <h4 class="text-xl font-bold font-display text-slate-900">Send Docs, Tasks, or Chat</h4>
+          <p class="text-sm text-slate-600 leading-relaxed">Drop photos/PDFs to store, set voice reminders, or share your date of birth for daily 6 AM morning briefings.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= PRICING ================= -->
+  <section id="pricing" class="py-20 bg-white border-t border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      
+      <div class="text-center max-w-2xl mx-auto space-y-4">
+        <h2 class="text-xs font-extrabold uppercase tracking-widest text-emerald-600">Transparent &amp; Fair Pricing</h2>
+        <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-slate-900">Simple plans. No auto-debit surprises.</h3>
+        <p class="text-slate-600 text-base">We never store your credit card or charge recurring auto-debits. You decide when to renew.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+        
+        <!-- Plan 1: Free -->
+        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <h4 class="text-lg font-bold font-display text-slate-900">Free Pack</h4>
+            <div class="text-3xl font-extrabold text-slate-900">₹0 <span class="text-xs font-normal text-slate-500">/ forever</span></div>
+            <p class="text-xs text-slate-600">Perfect for trying out DOST and saving essential cards.</p>
+            <ul class="text-xs space-y-2.5 text-slate-700">
+              <li class="flex items-center gap-2"><span>✓</span> 15 Encrypted Files &amp; PDFs</li>
+              <li class="flex items-center gap-2"><span>✓</span> Instant WhatsApp Search</li>
+              <li class="flex items-center gap-2"><span>✓</span> 1 Free Expiry Reminder Trial</li>
+              <li class="flex items-center gap-2"><span>✓</span> 24/7 Samajhdaar Dost Chat</li>
+            </ul>
+          </div>
+          <a href="https://wa.me/15556681690?text=Hi%20DOST" class="w-full text-center py-2.5 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 hover:bg-slate-100 transition-colors">Start Free</a>
+        </div>
+
+        <!-- Plan 2: Yaad Plan (Hero) -->
+        <div class="p-6 rounded-3xl bg-emerald-50 border-2 border-emerald-500 shadow-xl shadow-emerald-500/10 flex flex-col justify-between space-y-6 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[10px] font-extrabold tracking-wider uppercase px-3 py-0.5 rounded-full">
+            Most Popular
+          </div>
+          <div class="space-y-4">
+            <h4 class="text-lg font-bold font-display text-emerald-950">Yaad Plan</h4>
+            <div class="text-3xl font-extrabold text-slate-900">₹149 <span class="text-xs font-normal text-slate-500">/ year (₹12.50/mo)</span></div>
+            <p class="text-xs text-slate-600">Year-round expiry alerts &amp; personal document safety.</p>
+            <ul class="text-xs space-y-2.5 text-slate-800">
+              <li class="flex items-center gap-2 font-semibold text-emerald-800"><span>✓</span> 50 Encrypted Files &amp; PDFs</li>
+              <li class="flex items-center gap-2"><span>✓</span> 20 WhatsApp Expiry Alerts</li>
+              <li class="flex items-center gap-2"><span>✓</span> Natural Voice &amp; Task Reminders</li>
+              <li class="flex items-center gap-2"><span>✓</span> Daily 6 AM Astro Guidance</li>
+            </ul>
+          </div>
+          <a href="https://wa.me/15556681690?text=Yaad%20Plan%20Upgrade" class="w-full text-center py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-600/20 hover:bg-emerald-700 transition-colors">Get Yaad Plan</a>
+        </div>
+
+        <!-- Plan 3: Ghar Plan -->
+        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <h4 class="text-lg font-bold font-display text-slate-900">Ghar Plan</h4>
+            <div class="text-3xl font-extrabold text-slate-900">₹399 <span class="text-xs font-normal text-slate-500">/ year</span></div>
+            <p class="text-xs text-slate-600">For family households managing 2-3 vehicles &amp; homes.</p>
+            <ul class="text-xs space-y-2.5 text-slate-700">
+              <li class="flex items-center gap-2"><span>✓</span> 200 Encrypted Files &amp; PDFs</li>
+              <li class="flex items-center gap-2"><span>✓</span> 4 Family Member WhatsApp Seats</li>
+              <li class="flex items-center gap-2 font-bold text-emerald-700"><span>✓</span> Unlimited Expiry Alerts</li>
+              <li class="flex items-center gap-2"><span>✓</span> Priority WhatsApp Engine</li>
+            </ul>
+          </div>
+          <a href="https://wa.me/15556681690?text=Ghar%20Plan%20Upgrade" class="w-full text-center py-2.5 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 hover:bg-slate-100 transition-colors">Get Ghar Plan</a>
+        </div>
+
+        <!-- Plan 4: Vault Plan -->
+        <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <h4 class="text-lg font-bold font-display text-slate-900">Vault Plan</h4>
+            <div class="text-3xl font-extrabold text-slate-900">₹799 <span class="text-xs font-normal text-slate-500">/ year</span></div>
+            <p class="text-xs text-slate-600">Business owners &amp; full family legacy protection.</p>
+            <ul class="text-xs space-y-2.5 text-slate-700">
+              <li class="flex items-center gap-2"><span>✓</span> 500 Encrypted Files &amp; PDFs</li>
+              <li class="flex items-center gap-2"><span>✓</span> Nominee Succession (WarisPath)</li>
+              <li class="flex items-center gap-2"><span>✓</span> Secure CA/Tax Accountant Link</li>
+              <li class="flex items-center gap-2"><span>✓</span> Dedicated VIP Support</li>
+            </ul>
+          </div>
+          <a href="https://wa.me/15556681690?text=Vault%20Plan%20Upgrade" class="w-full text-center py-2.5 rounded-xl border border-slate-300 font-bold text-xs text-slate-800 hover:bg-slate-100 transition-colors">Get Vault Plan</a>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= SECURITY & PRIVACY ================= -->
+  <section id="security" class="py-20 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div class="text-center space-y-3">
+        <h3 class="text-3xl font-extrabold font-display text-slate-900">Your Privacy is Sacred</h3>
+        <p class="text-slate-600 text-sm">We strictly comply with the Digital Personal Data Protection (DPDP) Act 2023.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-sm">
+          <div class="text-xl">🔒</div>
+          <h4 class="font-bold text-slate-900 text-sm">AES-256 GCM Encryption</h4>
+          <p class="text-xs text-slate-600">Every document is encrypted with military-grade keys before being safely saved.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-sm">
+          <div class="text-xl">🚫</div>
+          <h4 class="font-bold text-slate-900 text-sm">Zero Model Training</h4>
+          <p class="text-xs text-slate-600">Your personal documents and chats are never used to train public AI models.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-sm">
+          <div class="text-xl">🛡️</div>
+          <h4 class="font-bold text-slate-900 text-sm">No Spam / No Telecalling</h4>
+          <p class="text-xs text-slate-600">We will never sell your number to telecallers, insurance brokers, or third parties.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ================= FAQ SECTION ================= -->
-  <section id="faq" class="py-16 bg-slate-50 border-t border-slate-200">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      <h2 class="text-3xl font-extrabold text-slate-900 text-center">Aksar Poochhe Jaane Wale Sawaal (FAQ)</h2>
+  <section id="faq" class="py-20 bg-white border-t border-slate-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <h3 class="text-3xl font-extrabold font-display text-slate-900 text-center">Frequently Asked Questions</h3>
       <div class="space-y-4">
-        <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">Q: Kya mujhe koi app download karni padegi?</h4>
-          <p class="text-xs sm:text-sm text-slate-600">Bilkul nahi! MunshiJi 100% WhatsApp par chalta hai. Bas number par "Hi" bhejein aur shuru ho jayein.</p>
+        
+        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <h4 class="font-bold text-slate-900 text-sm">Q: Do I need to install any new app?</h4>
+          <p class="text-xs sm:text-sm text-slate-600">No! DOST runs 100% inside your existing WhatsApp. Just click the green button, say "Hi", and you're good to go.</p>
         </div>
-        <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">Q: DigiLocker se yeh alag kaise hai?</h4>
-          <p class="text-xs sm:text-sm text-slate-600">DigiLocker sirf sarkari linked documents rakhta hai. Usme aap dukan ka mixer bill, doctor ka prescription, rented flat agreement ya local mechanic ki receipt nahi daal sakte. MunshiJi har tarah ke kachhe/pakke kaagaz sambhalta hai aur expiry se pehle WhatsApp par khud yaad dilata hai.</p>
+
+        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <h4 class="font-bold text-slate-900 text-sm">Q: Can I retrieve the exact original PDF files I upload?</h4>
+          <p class="text-xs sm:text-sm text-slate-600">Yes! If you upload a PDF (like an RC, insurance policy, or electricity bill), DOST returns the exact original PDF file natively in WhatsApp whenever you ask for it.</p>
         </div>
-        <div class="p-5 bg-white rounded-2xl border border-slate-200 space-y-2">
-          <h4 class="font-bold text-slate-900 text-sm">Q: Kya 1 saal baad mere bank se khud paise katenge?</h4>
-          <p class="text-xs sm:text-sm text-slate-600">Kabhi nahi! Hamara koi auto-debit ya subscription trap nahi hai. 1 saal baad agar aapka man karega to aap khud renew karenge, warna aapka Free pack chalta rahega.</p>
+
+        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <h4 class="font-bold text-slate-900 text-sm">Q: How does the Daily 6 AM Astro Guidance work?</h4>
+          <p class="text-xs sm:text-sm text-slate-600">Simply text DOST your Date of Birth (and time/city if known). Every morning at 6:00 AM, DOST sends you a personalized morning vibe check, driving precautions, and lucky hours for the day.</p>
         </div>
+
+        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <h4 class="font-bold text-slate-900 text-sm">Q: Will I be charged automatically after 1 year?</h4>
+          <p class="text-xs sm:text-sm text-slate-600">Never. We do not support hidden recurring auto-debits. Renewal is 100% voluntary, and your Free Pack documents remain safe forever.</p>
+        </div>
+
       </div>
     </div>
   </section>
@@ -382,20 +416,20 @@
   <!-- ================= FOOTER ================= -->
   <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-      <div class="flex items-center gap-2">
-        <span class="text-2xl">🧞‍♂️</span>
+      <div class="flex items-center gap-3">
+        <img src="/images/dost-logo.jpg" alt="DOST" class="w-8 h-8 rounded-full object-cover" />
         <div>
-          <span class="text-white font-extrabold text-lg">MunshiJi</span>
-          <span class="text-xs block text-slate-500">Official Product of stayonchat.com</span>
+          <span class="text-white font-extrabold text-base font-display">DOST 🤖✨</span>
+          <span class="text-[11px] block text-slate-500">Official Product of stayonchat.com</span>
         </div>
       </div>
       <p class="text-xs text-slate-500 text-center sm:text-left">
         © 2026 stayonchat.com • Contact: <a href="mailto:info@stayonchat.com" class="text-emerald-400 underline">info@stayonchat.com</a>
       </p>
-      <div class="flex items-center gap-4 text-xs">
-        <a href="https://wa.me/15556681690?text=Hi%20MunshiJi" class="text-emerald-400 hover:text-emerald-300 font-bold">WhatsApp Bot</a>
-        <a href="#privacy" class="hover:text-white transition-colors">Privacy Policy</a>
-        <a href="#terms" class="hover:text-white transition-colors">Terms of Service</a>
+      <div class="flex items-center gap-6 text-xs font-medium">
+        <a href="https://wa.me/15556681690?text=Hi%20DOST" class="text-emerald-400 hover:text-emerald-300 font-bold">Chat on WhatsApp</a>
+        <a href="#security" class="hover:text-white transition-colors">Privacy Policy</a>
+        <a href="#pricing" class="hover:text-white transition-colors">Terms of Service</a>
       </div>
     </div>
   </footer>

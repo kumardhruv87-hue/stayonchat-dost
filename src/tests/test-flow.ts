@@ -34,7 +34,7 @@ if (parsed.success) {
 
 // 2. Test Persona Document Confirmation
 console.log('\n2. Testing MunshiJi Persona confirmation message...');
-const confirmMsg = personaService.getDocSavedMessage(mockExtraction as any, 14);
+const confirmMsg = personaService.getDocSavedMessage(mockExtraction as any, 'hinglish', 14);
 console.log('--- Sample WhatsApp Confirmation ---');
 console.log(confirmMsg);
 console.log('------------------------------------');

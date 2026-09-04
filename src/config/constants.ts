@@ -4,9 +4,9 @@
 // =================================================================
 
 export const BRAND = {
-  name: "MunshiJi",
-  displayName: "MunshiJi 🧞‍♂️",
-  tagline: "Aapka Digital Munshi. Kaagaz sambhale, waqt pe yaad dilaye.",
+  name: "DOST",
+  displayName: "DOST 🤖✨",
+  tagline: "Aapka Apna Digital Saathi | Locker, Reminders, Astro Guide & Smart Companion",
   domain: "stayonchat.com",
   supportEmail: "info@stayonchat.com",
   supportWhatsApp: "+91-XXXXXXXXXX",

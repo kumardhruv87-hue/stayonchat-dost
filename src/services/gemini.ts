@@ -173,5 +173,193 @@ Return JSON:
         query: '',
       };
     }
+  },
+
+  /**
+   * Conversational Companion: "Samajhdaar Dost"
+   * Empathetic, witty, street-smart, warm Indian friend persona
+   */
+  async chatAsDost(
+    userMessage: string,
+    history: Array<{ role: string; text: string }> = [],
+    language: 'en' | 'hi' | 'hinglish' = 'hinglish',
+    userName: string = 'Bhai'
+  ): Promise<string> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          temperature: 0.7,
+        },
+      });
+
+      const langInstruction =
+        language === 'hi'
+          ? 'Shuddh aam bolchal ki saral Hindi mein baat karein.'
+          : language === 'en'
+          ? 'Speak in warm, friendly, modern Indian English.'
+          : 'Speak in warm, street-smart, natural Hinglish (Hindi + English mix).';
+
+      const prompt = `
+You are "DOST 🤖✨" (stayonchat.com) — India's friendliest, smartest WhatsApp AI companion and digital locker.
+You are talking to ${userName}.
+
+YOUR PERSONALITY & TONE:
+- You are like a wise, mature, caring, and humorous best friend (Bhai/Yaar/Dost).
+- You speak naturally, NEVER like a robot or textbook ("As an AI language model...").
+- ${langInstruction}
+- You give practical, sensible life advice, emotional comfort, work tips, health reminders, or just warm banter.
+- If the user seems stressed or sad, be genuinely supportive, uplifting, and calm.
+- You casually remind them whenever relevant: "Tera koi bill, warranty, paper ya reminder ho toh bhej dena, main sambhal ke rakhunga!"
+- Keep WhatsApp responses punchy, readable, with friendly emojis (2-4 paragraphs max).
+
+USER MESSAGE: "${userMessage}"
+`;
+
+      const result = await model.generateContent(prompt);
+      return result.response.text().trim();
+    } catch (err: any) {
+      console.error('Error in chatAsDost:', err);
+      if (language === 'hi') {
+        return 'अरे भाई, अभी नेटवर्क थोड़ा धीमा है, लेकिन मैं यहीं हूँ! बताओ क्या मदद करूँ?';
+      }
+      return 'Arre bhai, network thoda dheema ho gaya tha par main yahin hoon! Tu bata kya haal chaal?';
+    }
+  },
+
+  /**
+   * Detect and parse natural language reminders (e.g. "Kal subah 10 baje mummy ko BP ki dawa deni hai")
+   */
+  async parseNaturalReminder(
+    text: string,
+    currentIsoTime: string = new Date().toISOString()
+  ): Promise<{ isReminder: boolean; task?: string; remindAtIso?: string; replyText?: string }> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1,
+        },
+      });
+
+      const prompt = `
+Analyze this text to see if the user is asking to set a reminder or alarm:
+Current reference time (IST/UTC): ${currentIsoTime}
+User Text: "${text}"
+
+If the user wants a reminder (e.g. "kal subah 9 baje car service", "remind me to pay bill on 15th", "dawai ka yaad dila dena at 8pm"):
+Return JSON:
+{
+  "isReminder": true,
+  "task": "Clean description of the reminder task in Hinglish/English",
+  "remindAtIso": "ISO 8601 timestamp (YYYY-MM-DDTHH:mm:ss) when the reminder should fire in Indian Standard Time (UTC+5:30)",
+  "replyText": "Warm confirmation message in Hinglish saying reminder is locked"
+}
+
+If NOT a reminder request (just normal chat, search, or document query):
+Return JSON:
+{
+  "isReminder": false
+}
+`;
+
+      const result = await model.generateContent(prompt);
+      return JSON.parse(result.response.text());
+    } catch (err) {
+      console.error('Error in parseNaturalReminder:', err);
+      return { isReminder: false };
+    }
+  },
+
+  /**
+   * Parse user's birth details for Astro / Kundali profile (DOB, Time of Birth, Place of Birth)
+   */
+  async parseAstroProfile(
+    text: string
+  ): Promise<{ hasAstroData: boolean; dob?: string; tob?: string; pob?: string; rashi?: string; summary?: string }> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1,
+        },
+      });
+
+      const prompt = `
+Analyze if the user is sharing their birth details (Date of Birth, Time of Birth, Place of Birth, or Rashi/Zodiac):
+User Text: "${text}"
+
+If they are sharing birth details:
+Return JSON:
+{
+  "hasAstroData": true,
+  "dob": "YYYY-MM-DD" or null,
+  "tob": "HH:MM AM/PM" or null,
+  "pob": "City/State/Place" or null,
+  "rashi": "Vedic moon sign or western sun sign if mentioned/inferred" or null,
+  "summary": "Brief 1-line friendly acknowledgment in Hinglish"
+}
+
+If NOT sharing birth details:
+Return JSON:
+{
+  "hasAstroData": false
+}
+`;
+
+      const result = await model.generateContent(prompt);
+      return JSON.parse(result.response.text());
+    } catch (err) {
+      console.error('Error in parseAstroProfile:', err);
+      return { hasAstroData: false };
+    }
+  },
+
+  /**
+   * Generate Daily 6:00 AM Astro & Life Guidance (Grah-Nakshatra + Practical Safety Caution)
+   */
+  async generateDailyAstroGuide(
+    profile: { name?: string; dob: string; tob?: string; pob?: string; rashi?: string },
+    language: 'en' | 'hi' | 'hinglish' = 'hinglish'
+  ): Promise<string> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          temperature: 0.7,
+        },
+      });
+
+      const todayDate = new Date().toLocaleDateString('en-IN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+
+      const prompt = `
+You are "DOST 🤖✨", delivering the daily 6:00 AM personalized morning vibe & astrological guidance for ${profile.name || 'Bhai'}.
+Today's Date: ${todayDate}
+User Birth Info: DOB: ${profile.dob}, Time: ${profile.tob || 'Not specified'}, Place: ${profile.pob || 'India'}, Sign/Rashi: ${profile.rashi || 'General'}.
+Preferred Language: ${language}
+
+REQUIREMENTS:
+1. Warm morning greeting (Suprabhat / Good Morning / Jai Shri Ram / Radhe Radhe).
+2. Vedic Grah/Nakshatra brief overview for today (e.g. Surya transit, Chandra impact, Rahu Kaal alert).
+3. Practical Life Guidance:
+   - A specific caution (e.g. "Sadak par gaadi sambhal ke chalayein", "Kisi se bewajah behas se bachein", or "Paison ke mamle mein dhyan rakhein").
+   - Favorable time / lucky hours today (Shubh Muhurat / Rahu Kaal window).
+4. An inspiring, caring one-liner from their trusted buddy DOST to kickstart their day with high energy!
+5. Format with neat WhatsApp bullet points and emojis. Keep it under 150 words.
+`;
+
+      const result = await model.generateContent(prompt);
+      return result.response.text().trim();
+    } catch (err: any) {
+      console.error('Error in generateDailyAstroGuide:', err);
+      return `🌅 *Suprabhat ${profile.name || 'Bhai'}!* ✨\n\nAaj ka din aapke liye nayi urja lekar aaya hai. Sadak par driving sambhal kar karein aur apne krodh par niyantran rakhein. Aapka din shubh aur mangalmay ho! ☀️`;
+    }
   }
 };

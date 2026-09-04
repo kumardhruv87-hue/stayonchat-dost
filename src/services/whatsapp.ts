@@ -151,6 +151,39 @@ export const whatsappService = {
   },
 
   /**
+   * Send a PDF / Document using Meta Media ID
+   */
+  async sendDocumentByMediaId(to: string, mediaId: string, filename: string, caption?: string): Promise<boolean> {
+    try {
+      const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
+      await axios.post(
+        url,
+        {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to,
+          type: 'document',
+          document: {
+            id: mediaId,
+            filename: filename,
+            caption: caption,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      return true;
+    } catch (err: any) {
+      console.error('Failed to send WhatsApp document by ID:', err.response?.data || err.message);
+      return false;
+    }
+  },
+
+  /**
    * Send a document or image file to user
    */
   async sendDocument(

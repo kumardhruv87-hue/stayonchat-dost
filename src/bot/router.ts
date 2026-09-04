@@ -1,8 +1,9 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - 3-Layer Dispatch Router
-// Layer 1: Fast Regex / Zero-Cost Intent
-// Layer 2: Gemini Flash Document / Audio Extraction
-// Layer 3: Instant Database Search & Retrieval
+// DOST (stayonchat.com) - Multi-Layer Smart Router
+// Layer 1: Interactive Buttons & Language Selection
+// Layer 2: Natural Reminders & Astro Profiler (Gemini Flash)
+// Layer 3: Document Vault & Original PDF/Image Delivery
+// Layer 4: Samajhdaar Dost Conversational AI Companion
 // =================================================================
 
 import { dbService } from '../db/supabase.js';
@@ -11,7 +12,7 @@ import { storageService } from '../services/storage.js';
 import { whatsappService } from '../services/whatsapp.js';
 import { paymentService } from '../services/razorpay.js';
 import { personaService } from './persona.js';
-import { PLANS, BUSINESS_RULES } from '../config/constants.js';
+import { PLANS, BRAND } from '../config/constants.js';
 
 export const botRouter = {
   /**
@@ -24,24 +25,11 @@ export const botRouter = {
     if (!message) return;
 
     const fromPhone = message.from; // User's WhatsApp number
-    const userName = contact?.profile?.name || 'Bhaiya';
+    const userName = contact?.profile?.name || 'Bhai';
 
     // 1. Get or register user in database
-    let user;
-    try {
-      user = await dbService.getOrCreateUser(fromPhone, userName);
-    } catch (dbErr) {
-      console.warn('DB user fetch/create warning, using fallback:', dbErr);
-      user = {
-        phone_number: fromPhone,
-        name: userName,
-        language: 'hinglish',
-        plan: 'free' as const,
-        file_count: 0,
-        reminder_count: 0,
-        created_at: new Date().toISOString()
-      };
-    }
+    const user = await dbService.getOrCreateUser(fromPhone, userName);
+    const userLang = user.language || 'hinglish';
 
     // =============================================================
     // BRANCH 1: User Clicked an Interactive Button
@@ -49,18 +37,29 @@ export const botRouter = {
     if (message.type === 'interactive' && message.interactive?.button_reply) {
       const buttonId = message.interactive.button_reply.id;
 
+      // 1.1 Language Switcher Selection
+      if (buttonId.startsWith('lang_')) {
+        const chosenLang = buttonId.replace('lang_', '') as 'en' | 'hi' | 'hinglish';
+        await dbService.setUserLanguage(fromPhone, chosenLang);
+        const welcome = personaService.getWelcomeMessage(userName, chosenLang);
+        await whatsappService.sendTextMessage(fromPhone, welcome);
+        return;
+      }
+
+      // 1.2 Subscription Plans
       if (buttonId.startsWith('upgrade_')) {
         const planKey = buttonId.replace('upgrade_', '') as 'yaad_149' | 'ghar_399' | 'vault_799';
         const plan = PLANS[planKey];
         const paymentLink = await paymentService.createPaymentLink(fromPhone, planKey);
 
-        const responseText = `✨ *${plan.name} Activate karein* 🧞‍♂️\n\nRakam: *₹${plan.priceInr}/saal*\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\n_Koi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment._`;
+        const responseText = `✨ *${plan.name} Activate karein* 🤖✨\n\nRakam: *₹${plan.priceInr}/saal*\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\n_Koi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment._`;
         await whatsappService.sendTextMessage(fromPhone, responseText);
         return;
       }
 
+      // 1.3 Dismiss
       if (buttonId === 'dismiss_upsell') {
-        await whatsappService.sendTextMessage(fromPhone, 'Hukum! Koi baat nahi bhaiya. Aapka locker pehle ki tarah chalta rahega. 🙏');
+        await whatsappService.sendTextMessage(fromPhone, 'Koi baat nahi bhai! Tera dost pehle ki tarah hamesha ready hai. 🙏');
         return;
       }
     }
@@ -80,15 +79,15 @@ export const botRouter = {
 
       // Download file from Meta Cloud API
       const mediaId = message.image ? message.image.id : message.document.id;
-      const fileName = message.document?.filename || `doc_${Date.now()}.jpg`;
+      const fileName = message.document?.filename || (message.image ? `doc_${Date.now()}.jpg` : `file_${Date.now()}.pdf`);
       const caption = message.image?.caption || message.document?.caption || '';
 
-      await whatsappService.sendTextMessage(fromPhone, 'MunshiJi kaagaz padh rahe hain... 1 second dijiye! ⏳');
+      await whatsappService.sendTextMessage(fromPhone, 'DOST kaagaz padh raha hai... 1 second ruko! ⏳');
 
       try {
         const { buffer, mimeType } = await whatsappService.downloadMedia(mediaId);
 
-        // Upload encrypted to Supabase Storage
+        // Upload encrypted to Storage / Local Vault
         const { storagePath } = await storageService.uploadDocument(
           fromPhone,
           fileName,
@@ -100,7 +99,7 @@ export const botRouter = {
         const extracted = await geminiService.extractDocumentMetadata(buffer, mimeType, caption);
         console.log('📄 Gemini Extracted Metadata:', JSON.stringify(extracted, null, 2));
 
-        // Save into Supabase Database
+        // Save into Database
         const savedDoc = await dbService.saveDocument({
           user_phone: fromPhone,
           storage_path: storagePath,
@@ -128,7 +127,7 @@ export const botRouter = {
 
         // Send confirmation to user
         const remainingSlots = currentPlan.maxFiles - (user.file_count + 1);
-        const confirmMsg = personaService.getDocSavedMessage(extracted, user.plan === 'free' ? remainingSlots : undefined);
+        const confirmMsg = personaService.getDocSavedMessage(extracted, userLang, user.plan === 'free' ? remainingSlots : undefined);
         await whatsappService.sendTextMessage(fromPhone, confirmMsg);
 
         // Contextual Upsell Check (Anti-Spam rule: max 1 per 7 days)
@@ -139,7 +138,7 @@ export const botRouter = {
         }
       } catch (err: any) {
         console.error('Failed to process document:', err);
-        await whatsappService.sendTextMessage(fromPhone, 'Kshama karein bhaiya, kaagaz padhne mein thodi takleef hui. Kripya thoda saaf photo ya PDF dobara bhejein.');
+        await whatsappService.sendTextMessage(fromPhone, 'Kaagaz padhne mein thodi takleef hui bhai. Thoda saaf photo ya PDF dobara bhejo.');
       }
       return;
     }
@@ -154,10 +153,18 @@ export const botRouter = {
 
         console.log(`Voice transcribed: "${voiceResult.transcript}", intent: ${voiceResult.intent}`);
 
+        // Check if voice note is asking to set a reminder
+        const reminderCheck = await geminiService.parseNaturalReminder(voiceResult.transcript);
+        if (reminderCheck.isReminder && reminderCheck.task && reminderCheck.remindAtIso) {
+          await dbService.addGeneralReminder(fromPhone, reminderCheck.task, reminderCheck.remindAtIso);
+          const reply = personaService.getReminderSavedMessage(reminderCheck.task, reminderCheck.remindAtIso, userLang);
+          await whatsappService.sendTextMessage(fromPhone, reply);
+          return;
+        }
+
         if (voiceResult.intent === 'search' || voiceResult.query) {
-          // Perform search based on transcribed query
           const results = await dbService.searchDocuments(fromPhone, voiceResult.query);
-          const reply = personaService.formatSearchResults(voiceResult.query, results);
+          const reply = personaService.formatSearchResults(voiceResult.query, results, userLang);
           await whatsappService.sendTextMessage(fromPhone, reply);
           return;
         }
@@ -169,29 +176,38 @@ export const botRouter = {
           return;
         }
 
-        // General voice response
-        await whatsappService.sendTextMessage(fromPhone, `MunshiJi ne sun liya: "${voiceResult.transcript}" 🧞‍♂️\n\nAap apna koi bhi kaagaz (photo/pdf) bhej sakte hain, main sambhal lunga!`);
+        // Conversational voice response
+        const chatReply = await geminiService.chatAsDost(voiceResult.transcript, [], userLang, userName);
+        await whatsappService.sendTextMessage(fromPhone, chatReply);
       } catch (err) {
         console.error('Failed to process audio:', err);
-        await whatsappService.sendTextMessage(fromPhone, 'MunshiJi aapki awaaz saaf sun nahi paaye. Kripya dobara voice note bhejein ya type karein.');
+        await whatsappService.sendTextMessage(fromPhone, 'Awaaz saaf sun nahi paaya bhai. Ek baar dobara voice note bhejo ya type karo.');
       }
       return;
     }
 
     // =============================================================
-    // BRANCH 4: Plain Text Query (Fast 0 ms Layer 1 & 3 Router)
+    // BRANCH 4: Plain Text Messages
     // =============================================================
     if (message.type === 'text') {
       const text = (message.text?.body || '').trim();
       const lowerText = text.toLowerCase();
 
-      // 4.1 Greeting / First contact
-      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'munshiji', 'start'].includes(lowerText)) {
-        await whatsappService.sendTextMessage(fromPhone, personaService.getWelcomeMessage(userName));
+      // 4.1 Language Selection Command
+      if (['language', 'bhasha', 'lang', 'change language', 'bhasha badlo'].includes(lowerText)) {
+        const picker = personaService.getLanguagePicker();
+        await whatsappService.sendInteractiveButtons(fromPhone, picker.text, picker.buttons);
         return;
       }
 
-      // 4.2 Expiry inquiry
+      // 4.2 First-time greeting / Start
+      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'dost', 'start', 'shuru'].includes(lowerText)) {
+        const picker = personaService.getLanguagePicker();
+        await whatsappService.sendInteractiveButtons(fromPhone, picker.text, picker.buttons);
+        return;
+      }
+
+      // 4.3 Expiry inquiry
       if (['expiry', 'dates', 'kab khatam', 'renew', 'tarikh', 'tareekh', 'list'].some(k => lowerText.includes(k))) {
         const expiries = await dbService.getUserExpiries(fromPhone);
         const reply = personaService.formatExpiriesList(expiries);
@@ -199,15 +215,15 @@ export const botRouter = {
         return;
       }
 
-      // 4.3 Succession / Nominee inquiry (WarisPath Kit)
+      // 4.4 Succession / Nominee inquiry (WarisPath Kit)
       if (['waris', 'nominee', 'papa ke papers', 'baad mein', 'succession'].some(k => lowerText.includes(k))) {
         await whatsappService.sendTextMessage(fromPhone, personaService.getWarisPathInfo());
         return;
       }
 
-      // 4.4 Plans & Pricing inquiry
+      // 4.5 Plans & Pricing inquiry
       if (['plan', 'price', 'pricing', 'kharidna', 'charges', 'pack'].some(k => lowerText.includes(k))) {
-        const plansMsg = `📋 *MunshiJi Parivaar Plans (stayonchat.com)* 🧞‍♂️\n\n1️⃣ *Free Pack:* 15 files + 1 reminder trial (₹0)\n2️⃣ *Yaad Plan:* 50 files + 20 WhatsApp reminders (₹149/saal)\n3️⃣ *Ghar Plan:* 200 files + 4 Family seats + Unlimited reminders (₹399/saal)\n4️⃣ *Vault Plan:* 500 files + CA link + Waris kit (₹799/saal)\n\n_Jo plan chahiye uska naam likhein ya button dabayein._`;
+        const plansMsg = `📋 *DOST Parivaar Plans (stayonchat.com)* 🤖✨\n\n1️⃣ *Free Pack:* 15 files + 1 reminder trial (₹0)\n2️⃣ *Yaad Plan:* 50 files + 20 WhatsApp reminders (₹149/saal)\n3️⃣ *Ghar Plan:* 200 files + 4 Family seats + Unlimited reminders (₹399/saal)\n4️⃣ *Vault Plan:* 500 files + CA link + Waris kit (₹799/saal)\n\n_Jo plan chahiye uska naam likhein ya button dabayein._`;
         await whatsappService.sendInteractiveButtons(fromPhone, plansMsg, [
           { id: 'upgrade_yaad_149', title: 'Yaad Plan (₹149)' },
           { id: 'upgrade_ghar_399', title: 'Ghar Plan (₹399)' },
@@ -216,10 +232,32 @@ export const botRouter = {
         return;
       }
 
-      // 4.5 Fast Search Query (e.g. "RC", "Havells bill", "LIC policy", "PUC")
-      // Clean query text: remove common words like "mera", "meri", "dikha", "bhej", "kahan hai"
+      // 4.6 Check for Natural Reminder (e.g. "Kal 10 baje mummy ki dava yaad dilana", "Remind me to pay electricity bill on 15th")
+      const reminderCheck = await geminiService.parseNaturalReminder(text);
+      if (reminderCheck.isReminder && reminderCheck.task && reminderCheck.remindAtIso) {
+        await dbService.addGeneralReminder(fromPhone, reminderCheck.task, reminderCheck.remindAtIso);
+        const reply = personaService.getReminderSavedMessage(reminderCheck.task, reminderCheck.remindAtIso, userLang);
+        await whatsappService.sendTextMessage(fromPhone, reply);
+        return;
+      }
+
+      // 4.7 Check for Astro / Birth Details (DOB, Time, Place, Kundali)
+      const astroCheck = await geminiService.parseAstroProfile(text);
+      if (astroCheck.hasAstroData && astroCheck.dob) {
+        await dbService.setUserAstro(fromPhone, {
+          dob: astroCheck.dob,
+          tob: astroCheck.tob,
+          pob: astroCheck.pob,
+          rashi: astroCheck.rashi,
+        });
+        const reply = personaService.getAstroSavedMessage(astroCheck, userLang);
+        await whatsappService.sendTextMessage(fromPhone, reply);
+        return;
+      }
+
+      // 4.8 Document Search Query (e.g. "RC", "Havells bill", "LIC policy", "PUC")
       const cleanQuery = text
-        .replace(/^(mera|meri|mere|apna|apni|bhai|munshiji)\s+/i, '')
+        .replace(/^(mera|meri|mere|apna|apni|bhai|dost)\s+/i, '')
         .replace(/\s+(bhej|bhejo|dikha|dikhao|kahan hai|kaha h|send)$/i, '')
         .trim();
 
@@ -227,9 +265,9 @@ export const botRouter = {
       const results = await dbService.searchDocuments(fromPhone, searchKeyword);
 
       if (results.length === 1 && results[0].storage_path) {
-        // Single exact result found! Send details + original image/document
+        // Single exact result found! Send details + original image OR PDF document
         const doc = results[0];
-        let caption = `📄 *${doc.title}* 🧞‍♂️\n`;
+        let caption = `📄 *${doc.title}* 🤖✨\n`;
         if (doc.entity_name) caption += `🏢 ${doc.entity_name}\n`;
         if (doc.policy_or_bill_no) caption += `🔢 No: ${doc.policy_or_bill_no}\n`;
         if (doc.expiry_date) caption += `⏳ Expiry: ${doc.expiry_date}\n`;
@@ -238,12 +276,25 @@ export const botRouter = {
         try {
           const buffer = await storageService.downloadDocument(doc.storage_path);
           const mimeType = doc.file_type || 'image/jpeg';
-          const mediaId = await whatsappService.uploadMedia(buffer, mimeType, `${doc.title}.jpg`);
+          const isPdf = mimeType.includes('pdf') || doc.file_name?.toLowerCase().endsWith('.pdf');
 
-          if (mediaId) {
-            console.log(`Sending image by mediaId ${mediaId} to ${fromPhone}...`);
-            await whatsappService.sendImageByMediaId(fromPhone, mediaId, caption.trim());
-            return;
+          if (isPdf) {
+            // PDF Document Delivery (Exact original PDF file back on WhatsApp!)
+            const docName = doc.file_name || `${doc.title}.pdf`;
+            const mediaId = await whatsappService.uploadMedia(buffer, 'application/pdf', docName);
+            if (mediaId) {
+              console.log(`Sending PDF document by mediaId ${mediaId} to ${fromPhone}...`);
+              await whatsappService.sendDocumentByMediaId(fromPhone, mediaId, docName, caption.trim());
+              return;
+            }
+          } else {
+            // Image Delivery (JPG/PNG)
+            const mediaId = await whatsappService.uploadMedia(buffer, mimeType, `${doc.title}.jpg`);
+            if (mediaId) {
+              console.log(`Sending image by mediaId ${mediaId} to ${fromPhone}...`);
+              await whatsappService.sendImageByMediaId(fromPhone, mediaId, caption.trim());
+              return;
+            }
           }
         } catch (mediaErr) {
           console.error('Error sending media back to user:', mediaErr);
@@ -251,10 +302,19 @@ export const botRouter = {
 
         // Fallback text if media upload fails
         await whatsappService.sendTextMessage(fromPhone, caption.trim());
-      } else {
-        const formatted = personaService.formatSearchResults(searchKeyword, results);
-        await whatsappService.sendTextMessage(fromPhone, formatted);
+        return;
       }
+
+      if (results.length > 1) {
+        const formatted = personaService.formatSearchResults(searchKeyword, results, userLang);
+        await whatsappService.sendTextMessage(fromPhone, formatted);
+        return;
+      }
+
+      // 4.9 Samajhdaar Dost Conversational AI
+      // When the user is simply chatting, sharing feelings, asking life/money advice, or greeting:
+      const dostReply = await geminiService.chatAsDost(text, [], userLang, userName);
+      await whatsappService.sendTextMessage(fromPhone, dostReply);
     }
   }
 };

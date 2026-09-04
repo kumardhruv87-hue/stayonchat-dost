@@ -12,13 +12,74 @@ export const schedulerService = {
    * Initialize cron jobs
    */
   startScheduler() {
-    console.log('MunshiJi Daily Scheduler initialized (Cron: 09:00 AM IST)');
+    console.log('DOST Multi-tier Scheduler initialized:');
+    console.log('- 06:00 AM IST: Daily Astro & Morning Vibe Check');
+    console.log('- 09:00 AM IST: Document Expiry Alerts');
+    console.log('- Every 1 Minute: Real-time General Task Reminders');
 
-    // Run every day at 09:00 AM IST (03:30 AM UTC)
+    // 1. Run every day at 06:00 AM IST (00:30 AM UTC): Daily Astro & Morning Guidance
+    cron.schedule('30 0 * * *', async () => {
+      console.log('Running daily 06:00 AM IST Astro & Morning Guidance...');
+      await this.processDailyAstroGuidance();
+    });
+
+    // 2. Run every day at 09:00 AM IST (03:30 AM UTC): Document Expiries
     cron.schedule('30 3 * * *', async () => {
       console.log('Running daily expiry check at 09:00 AM IST...');
       await this.processDailyReminders();
     });
+
+    // 3. Run every 1 minute: Real-time user custom reminders
+    cron.schedule('* * * * *', async () => {
+      await this.processGeneralReminders();
+    });
+  },
+
+  /**
+   * Check and deliver real-time user-defined general reminders
+   */
+  async processGeneralReminders() {
+    try {
+      const dueReminders = await dbService.getDueGeneralReminders();
+      for (const r of dueReminders) {
+        console.log(`Delivering general reminder to ${r.user_phone}: ${r.task}`);
+        const msg = `⏰ *DOST Reminder!* 🤖✨\n\n📌 *${r.task}*\n\n_Bhai, aapne bola tha is samay yaad dilane ko. Kaam ho gaya na?_`;
+        await whatsappService.sendTextMessage(r.user_phone, msg);
+        await dbService.markGeneralReminderSent(r.id);
+      }
+    } catch (err) {
+      console.error('Error processing general reminders:', err);
+    }
+  },
+
+  /**
+   * Send personalized 6:00 AM daily morning Astro & Safety guidance
+   */
+  async processDailyAstroGuidance() {
+    try {
+      const astroUsers = await dbService.getAllAstroUsers();
+      console.log(`Sending 6:00 AM Astro guidance to ${astroUsers.length} users.`);
+
+      const { geminiService } = await import('./gemini.js');
+
+      for (const user of astroUsers) {
+        if (!user.dob) continue;
+        const guidance = await geminiService.generateDailyAstroGuide(
+          {
+            name: user.name,
+            dob: user.dob,
+            tob: user.tob,
+            pob: user.pob,
+            rashi: user.rashi,
+          },
+          user.language || 'hinglish'
+        );
+
+        await whatsappService.sendTextMessage(user.phone_number, guidance);
+      }
+    } catch (err) {
+      console.error('Failed to send daily astro guidance:', err);
+    }
   },
 
   /**

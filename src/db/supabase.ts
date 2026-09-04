@@ -25,13 +25,26 @@ export const supabase: SupabaseClient = createClient(
 export interface UserRecord {
   phone_number: string;
   name: string;
-  language: string;
+  language: 'en' | 'hi' | 'hinglish';
   plan: 'free' | 'yaad_149' | 'ghar_399' | 'vault_799';
   plan_activated_at?: string;
   plan_expires_at?: string;
   file_count: number;
   reminder_count: number;
+  dob?: string;
+  tob?: string;
+  pob?: string;
+  rashi?: string;
   last_offer_sent_at?: string;
+  created_at: string;
+}
+
+export interface GeneralReminder {
+  id: string;
+  user_phone: string;
+  task: string;
+  remind_at: string; // ISO string
+  is_sent: boolean;
   created_at: string;
 }
 
@@ -57,39 +70,62 @@ export interface DocumentRecord {
   created_at?: string;
 }
 
+// In-memory caching & resilient fallback store
+const inMemoryUsers: Map<string, UserRecord> = new Map();
+const inMemoryReminders: GeneralReminder[] = [];
+
 export const dbService = {
   // Get or auto-register user on first WhatsApp message
   async getOrCreateUser(phoneNumber: string, name?: string): Promise<UserRecord> {
-    const { data: existingUser, error: fetchError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('phone_number', phoneNumber)
-      .single();
-
-    if (existingUser && !fetchError) {
-      return existingUser as UserRecord;
+    // Check in-memory first for ultra-fast response
+    if (inMemoryUsers.has(phoneNumber)) {
+      return inMemoryUsers.get(phoneNumber)!;
     }
 
-    const newUser: Partial<UserRecord> = {
+    try {
+      const { data: existingUser, error: fetchError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('phone_number', phoneNumber)
+        .single();
+
+      if (existingUser && !fetchError) {
+        const user = existingUser as UserRecord;
+        inMemoryUsers.set(phoneNumber, user);
+        return user;
+      }
+    } catch {
+      // Supabase unavailable or table error, continue to fallback creation
+    }
+
+    const defaultUser: UserRecord = {
       phone_number: phoneNumber,
-      name: name || 'Bhaiya',
+      name: name || 'Bhai',
+      language: 'hinglish',
       plan: 'free',
       file_count: 0,
       reminder_count: 0,
+      created_at: new Date().toISOString(),
     };
 
-    const { data: insertedUser, error: insertError } = await supabase
-      .from('users')
-      .insert(newUser)
-      .select('*')
-      .single();
+    try {
+      const { data: insertedUser, error: insertError } = await supabase
+        .from('users')
+        .insert(defaultUser)
+        .select('*')
+        .single();
 
-    if (insertError) {
-      console.error('Error creating user in Supabase:', insertError);
-      throw insertError;
+      if (!insertError && insertedUser) {
+        const user = insertedUser as UserRecord;
+        inMemoryUsers.set(phoneNumber, user);
+        return user;
+      }
+    } catch {
+      // Supabase insert failed, use in-memory
     }
 
-    return insertedUser as UserRecord;
+    inMemoryUsers.set(phoneNumber, defaultUser);
+    return defaultUser;
   },
 
   // Save extracted document and update file_count
@@ -247,5 +283,96 @@ export const dbService = {
       .from('users')
       .update({ last_offer_sent_at: new Date().toISOString() })
       .eq('phone_number', userPhone);
+  },
+
+  // Set user language preference
+  async setUserLanguage(phoneNumber: string, language: 'en' | 'hi' | 'hinglish'): Promise<void> {
+    const user = inMemoryUsers.get(phoneNumber);
+    if (user) {
+      user.language = language;
+      inMemoryUsers.set(phoneNumber, user);
+    }
+    try {
+      await supabase.from('users').update({ language }).eq('phone_number', phoneNumber);
+    } catch {
+      // Ignore fallback
+    }
+  },
+
+  // Set user astrology birth profile
+  async setUserAstro(phoneNumber: string, astro: { dob: string; tob?: string; pob?: string; rashi?: string }): Promise<void> {
+    const user = inMemoryUsers.get(phoneNumber);
+    if (user) {
+      user.dob = astro.dob;
+      if (astro.tob) user.tob = astro.tob;
+      if (astro.pob) user.pob = astro.pob;
+      if (astro.rashi) user.rashi = astro.rashi;
+      inMemoryUsers.set(phoneNumber, user);
+    }
+    try {
+      await supabase.from('users').update({
+        dob: astro.dob,
+        tob: astro.tob,
+        pob: astro.pob,
+        rashi: astro.rashi,
+      }).eq('phone_number', phoneNumber);
+    } catch {
+      // Ignore fallback
+    }
+  },
+
+  // Add general natural reminder
+  async addGeneralReminder(userPhone: string, task: string, remindAtIso: string): Promise<GeneralReminder> {
+    const { randomUUID } = await import('crypto');
+    const reminder: GeneralReminder = {
+      id: randomUUID(),
+      user_phone: userPhone,
+      task,
+      remind_at: remindAtIso,
+      is_sent: false,
+      created_at: new Date().toISOString(),
+    };
+    inMemoryReminders.push(reminder);
+
+    try {
+      await supabase.from('general_reminders').insert(reminder);
+    } catch {
+      // In-memory fallback is active
+    }
+
+    return reminder;
+  },
+
+  // Get due general reminders that need to be delivered right now
+  async getDueGeneralReminders(): Promise<GeneralReminder[]> {
+    const now = new Date().toISOString();
+    return inMemoryReminders.filter((r) => !r.is_sent && r.remind_at <= now);
+  },
+
+  // Mark general reminder as sent
+  async markGeneralReminderSent(reminderId: string): Promise<void> {
+    const rem = inMemoryReminders.find((r) => r.id === reminderId);
+    if (rem) {
+      rem.is_sent = true;
+    }
+    try {
+      await supabase.from('general_reminders').update({ is_sent: true }).eq('id', reminderId);
+    } catch {
+      // In-memory fallback
+    }
+  },
+
+  // Get all users who have an Astro profile for daily 6:00 AM morning guidance
+  async getAllAstroUsers(): Promise<UserRecord[]> {
+    const usersWithDob = Array.from(inMemoryUsers.values()).filter((u) => !!u.dob);
+    try {
+      const { data } = await supabase.from('users').select('*').not('dob', 'is', null);
+      if (data && data.length > 0) {
+        return data as UserRecord[];
+      }
+    } catch {
+      // In-memory fallback
+    }
+    return usersWithDob;
   }
 };
