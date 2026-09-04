@@ -31,6 +31,18 @@ export const botRouter = {
     const user = await dbService.getOrCreateUser(fromPhone, userName);
     const userLang = user.language || 'hinglish';
 
+    // 1.1 Check if new user came with a viral referral code (e.g. "Hi DOST ref_956093")
+    const refMatch = (message.text?.body || '').match(/ref_([a-zA-Z0-9]+)/i);
+    if (refMatch && !user.referred_by) {
+      const refCode = refMatch[0];
+      const result = await dbService.applyReferral(fromPhone, refCode);
+      if (result.success && result.referrerPhone) {
+        // Send instant celebration message to the referrer
+        const rewardMsg = personaService.getReferralRewardMessage(userName, result.newTotalBonus || 15);
+        await whatsappService.sendTextMessage(result.referrerPhone, rewardMsg);
+      }
+    }
+
     // =============================================================
     // BRANCH 1: User Clicked an Interactive Button
     // =============================================================
@@ -57,7 +69,14 @@ export const botRouter = {
         return;
       }
 
-      // 1.3 Dismiss
+      // 1.3 Viral Invite / Share
+      if (buttonId === 'btn_share_invite') {
+        const shareMsg = personaService.getReferralShareMessage(fromPhone, user.referral_code || fromPhone.slice(-6));
+        await whatsappService.sendTextMessage(fromPhone, shareMsg);
+        return;
+      }
+
+      // 1.4 Dismiss
       if (buttonId === 'dismiss_upsell') {
         await whatsappService.sendTextMessage(fromPhone, 'Koi baat nahi bhai! Tera dost pehle ki tarah hamesha ready hai. 🙏');
         return;
@@ -69,11 +88,16 @@ export const botRouter = {
     // =============================================================
     if (message.type === 'image' || message.type === 'document') {
       const currentPlan = PLANS[user.plan] || PLANS.free;
+      const effectiveMaxFiles = dbService.getUserEffectiveMaxFiles(user);
 
-      // Check quota limit for free tier
-      if (user.plan === 'free' && user.file_count >= currentPlan.maxFiles) {
-        const upsell = personaService.getQuotaFullUpsell(fromPhone);
-        await whatsappService.sendInteractiveButtons(fromPhone, upsell.text, upsell.buttons);
+      // Check quota limit with referral bonus inclusion
+      if (user.plan === 'free' && user.file_count >= effectiveMaxFiles) {
+        const quotaMsg = `📦 *Free Storage Limit Reached (${effectiveMaxFiles} Files)* 🤖✨\n\nPurani files 100% safe hain!\n\nAur jagah chahiye toh:\n1️⃣ *Dosto ko Invite karein:* Har friend par +5 files free (+30 files tak)\n2️⃣ *Yaad Plan (₹149/saal):* 50 files + 20 auto WhatsApp alerts!`;
+        await whatsappService.sendInteractiveButtons(fromPhone, quotaMsg, [
+          { id: 'upgrade_yaad_149', title: 'Yaad Plan (₹149)' },
+          { id: 'btn_share_invite', title: '🎁 Dosto ko Invite (+5)' },
+          { id: 'dismiss_upsell', title: 'Baad Mein' },
+        ]);
         return;
       }
 
@@ -129,6 +153,12 @@ export const botRouter = {
         const remainingSlots = currentPlan.maxFiles - (user.file_count + 1);
         const confirmMsg = personaService.getDocSavedMessage(extracted, userLang, user.plan === 'free' ? remainingSlots : undefined);
         await whatsappService.sendTextMessage(fromPhone, confirmMsg);
+
+        // Habit & Loss-prevention milestone message
+        if (extracted.expiry_date) {
+          const milestoneMsg = personaService.getMilestoneMessage('penalty_saved', extracted.title);
+          await whatsappService.sendTextMessage(fromPhone, milestoneMsg);
+        }
 
         // Contextual Upsell Check (Anti-Spam rule: max 1 per 7 days)
         if (extracted.expiry_date && user.plan === 'free' && dbService.canSendUpsell(user)) {
@@ -207,7 +237,18 @@ export const botRouter = {
         return;
       }
 
-      // 4.3 Expiry inquiry
+      // 4.3 Invite / Referral Share Command (e.g. "share", "invite", "refer", "link", "dosto ko bhejo")
+      if (
+        ['share', 'invite', 'refer', 'referral', 'dosto ko bhejo', 'invite friend', 'link', 'dost invite'].some(
+          k => lowerText === k || lowerText.startsWith('invite') || lowerText.startsWith('refer')
+        )
+      ) {
+        const shareMsg = personaService.getReferralShareMessage(fromPhone, user.referral_code || fromPhone.slice(-6));
+        await whatsappService.sendTextMessage(fromPhone, shareMsg);
+        return;
+      }
+
+      // 4.4 Expiry inquiry
       if (['expiry', 'dates', 'kab khatam', 'renew', 'tarikh', 'tareekh', 'list'].some(k => lowerText.includes(k))) {
         const expiries = await dbService.getUserExpiries(fromPhone);
         const reply = personaService.formatExpiriesList(expiries);
@@ -215,15 +256,15 @@ export const botRouter = {
         return;
       }
 
-      // 4.4 Succession / Nominee inquiry (WarisPath Kit)
+      // 4.5 Succession / Nominee inquiry (WarisPath Kit)
       if (['waris', 'nominee', 'papa ke papers', 'baad mein', 'succession'].some(k => lowerText.includes(k))) {
         await whatsappService.sendTextMessage(fromPhone, personaService.getWarisPathInfo());
         return;
       }
 
-      // 4.5 Plans & Pricing inquiry
+      // 4.6 Plans & Pricing inquiry
       if (['plan', 'price', 'pricing', 'kharidna', 'charges', 'pack'].some(k => lowerText.includes(k))) {
-        const plansMsg = `📋 *DOST Parivaar Plans (stayonchat.com)* 🤖✨\n\n1️⃣ *Free Pack:* 15 files + 1 reminder trial (₹0)\n2️⃣ *Yaad Plan:* 50 files + 20 WhatsApp reminders (₹149/saal)\n3️⃣ *Ghar Plan:* 200 files + 4 Family seats + Unlimited reminders (₹399/saal)\n4️⃣ *Vault Plan:* 500 files + CA link + Waris kit (₹799/saal)\n\n_Jo plan chahiye uska naam likhein ya button dabayein._`;
+        const plansMsg = `📋 *DOST Parivaar Plans (stayonchat.com)* 🤖✨\n\n1️⃣ *Free Pack:* 15 files + 2 reminder trials (₹0)\n2️⃣ *Yaad Plan:* 50 files + 20 WhatsApp reminders (₹149/saal)\n3️⃣ *Ghar Plan:* 200 files + 4 Family seats + Unlimited reminders (₹399/saal)\n4️⃣ *Vault Plan:* 500 files + CA link + Waris kit (₹799/saal)\n\n_Jo plan chahiye uska naam likhein ya button dabayein._`;
         await whatsappService.sendInteractiveButtons(fromPhone, plansMsg, [
           { id: 'upgrade_yaad_149', title: 'Yaad Plan (₹149)' },
           { id: 'upgrade_ghar_399', title: 'Ghar Plan (₹399)' },
@@ -232,7 +273,16 @@ export const botRouter = {
         return;
       }
 
-      // 4.6 Check for Natural Reminder (e.g. "Kal 10 baje mummy ki dava yaad dilana", "Remind me to pay electricity bill on 15th")
+      // 4.7 Custom Regional Language Request (e.g. "Marathi", "Gujarati", "Bengali", "Tamil", "Bhojpuri")
+      const detectedLang = await geminiService.detectCustomLanguage(text);
+      if (detectedLang) {
+        await dbService.setUserLanguage(fromPhone, detectedLang.toLowerCase());
+        const langAck = `✅ *Language set to ${detectedLang}!* 🤖✨\n\nAb se main aapse ${detectedLang} mein hi baat karunga aur aapke documents & reminders sambhalunga. Kahiye, aaj kya help karun?`;
+        await whatsappService.sendTextMessage(fromPhone, langAck);
+        return;
+      }
+
+      // 4.8 Check for Natural Reminder (e.g. "Kal 10 baje mummy ki dava yaad dilana", "Remind me to pay electricity bill on 15th")
       const reminderCheck = await geminiService.parseNaturalReminder(text);
       if (reminderCheck.isReminder && reminderCheck.task && reminderCheck.remindAtIso) {
         await dbService.addGeneralReminder(fromPhone, reminderCheck.task, reminderCheck.remindAtIso);
@@ -241,7 +291,7 @@ export const botRouter = {
         return;
       }
 
-      // 4.7 Check for Astro / Birth Details (DOB, Time, Place, Kundali)
+      // 4.9 Check for Astro / Birth Details (DOB, Time, Place, Kundali)
       const astroCheck = await geminiService.parseAstroProfile(text);
       if (astroCheck.hasAstroData && astroCheck.dob) {
         await dbService.setUserAstro(fromPhone, {
@@ -255,7 +305,7 @@ export const botRouter = {
         return;
       }
 
-      // 4.8 Document Search Query (e.g. "RC", "Havells bill", "LIC policy", "PUC")
+      // 4.10 Document Search Query (e.g. "RC", "Havells bill", "LIC policy", "PUC")
       const cleanQuery = text
         .replace(/^(mera|meri|mere|apna|apni|bhai|dost)\s+/i, '')
         .replace(/\s+(bhej|bhejo|dikha|dikhao|kahan hai|kaha h|send)$/i, '')
@@ -311,7 +361,7 @@ export const botRouter = {
         return;
       }
 
-      // 4.9 Samajhdaar Dost Conversational AI
+      // 4.11 Samajhdaar Dost Conversational AI
       // When the user is simply chatting, sharing feelings, asking life/money advice, or greeting:
       const dostReply = await geminiService.chatAsDost(text, [], userLang, userName);
       await whatsappService.sendTextMessage(fromPhone, dostReply);

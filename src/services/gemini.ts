@@ -182,7 +182,7 @@ Return JSON:
   async chatAsDost(
     userMessage: string,
     history: Array<{ role: string; text: string }> = [],
-    language: 'en' | 'hi' | 'hinglish' = 'hinglish',
+    language: string = 'hinglish',
     userName: string = 'Bhai'
   ): Promise<string> {
     try {
@@ -198,7 +198,9 @@ Return JSON:
           ? 'Shuddh aam bolchal ki saral Hindi mein baat karein.'
           : language === 'en'
           ? 'Speak in warm, friendly, modern Indian English.'
-          : 'Speak in warm, street-smart, natural Hinglish (Hindi + English mix).';
+          : language === 'hinglish'
+          ? 'Speak in warm, street-smart, natural Hinglish (Hindi + English mix).'
+          : `Speak warmly, naturally, and fluently in ${language} (user's preferred language).`;
 
       const prompt = `
 You are "DOST 🤖✨" (stayonchat.com) — India's friendliest, smartest WhatsApp AI companion and digital locker.
@@ -318,11 +320,92 @@ Return JSON:
   },
 
   /**
-   * Generate Daily 6:00 AM Astro & Life Guidance (Grah-Nakshatra + Practical Safety Caution)
+   * Detect custom language if user types "marathi", "bengali", "gujarati", "tamil", etc.
+   */
+  async detectCustomLanguage(text: string): Promise<string | null> {
+    const cleaned = text.trim().toLowerCase();
+    const commonLangs: Record<string, string> = {
+      marathi: 'Marathi',
+      'marathi mein': 'Marathi',
+      'in marathi': 'Marathi',
+      bengali: 'Bengali',
+      bangla: 'Bengali',
+      'bengali mein': 'Bengali',
+      'in bengali': 'Bengali',
+      gujarati: 'Gujarati',
+      gujrati: 'Gujarati',
+      'gujarati mein': 'Gujarati',
+      'in gujarati': 'Gujarati',
+      punjabi: 'Punjabi',
+      'punjabi mein': 'Punjabi',
+      tamil: 'Tamil',
+      'tamil mein': 'Tamil',
+      'in tamil': 'Tamil',
+      telugu: 'Telugu',
+      'telugu mein': 'Telugu',
+      'in telugu': 'Telugu',
+      kannada: 'Kannada',
+      'kannada mein': 'Kannada',
+      malayalam: 'Malayalam',
+      'malayalam mein': 'Malayalam',
+      urdu: 'Urdu',
+      'urdu mein': 'Urdu',
+      odia: 'Odia',
+      assamese: 'Assamese',
+      bhojpuri: 'Bhojpuri',
+      marwari: 'Marwari',
+    };
+
+    if (commonLangs[cleaned]) {
+      return commonLangs[cleaned];
+    }
+
+    // Only invoke LLM if message looks like a language switch request
+    const hasLangKeywords = /\b(language|bhasha|speak in|talk in|mein baat|boli|bhasha badlo)\b/i.test(text);
+    if (!hasLangKeywords && text.split(/\s+/).length > 4) {
+      return null;
+    }
+
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1,
+        },
+      });
+
+      const prompt = `
+Did the user just ask to switch to a specific language in this message?
+Text: "${text}"
+
+If they mentioned a language name (like "talk in Marathi", "Tamil please", "Bengali mein baat karo", "Spanish", etc.):
+Return JSON:
+{ "isLanguageRequest": true, "languageName": "English name of the language e.g. Marathi, Tamil, Bengali" }
+
+Else:
+Return JSON:
+{ "isLanguageRequest": false }
+`;
+
+      const res = await model.generateContent(prompt);
+      const data = JSON.parse(res.response.text());
+      if (data.isLanguageRequest && data.languageName) {
+        return data.languageName;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Generate Daily 6:00 AM Universal Morning & Safety Guidance
+   * Inclusive for all faiths (Hindu, Muslim, Sikh, Christian, Secular)
    */
   async generateDailyAstroGuide(
-    profile: { name?: string; dob: string; tob?: string; pob?: string; rashi?: string },
-    language: 'en' | 'hi' | 'hinglish' = 'hinglish'
+    profile: { name?: string; dob?: string; tob?: string; pob?: string; rashi?: string },
+    language: string = 'hinglish'
   ): Promise<string> {
     try {
       const model = genAI.getGenerativeModel({
@@ -340,26 +423,28 @@ Return JSON:
       });
 
       const prompt = `
-You are "DOST 🤖✨", delivering the daily 6:00 AM personalized morning vibe & astrological guidance for ${profile.name || 'Bhai'}.
+You are "DOST 🤖✨", delivering the daily 6:00 AM personalized morning vibe & safety check for ${profile.name || 'Bhai'}.
 Today's Date: ${todayDate}
-User Birth Info: DOB: ${profile.dob}, Time: ${profile.tob || 'Not specified'}, Place: ${profile.pob || 'India'}, Sign/Rashi: ${profile.rashi || 'General'}.
-Preferred Language: ${language}
+User Profile: DOB: ${profile.dob || 'General'}, City: ${profile.pob || 'India'}.
+User Language: ${language}
 
-REQUIREMENTS:
-1. Warm morning greeting (Suprabhat / Good Morning / Jai Shri Ram / Radhe Radhe).
-2. Vedic Grah/Nakshatra brief overview for today (e.g. Surya transit, Chandra impact, Rahu Kaal alert).
-3. Practical Life Guidance:
-   - A specific caution (e.g. "Sadak par gaadi sambhal ke chalayein", "Kisi se bewajah behas se bachein", or "Paison ke mamle mein dhyan rakhein").
-   - Favorable time / lucky hours today (Shubh Muhurat / Rahu Kaal window).
-4. An inspiring, caring one-liner from their trusted buddy DOST to kickstart their day with high energy!
-5. Format with neat WhatsApp bullet points and emojis. Keep it under 150 words.
+INCLUSIVE & UNIVERSAL GUIDELINES:
+1. Warm, respectful morning greeting suitable for everyone across India (e.g. "Good morning / Suprabhat / Khush Raho / Salaam / Namaste").
+2. Day's Energy & Motivation: Focus on clarity of mind, positivity, and staying energized.
+3. Practical Life & Safety Check:
+   - Specific road & driving alert (e.g. rush hour traffic, cautious driving, patience on the road).
+   - Practical work/finance caution (e.g. double-check bills, avoid rash decisions, keep calm in discussions).
+4. Best Focus Hours: Suggest optimal productive hours of the day (e.g. 10 AM - 1 PM).
+5. (Optional): If the user specifically asked for Rashi/Astrology, provide a gentle planetary hint, else keep it universal and life-oriented.
+6. A punchy, caring one-liner from their trusted buddy DOST!
+7. Format with clean WhatsApp bullet points and emojis. Keep under 140 words.
 `;
 
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
     } catch (err: any) {
       console.error('Error in generateDailyAstroGuide:', err);
-      return `🌅 *Suprabhat ${profile.name || 'Bhai'}!* ✨\n\nAaj ka din aapke liye nayi urja lekar aaya hai. Sadak par driving sambhal kar karein aur apne krodh par niyantran rakhein. Aapka din shubh aur mangalmay ho! ☀️`;
+      return `🌅 *Good Morning ${profile.name || 'Bhai'}!* ✨\n\nAaj ka din aapke liye nayi urja lekar aaya hai. Sadak par driving sambhal kar karein aur dimaag shaant rakhein. Koi bhi zaroori kaagaz ya reminder ho toh mujhe bhej dena! Have a wonderful day! ☀️`;
     }
   }
 };

@@ -6,10 +6,16 @@
 export const BRAND = {
   name: "DOST",
   displayName: "DOST 🤖✨",
-  tagline: "Aapka Apna Digital Saathi | Locker, Reminders, Astro Guide & Smart Companion",
+  tagline: "Aapka Apna Digital Saathi — Commitment se zyada samajhdaar.",
   domain: "stayonchat.com",
   supportEmail: "info@stayonchat.com",
   supportWhatsApp: "+91-XXXXXXXXXX",
+};
+
+export const REFERRAL_RULES = {
+  bonusFilesPerFriend: 5,
+  bonusRemindersPerFriend: 3,
+  maxReferralsAllowed: 6, // Up to 30 bonus files free
 };
 
 export interface PlanDetails {
@@ -30,14 +36,14 @@ export const PLANS: Record<string, PlanDetails> = {
     name: "Free Pack",
     priceInr: 0,
     period: "Lifetime",
-    maxFiles: 15,
-    maxReminders: 1, // 1 free reminder trial
+    maxFiles: 10, // 10 files base limit + can earn up to 30 more via referrals!
+    maxReminders: 2, // 2 free reminder trials
     familySeats: 1,
-    description: "Shuruat ke liye 15 files aur instant search",
+    description: "Shuruat ke liye 10 files aur instant search",
     features: [
-      "15 files encrypted storage",
+      "10 files encrypted storage (refer karke 40 tak badhayein)",
       "Instant WhatsApp search (0 ms)",
-      "1 free reminder trial",
+      "2 free reminder trials",
       "No auto-debit, no credit card required"
     ]
   },

@@ -12,7 +12,7 @@ export const personaService = {
    */
   getLanguagePicker() {
     return {
-      text: `Namaste / Hello! 🙏✨\n\nMain hoon **DOST 🤖** (stayonchat.com) — aapka digital saathi.\n\nPlease choose your preferred language / Apni bhasha chunein:`,
+      text: `Namaste / Hello! 🙏✨\n\nMain hoon **DOST 🤖** (stayonchat.com) — *commitment se zyada samajhdaar!*\n\nApni bhasha chunein:\n\n_👉 Kisi aur bhasha (Marathi, Gujarati, Bengali, Tamil, etc.) ke liye bas uska naam type kar dein!_`,
       buttons: [
         { id: 'lang_hinglish', title: 'Hinglish (Mix)' },
         { id: 'lang_hi', title: 'हिंदी' },
@@ -24,7 +24,7 @@ export const personaService = {
   /**
    * Warm, lovable welcome message after language selection
    */
-  getWelcomeMessage(userName: string = 'Bhai', language: 'en' | 'hi' | 'hinglish' = 'hinglish'): string {
+  getWelcomeMessage(userName: string = 'Bhai', language: string = 'hinglish'): string {
     if (language === 'hi') {
       return `नमस्ते ${userName}! 🙏✨\n\nमैं हूँ आपका **DOST 🤖** (stayonchat.com) — आपका अपना डिजिटल साथी!\n\nमैं आपकी क्या-क्या मदद कर सकता हूँ:\n📁 *कागज़ व बिल लॉकर:* फोटो या PDF भेजिए, सुरक्षित रखूँगा और मांगने पर सेकंड में लौटा दूँगा।\n⏰ *स्मार्ट रिमाइंडर्स:* किसी भी चीज़ की याद दिलवाने को कहिए (जैसे "कल 10 बजे मम्मी की दवा")।\n🌅 *सुबह 6 बजे ग्रह-नक्षत्र सलाह:* अपनी जन्मतिथि (DOB) बताइए, हर सुबह आपके दिन की खास सलाह दूँगा।\n💬 *सच्चा दोस्त:* कोई भी बात करनी हो या सलाह चाहिए, बेझिझक चैट कीजिए!\n\n_शुरुआत करने के लिए कोई भी फोटो, PDF या मैसेज भेजिए!_ 😊`;
     }
@@ -42,7 +42,7 @@ export const personaService = {
    */
   getDocSavedMessage(
     doc: ExtractedDoc,
-    language: 'en' | 'hi' | 'hinglish' = 'hinglish',
+    language: string = 'hinglish',
     remainingFreeSlots?: number
   ): string {
     if (language === 'hi') {
@@ -104,7 +104,7 @@ export const personaService = {
   formatSearchResults(
     query: string,
     docs: any[],
-    language: 'en' | 'hi' | 'hinglish' = 'hinglish'
+    language: string = 'hinglish'
   ): string {
     if (docs.length === 0) {
       if (language === 'hi') {
@@ -143,7 +143,7 @@ export const personaService = {
   getReminderSavedMessage(
     task: string,
     remindAtIso: string,
-    language: 'en' | 'hi' | 'hinglish' = 'hinglish'
+    language: string = 'hinglish'
   ): string {
     const formattedDate = new Date(remindAtIso).toLocaleString('en-IN', {
       timeZone: 'Asia/Kolkata',
@@ -165,7 +165,7 @@ export const personaService = {
    */
   getAstroSavedMessage(
     astro: { dob?: string; tob?: string; pob?: string; rashi?: string },
-    language: 'en' | 'hi' | 'hinglish' = 'hinglish'
+    language: string = 'hinglish'
   ): string {
     if (language === 'hi') {
       return `🌅 *आपकी जन्म जानकारी दर्ज हो गई है!* 🪐✨\n\n📅 *जन्मतिथि (DOB):* ${astro.dob || 'दर्ज'}\n⏰ *समय:* ${astro.tob || 'सामान्य'}\n📍 *स्थान:* ${astro.pob || 'भारत'}\n\nअब हर सुबह **6:00 AM** पर मैं आपको आपके ग्रह-नक्षत्र, शुभ मुहूर्त और दिन की विशेष सावधानी की व्यक्तिगत सलाह WhatsApp पर भेजूँगा! ☀️`;
@@ -227,5 +227,35 @@ export const personaService = {
    */
   getWarisPathInfo(): string {
     return `🛡️ *WarisPath Kit (Family Protection)*\n\nAapne apne saare zaroori kaagaz to surakshit kar liye.\n\nLekin bhagwan na kare kabhi koi emergency ya unhoni ho, to kya aapki family / nominee ko pata hai ki FD, Insurance aur Property kaise claim karni hai?\n\nIske liye hamari alag **WarisPath Kit** aati hai jo aapke nominee ko step-by-step guidance deti hai bina kisi vakil ke chakkar ke.\n\n_Agar dekhna ho to 'Waris Kit' likhein, warna aapka dost normal chalta rahega._ 🙏`;
+  },
+
+  /**
+   * Viral Marketing: Referral invite link message
+   */
+  getReferralShareMessage(userPhone: string, referralCode: string): string {
+    const shareLink = `https://wa.me/15556681690?text=Hi%20DOST%20ref_${referralCode}`;
+    const clickToForward = `https://api.whatsapp.com/send?text=Bhai%20ye%20check%20kar,%20WhatsApp%20par%20AI%20Locker%20aur%20Reminders%20hai%20ekdum%20free:%20${encodeURIComponent(shareLink)}`;
+
+    return `🎁 *Dosto ko Bhejo, Free Storage Badhao!* 🤖✨\n\nHar ek dost ke judne par aapko milenge:\n📁 *+5 Extra Files Free Storage*\n⏰ *+3 Extra Free Reminders*\n\n📲 *Aapka Personal Invite Link:*\n${shareLink}\n\n👉 *Direct WhatsApp Forward karne ke liye yahan tap karein:*\n${clickToForward}\n\n_Jaise hi aapka dost link se "Hi" bhejega, aapka extra quota turant unlock ho jayega!_ 🎉`;
+  },
+
+  /**
+   * Confirmation to referrer when a friend joins
+   */
+  getReferralRewardMessage(friendName: string, totalFiles: number): string {
+    return `🎉 *Badhai ho bhai!* 🤖✨\n\nAapke dost (${friendName}) ne DOST join kar liya hai!\n\nAapko **+5 Extra Files & Reminders** free unlock ho gaye hain. Ab aapke account mein total **${totalFiles} files** ki jagah hai!\n\n_Aise hi aur dosto ko jodein aur storage badhate rahein._ 🚀`;
+  },
+
+  /**
+   * Habit & Loss-Prevention Milestones
+   */
+  getMilestoneMessage(type: 'penalty_saved' | 'five_files' | 'habit_week', data?: string): string {
+    if (type === 'penalty_saved') {
+      return `🚨 *DOST Money Guard:* Bhai, tune is ${data || 'kaagaz'} ki date save karke seedha **₹10,000 ka traffic challan** ya warranty nuksaan bacha liya! Ek samajhdaar dost ka yahi kaam hota hai. ✨`;
+    }
+    if (type === 'five_files') {
+      return `🏆 *5 Zaroori Kaagaz Safe!* Bhai, ab wallet ya almirah mein file dhoondhne ki tension hamesha ke liye khatam. Jab bhi zaroorat ho, bas naam likhna!`;
+    }
+    return `✨ *1 Hafta Saath:* Dosti ko 1 hafta ho gaya! Main hamesha 24/7 yahin hoon tera har kaagaz aur har baat sambhalne ke liye.`;
   }
 };

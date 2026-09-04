@@ -25,12 +25,16 @@ export const supabase: SupabaseClient = createClient(
 export interface UserRecord {
   phone_number: string;
   name: string;
-  language: 'en' | 'hi' | 'hinglish';
+  language: string;
   plan: 'free' | 'yaad_149' | 'ghar_399' | 'vault_799';
   plan_activated_at?: string;
   plan_expires_at?: string;
   file_count: number;
   reminder_count: number;
+  referral_code?: string;
+  referred_by?: string;
+  referral_count?: number;
+  bonus_files?: number;
   dob?: string;
   tob?: string;
   pob?: string;
@@ -105,6 +109,9 @@ export const dbService = {
       plan: 'free',
       file_count: 0,
       reminder_count: 0,
+      referral_code: phoneNumber.slice(-6),
+      referral_count: 0,
+      bonus_files: 0,
       created_at: new Date().toISOString(),
     };
 
@@ -286,7 +293,7 @@ export const dbService = {
   },
 
   // Set user language preference
-  async setUserLanguage(phoneNumber: string, language: 'en' | 'hi' | 'hinglish'): Promise<void> {
+  async setUserLanguage(phoneNumber: string, language: string): Promise<void> {
     const user = inMemoryUsers.get(phoneNumber);
     if (user) {
       user.language = language;
@@ -374,5 +381,74 @@ export const dbService = {
       // In-memory fallback
     }
     return usersWithDob;
+  },
+
+  // Effective max files including base plan + referral bonuses
+  getUserEffectiveMaxFiles(user: UserRecord): number {
+    const base = PLANS[user.plan]?.maxFiles || 10;
+    return base + (user.bonus_files || 0);
+  },
+
+  // Apply viral referral reward when a friend clicks an invite link
+  async applyReferral(
+    newPhoneNumber: string,
+    refCode: string
+  ): Promise<{ success: boolean; referrerPhone?: string; referrerName?: string; newTotalBonus?: number }> {
+    const cleanRef = refCode.replace('ref_', '').trim();
+    let referrer = Array.from(inMemoryUsers.values()).find(
+      (u) => (u.referral_code && u.referral_code === cleanRef) || u.phone_number.endsWith(cleanRef)
+    );
+
+    if (!referrer) {
+      try {
+        const { data } = await supabase
+          .from('users')
+          .select('*')
+          .or(`referral_code.eq.${cleanRef},phone_number.ilike.%${cleanRef}%`)
+          .limit(1)
+          .single();
+        if (data) referrer = data as UserRecord;
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (!referrer || referrer.phone_number === newPhoneNumber) {
+      return { success: false };
+    }
+
+    let newUser = inMemoryUsers.get(newPhoneNumber);
+    if (!newUser) {
+      newUser = await dbService.getOrCreateUser(newPhoneNumber);
+    }
+
+    if (newUser && !newUser.referred_by) {
+      newUser.referred_by = referrer.phone_number;
+      inMemoryUsers.set(newPhoneNumber, newUser);
+
+      // Reward referrer +5 files
+      referrer.referral_count = (referrer.referral_count || 0) + 1;
+      referrer.bonus_files = Math.min((referrer.bonus_files || 0) + 5, 30);
+      inMemoryUsers.set(referrer.phone_number, referrer);
+
+      try {
+        await supabase.from('users').update({ referred_by: referrer.phone_number }).eq('phone_number', newPhoneNumber);
+        await supabase.from('users').update({
+          referral_count: referrer.referral_count,
+          bonus_files: referrer.bonus_files,
+        }).eq('phone_number', referrer.phone_number);
+      } catch {
+        // Ignore fallback
+      }
+
+      return {
+        success: true,
+        referrerPhone: referrer.phone_number,
+        referrerName: referrer.name,
+        newTotalBonus: (PLANS[referrer.plan]?.maxFiles || 15) + referrer.bonus_files,
+      };
+    }
+
+    return { success: false };
   }
 };
