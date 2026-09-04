@@ -16,6 +16,101 @@ import { PLANS, BRAND } from '../config/constants.js';
 
 export const botRouter = {
   /**
+   * Helper: Display user's stored documents
+   */
+  async showMyDocs(fromPhone: string): Promise<void> {
+    const docs = await dbService.searchDocuments(fromPhone, '', 10);
+    if (!docs || docs.length === 0) {
+      await whatsappService.sendTextMessage(
+        fromPhone,
+        '📂 Aapke vault mein abhi koi kaagaz ya photo save nahi hai.\n\nKoi bhi photo ya PDF bhej kar dekhiye, main turant surakshit save kar lunga!'
+      );
+      return;
+    }
+
+    let reply = `📂 Aapke vault ke surakshit kaagaz (${docs.length}): 🤖✨\n\n`;
+    docs.forEach((doc: any, index: number) => {
+      reply += `${index + 1}. ${doc.title}\n`;
+      if (doc.expiry_date) reply += `   • Expiry: ${doc.expiry_date}\n`;
+      if (doc.policy_or_bill_no) reply += `   • Number: ${doc.policy_or_bill_no}\n`;
+    });
+    reply += `\nKisi bhi file ko dekhne ya mangwane ke liye bas uska naam likhkar bhej dijiye!`;
+    await whatsappService.sendTextMessage(fromPhone, reply);
+    await dbService.saveChatMessage(fromPhone, 'model', reply);
+  },
+
+  /**
+   * Helper: Display user's pending reminders & document expiries
+   */
+  async showMyReminders(fromPhone: string): Promise<void> {
+    const expiries = await dbService.getUserExpiries(fromPhone);
+    const reminders = await dbService.getUserGeneralReminders(fromPhone);
+
+    if ((!expiries || expiries.length === 0) && (!reminders || reminders.length === 0)) {
+      await whatsappService.sendTextMessage(
+        fromPhone,
+        '⏰ Abhi aapka koi pending reminder nahi hai.\n\nKisi bhi kaam ka reminder lagane ke liye bas likhiye (jaise: "Kal subah 10 baje doctor appointment").'
+      );
+      return;
+    }
+
+    let reply = `⏰ Aapke active reminders aur tareekhein: 🤖✨\n\n`;
+    let count = 1;
+    if (reminders && reminders.length > 0) {
+      reply += `📋 Kaam & Reminders:\n`;
+      reminders.forEach((r: any) => {
+        const timeStr = new Date(r.remind_at).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        });
+        reply += `${count++}. ${r.task} (Waqt: ${timeStr})\n`;
+      });
+      reply += `\n`;
+    }
+    if (expiries && expiries.length > 0) {
+      reply += `📅 Kaagaz Expiry Alerts:\n`;
+      expiries.forEach((e: any) => {
+        reply += `${count++}. ${e.title} (Expiry: ${e.expiry_date})\n`;
+      });
+    }
+    await whatsappService.sendTextMessage(fromPhone, reply);
+    await dbService.saveChatMessage(fromPhone, 'model', reply);
+  },
+
+  /**
+   * Helper: Display user's Ank Jyotish (Universal Numerology)
+   */
+  async showMyNumerology(fromPhone: string, user: any, resolvedName: string, userLang: string): Promise<void> {
+    const numerology = await dbService.getUserNumerologyData(fromPhone);
+    if (!numerology.profileContext && !user.dob) {
+      const askDob = `🔢 Apna Ank Jyotish janne ke liye kripya apni janmtithi (DOB, jaise: 15-03-1987) bhej dijiye.\n\nMain aapka Mulank (मूलांक), Bhagyank (भाग्यांक), shubh rang aur guidance nikal kar bata dunga! ✨`;
+      await whatsappService.sendTextMessage(fromPhone, askDob);
+      await dbService.saveChatMessage(fromPhone, 'model', askDob);
+      return;
+    }
+
+    const profile = {
+      name: resolvedName,
+      dob: user.dob || '1987-03-15',
+      carNumber: user.vehicle_plate || '',
+      mobile: fromPhone,
+    };
+    const guide = await geminiService.generateDailyNumerologyGuide(profile, userLang);
+    await whatsappService.sendTextMessage(fromPhone, guide);
+    await dbService.saveChatMessage(fromPhone, 'model', guide);
+  },
+
+  /**
+   * Helper: Display DOST Parivaar Plans & Live Razorpay Links
+   */
+  async showPlans(fromPhone: string): Promise<void> {
+    const plansMsg = `📋 DOST Parivaar Plans (stayonchat.com) 🤖✨\n\n1️⃣ Yaad Plan (₹149/saal)\n• 50 files vault storage + 20 auto WhatsApp alerts\n👉 Payment link: https://rzp.io/rzp/ukMXxGY\n\n2️⃣ Ghar Plan (₹399/saal)\n• 200 files + 4 Family seats + Unlimited reminders\n👉 Payment link: https://rzp.io/rzp/OOIVXyJ\n\n3️⃣ Vault Plan (₹799/saal)\n• 500 files + CA link + Waris kit\n👉 Payment link: https://rzp.io/rzp/SjNJKT0\n\n💡 Kisi bhi plan ki link par click karke turant UPI/Card se activate karein!`;
+    await whatsappService.sendTextMessage(fromPhone, plansMsg);
+    await dbService.saveChatMessage(fromPhone, 'model', plansMsg);
+  },
+
+  /**
    * Main entry point for incoming WhatsApp message events
    */
   async handleIncomingMessage(event: any) {
@@ -61,80 +156,22 @@ export const botRouter = {
 
       // 1.2 Interactive Menu Buttons
       if (buttonId === 'btn_my_docs') {
-        const docs = await dbService.searchDocuments(fromPhone, '', 10);
-        if (!docs || docs.length === 0) {
-          await whatsappService.sendTextMessage(
-            fromPhone,
-            '📂 Aapke vault mein abhi koi kaagaz ya photo save nahi hai.\n\nKoi bhi photo ya PDF bhej kar dekhiye, main turant surakshit save kar lunga!'
-          );
-          return;
-        }
-
-        let reply = `📂 Aapke vault ke surakshit kaagaz (${docs.length}): 🤖✨\n\n`;
-        docs.forEach((doc: any, index: number) => {
-          reply += `${index + 1}. ${doc.title}\n`;
-          if (doc.expiry_date) reply += `   • Expiry: ${doc.expiry_date}\n`;
-          if (doc.policy_or_bill_no) reply += `   • Number: ${doc.policy_or_bill_no}\n`;
-        });
-        reply += `\nKisi bhi file ko dekhne ya mangwane ke liye bas uska naam likhkar bhej dijiye!`;
-        await whatsappService.sendTextMessage(fromPhone, reply);
+        await this.showMyDocs(fromPhone);
         return;
       }
 
       if (buttonId === 'btn_my_reminders') {
-        const expiries = await dbService.getUserExpiries(fromPhone);
-        const reminders = await dbService.getUserGeneralReminders(fromPhone);
-
-        if ((!expiries || expiries.length === 0) && (!reminders || reminders.length === 0)) {
-          await whatsappService.sendTextMessage(
-            fromPhone,
-            '⏰ Abhi aapka koi pending reminder nahi hai.\n\nKisi bhi kaam ka reminder lagane ke liye bas likhiye (jaise: "Kal subah 10 baje doctor appointment").'
-          );
-          return;
-        }
-
-        let reply = `⏰ Aapke active reminders aur tareekhein: 🤖✨\n\n`;
-        let count = 1;
-        if (reminders && reminders.length > 0) {
-          reply += `📋 Kaam & Reminders:\n`;
-          reminders.forEach((r: any) => {
-            const timeStr = new Date(r.remind_at).toLocaleString('en-IN', {
-              timeZone: 'Asia/Kolkata',
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            });
-            reply += `${count++}. ${r.task} (Waqt: ${timeStr})\n`;
-          });
-          reply += `\n`;
-        }
-        if (expiries && expiries.length > 0) {
-          reply += `📅 Kaagaz Expiry Alerts:\n`;
-          expiries.forEach((e: any) => {
-            reply += `${count++}. ${e.title} (Expiry: ${e.expiry_date})\n`;
-          });
-        }
-        await whatsappService.sendTextMessage(fromPhone, reply);
+        await this.showMyReminders(fromPhone);
         return;
       }
 
       if (buttonId === 'btn_my_numerology') {
-        const numerology = await dbService.getUserNumerologyData(fromPhone);
-        if (!numerology.profileContext && !user.dob) {
-          await whatsappService.sendTextMessage(
-            fromPhone,
-            `🔢 Apna Ank Jyotish janne ke liye kripya apni janmtithi (DOB, jaise: 15-03-1987) bhej dijiye.\n\nMain aapka Mulank (मूलांक), Bhagyank (भाग्यांक), shubh rang aur guidance nikal kar bata dunga! ✨`
-          );
-          return;
-        }
+        await this.showMyNumerology(fromPhone, user, resolvedName, userLang);
+        return;
+      }
 
-        const profile = {
-          name: resolvedName,
-          dob: user.dob || '1987-03-15',
-          carNumber: user.vehicle_plate || '',
-          mobile: fromPhone,
-        };
-        const guide = await geminiService.generateDailyNumerologyGuide(profile, userLang);
-        await whatsappService.sendTextMessage(fromPhone, guide);
+      if (buttonId === 'btn_plans') {
+        await this.showPlans(fromPhone);
         return;
       }
 
@@ -350,12 +387,67 @@ export const botRouter = {
         await dbService.saveUserProfile(fromPhone, { vehiclePlate: cleanPlate });
       }
 
-      // 4.0 Check if user is replying with a name for a recently uploaded photo or document
+      // 4.0 Check if user is replying to Language Picker
+      const promptState = dbService.getUserPromptState(fromPhone);
+      if (promptState === 'language_picker') {
+        if (['1', 'hinglish', 'mix'].includes(lowerText)) {
+          dbService.clearUserPromptState(fromPhone);
+          await dbService.setUserLanguage(fromPhone, 'hinglish');
+          const welcome = personaService.getWelcomeMessage(resolvedName, 'hinglish');
+          await whatsappService.sendTextMessage(fromPhone, welcome);
+          await dbService.saveChatMessage(fromPhone, 'model', welcome);
+          return;
+        }
+        if (['2', 'hindi', 'hi', 'हिंदी'].includes(lowerText)) {
+          dbService.clearUserPromptState(fromPhone);
+          await dbService.setUserLanguage(fromPhone, 'hi');
+          const welcome = personaService.getWelcomeMessage(resolvedName, 'hi');
+          await whatsappService.sendTextMessage(fromPhone, welcome);
+          await dbService.saveChatMessage(fromPhone, 'model', welcome);
+          return;
+        }
+        if (['3', 'english', 'en'].includes(lowerText)) {
+          dbService.clearUserPromptState(fromPhone);
+          await dbService.setUserLanguage(fromPhone, 'en');
+          const welcome = personaService.getWelcomeMessage(resolvedName, 'en');
+          await whatsappService.sendTextMessage(fromPhone, welcome);
+          await dbService.saveChatMessage(fromPhone, 'model', welcome);
+          return;
+        }
+      }
+
+      // 4.01 Direct Plan checkout shortcuts (e.g. user types "yaad", "ghar", "vault")
+      if (['yaad', 'yaad plan', '149', 'rs 149', '₹149'].includes(lowerText)) {
+        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'yaad_149');
+        const responseText = `✨ Yaad Plan Activate karein 🤖✨\n\nRakam: ₹149/saal\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
+        await whatsappService.sendTextMessage(fromPhone, responseText);
+        await dbService.saveChatMessage(fromPhone, 'model', responseText);
+        return;
+      }
+
+      if (['ghar', 'ghar plan', '399', 'rs 399', '₹399'].includes(lowerText)) {
+        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'ghar_399');
+        const responseText = `✨ Ghar Plan Activate karein 🤖✨\n\nRakam: ₹399/saal\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
+        await whatsappService.sendTextMessage(fromPhone, responseText);
+        await dbService.saveChatMessage(fromPhone, 'model', responseText);
+        return;
+      }
+
+      if (['vault', 'vault plan', '799', 'rs 799', '₹799'].includes(lowerText)) {
+        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'vault_799');
+        const responseText = `✨ Vault Plan Activate karein 🤖✨\n\nRakam: ₹799/saal\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
+        await whatsappService.sendTextMessage(fromPhone, responseText);
+        await dbService.saveChatMessage(fromPhone, 'model', responseText);
+        return;
+      }
+
+      // 4.02 Check if user is replying with a name for a recently uploaded photo or document
       const pendingDocId = dbService.getPendingDocNaming(fromPhone);
       const isSystemCommand = [
         'hi', 'hello', 'hey', 'namaste', 'pranam', 'dost', 'start', 'shuru',
         'menu', 'help', 'madad', 'options', 'language', 'bhasha', 'lang',
-        'share', 'invite', 'refer', 'plan', 'pricing', 'kharidna'
+        'share', 'invite', 'refer', 'plan', 'pricing', 'kharidna',
+        '1', '2', '3', '4', '5'
       ].includes(lowerText);
 
       if (pendingDocId && !isSystemCommand && text.length > 0 && text.length <= 100) {
@@ -370,6 +462,7 @@ export const botRouter = {
 
       // 4.1 Interactive Menu Command
       if (['menu', 'help', 'madad', 'options', 'suvidha', 'features'].includes(lowerText)) {
+        dbService.setUserPromptState(fromPhone, 'main_menu');
         const menu = personaService.getMenuMessage(resolvedName);
         await whatsappService.sendInteractiveButtons(fromPhone, menu.text, menu.buttons);
         return;
@@ -377,6 +470,7 @@ export const botRouter = {
 
       // 4.2 Language Selection Command
       if (['language', 'bhasha', 'lang', 'change language', 'bhasha badlo'].includes(lowerText)) {
+        dbService.setUserPromptState(fromPhone, 'language_picker');
         const picker = personaService.getLanguagePicker();
         await whatsappService.sendInteractiveButtons(fromPhone, picker.text, picker.buttons);
         return;
@@ -384,48 +478,51 @@ export const botRouter = {
 
       // 4.3 First-time greeting / Start
       if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'dost', 'start', 'shuru'].includes(lowerText)) {
+        dbService.setUserPromptState(fromPhone, 'language_picker');
         const picker = personaService.getLanguagePicker();
         await whatsappService.sendInteractiveButtons(fromPhone, picker.text, picker.buttons);
         return;
       }
 
-      // 4.4 Invite / Referral Share Command (e.g. "share", "invite", "refer", "link", "dosto ko bhejo")
+      // 4.4 Menu Option 1: Kaagaz Vault
+      if (lowerText === '1' || ['kaagaz', 'mere kaagaz', 'dastavez', 'vault', 'files', 'documents', 'docs'].includes(lowerText)) {
+        dbService.clearUserPromptState(fromPhone);
+        await this.showMyDocs(fromPhone);
+        return;
+      }
+
+      // 4.5 Menu Option 2: Reminders & Expiries
+      if (lowerText === '2' || ['reminders', 'reminder', 'mere reminders', 'active reminders'].includes(lowerText)) {
+        dbService.clearUserPromptState(fromPhone);
+        await this.showMyReminders(fromPhone);
+        return;
+      }
+
+      // 4.6 Menu Option 3: Ank Jyotish
+      if (lowerText === '3' || ['jyotish', 'ank jyotish', 'mera ank jyotish', 'numerology', 'mulank', 'bhagyank'].includes(lowerText)) {
+        dbService.clearUserPromptState(fromPhone);
+        await this.showMyNumerology(fromPhone, user, resolvedName, userLang);
+        return;
+      }
+
+      // 4.7 Menu Option 4: Plans & Pricing
+      if (lowerText === '4' || ['plan', 'plans', 'pricing', 'kharidna', 'charges', 'pack'].some(k => lowerText.includes(k))) {
+        dbService.clearUserPromptState(fromPhone);
+        await this.showPlans(fromPhone);
+        return;
+      }
+
+      // 4.8 Menu Option 5: Invite Friends
       if (
+        lowerText === '5' ||
         ['share', 'invite', 'refer', 'referral', 'dosto ko bhejo', 'invite friend', 'link', 'dost invite'].some(
           k => lowerText === k || lowerText.startsWith('invite') || lowerText.startsWith('refer')
         )
       ) {
+        dbService.clearUserPromptState(fromPhone);
         const shareMsg = personaService.getReferralShareMessage(fromPhone, user.referral_code || fromPhone.slice(-6));
         await whatsappService.sendTextMessage(fromPhone, shareMsg);
         await dbService.saveChatMessage(fromPhone, 'model', shareMsg);
-        return;
-      }
-
-      // 4.5 Expiry inquiry
-      if (['expiry', 'dates', 'kab khatam', 'renew', 'tarikh', 'tareekh', 'list'].some(k => lowerText.includes(k))) {
-        const expiries = await dbService.getUserExpiries(fromPhone);
-        const reply = personaService.formatExpiriesList(expiries);
-        await whatsappService.sendTextMessage(fromPhone, reply);
-        await dbService.saveChatMessage(fromPhone, 'model', reply);
-        return;
-      }
-
-      // 4.6 Succession / Nominee inquiry (WarisPath Kit)
-      if (['waris', 'nominee', 'papa ke papers', 'baad mein', 'succession'].some(k => lowerText.includes(k))) {
-        const reply = personaService.getWarisPathInfo();
-        await whatsappService.sendTextMessage(fromPhone, reply);
-        await dbService.saveChatMessage(fromPhone, 'model', reply);
-        return;
-      }
-
-      // 4.7 Plans & Pricing inquiry
-      if (['plan', 'price', 'pricing', 'kharidna', 'charges', 'pack'].some(k => lowerText.includes(k))) {
-        const plansMsg = `📋 DOST Parivaar Plans (stayonchat.com) 🤖✨\n\n1️⃣ Free Pack: 15 files + 2 reminder trials (₹0)\n2️⃣ Yaad Plan: 50 files + 20 WhatsApp reminders (₹149/saal)\n3️⃣ Ghar Plan: 200 files + 4 Family seats + Unlimited reminders (₹399/saal)\n4️⃣ Vault Plan: 500 files + CA link + Waris kit (₹799/saal)\n\nJo plan chahiye uska naam likhein ya button dabayein.`;
-        await whatsappService.sendInteractiveButtons(fromPhone, plansMsg, [
-          { id: 'upgrade_yaad_149', title: 'Yaad Plan (₹149)' },
-          { id: 'upgrade_ghar_399', title: 'Ghar Plan (₹399)' },
-          { id: 'upgrade_vault_799', title: 'Vault Plan (₹799)' }
-        ]);
         return;
       }
 

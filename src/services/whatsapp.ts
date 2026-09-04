@@ -1,6 +1,7 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - WhatsApp Cloud API Client
-// Handles text, interactive buttons, document sending & media downloads
+// AI DOST (stayonchat.com) - WhatsApp Gateway Client
+// Supports UltraMsg (Primary Live Gateway) with Meta Cloud API Fallback
+// Zero Spam Asterisks Policy & Universal Media Handlers
 // =================================================================
 
 import axios from 'axios';
@@ -8,13 +9,17 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const ACTIVE_TOKEN =
+const ULTRAMSG_INSTANCE_ID = process.env.ULTRAMSG_INSTANCE_ID || 'instance190648';
+const ULTRAMSG_TOKEN = process.env.ULTRAMSG_TOKEN || 'knnyrkcj26wp4jyf';
+const ULTRAMSG_BASE_URL = `https://api.ultramsg.com/${ULTRAMSG_INSTANCE_ID}`;
+
+const ACTIVE_META_TOKEN =
   'EAAUU0G7bSl8BSVNpv55As86uPV8nwdcYkdJfZBSGemdmQubjZCIhwZBOHrJURg0mGtGUKcnFBCY8y5aN499HWdBNoRrGcKThx1sMVHVD6ZAOh1kszUf1ZCQcfHabXecPoAiCFz6wmczu01V3A6RZBNCEfZC6O3LpeL1ZBGpnYOCF6D9gTyYRTdaDAomMmvJmrrFBL3BP3mkVZAMpFKNhwVYBRVZB243ZBF9WmUXap7WroZAtyBZAiOErHCPDWRFF6taEIhUhfc8UZBoodpOItmPmvbB8H1oPtDNCVScZAvqswZDZD';
 
 export function getWhatsAppToken(): string {
   const envToken = process.env.WHATSAPP_TOKEN || '';
   if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7')) {
-    return ACTIVE_TOKEN;
+    return ACTIVE_META_TOKEN;
   }
   return envToken;
 }
@@ -24,14 +29,45 @@ const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0';
 
 export interface WhatsAppButton {
   id: string;
-  title: string; // Max 20 characters per Meta guidelines
+  title: string;
+}
+
+/**
+ * Clean phone number to ensure pure international digits (e.g. 919560931596)
+ */
+export function cleanPhoneNumber(phone: string): string {
+  let cleaned = (phone || '').replace('@c.us', '').replace(/[^0-9]/g, '');
+  if (cleaned.length === 10 && /^[6-9]/.test(cleaned)) {
+    cleaned = '91' + cleaned;
+  }
+  return cleaned;
 }
 
 export const whatsappService = {
   /**
-   * Send a standard text message
+   * Send a standard text message (Zero asterisks enforced)
    */
   async sendTextMessage(to: string, text: string): Promise<boolean> {
+    const toClean = cleanPhoneNumber(to);
+    const cleanBody = text.replace(/\*/g, '');
+
+    // 1. Primary Gateway: UltraMsg
+    try {
+      const res = await axios.post(`${ULTRAMSG_BASE_URL}/messages/chat`, {
+        token: ULTRAMSG_TOKEN,
+        to: toClean,
+        body: cleanBody,
+      });
+
+      if (res.data?.sent === 'true' || res.data?.sent === true) {
+        return true;
+      }
+      console.warn('UltraMsg chat send non-ok response:', res.data);
+    } catch (err: any) {
+      console.error('UltraMsg chat send error:', err.response?.data || err.message);
+    }
+
+    // 2. Secondary Gateway: Meta Graph API (Fallback)
     try {
       const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
       await axios.post(
@@ -39,9 +75,9 @@ export const whatsappService = {
         {
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
-          to,
+          to: toClean,
           type: 'text',
-          text: { preview_url: false, body: text },
+          text: { preview_url: false, body: cleanBody },
         },
         {
           headers: {
@@ -52,13 +88,13 @@ export const whatsappService = {
       );
       return true;
     } catch (error: any) {
-      console.error('Failed to send WhatsApp text:', error.response?.data || error.message);
+      console.error('Meta fallback send failed:', error.response?.data || error.message);
       return false;
     }
   },
 
   /**
-   * Send interactive reply buttons (e.g. Yes/No, Plans)
+   * Send interactive menu options cleanly formatted with emojis and numbers
    */
   async sendInteractiveButtons(
     to: string,
@@ -67,134 +103,140 @@ export const whatsappService = {
     headerText?: string,
     footerText: string = 'AI DOST • stayonchat.com'
   ): Promise<boolean> {
-    try {
-      const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
-      const payload: any = {
-        messaging_product: 'whatsapp',
-        recipient_type: 'individual',
-        to,
-        type: 'interactive',
-        interactive: {
-          type: 'button',
-          body: { text: bodyText },
-          footer: { text: footerText },
-          action: {
-            buttons: buttons.slice(0, 3).map((b) => ({
-              type: 'reply',
-              reply: { id: b.id, title: b.title.substring(0, 20) },
-            })),
-          },
-        },
-      };
+    const numberEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
+    let formatted = '';
 
-      if (headerText) {
-        payload.interactive.header = { type: 'text', text: headerText };
-      }
-
-      await axios.post(url, payload, {
-        headers: {
-          Authorization: `Bearer ${getWhatsAppToken()}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      return true;
-    } catch (error: any) {
-      console.error('Failed to send WhatsApp buttons:', error.response?.data || error.message);
-      return false;
+    if (headerText) {
+      formatted += `${headerText}\n\n`;
     }
+    formatted += `${bodyText}\n\n`;
+
+    buttons.forEach((btn, idx) => {
+      const num = numberEmojis[idx] || `${idx + 1}.`;
+      formatted += `${num} ${btn.title}\n`;
+    });
+
+    formatted += `\n👉 Vikalp chunne ke liye bas number (1, 2, 3...) ya naam likhkar bhejiye.`;
+    if (footerText) {
+      formatted += `\n\n_${footerText}_`;
+    }
+
+    return await this.sendTextMessage(to, formatted);
   },
 
   /**
-   * Upload binary media buffer directly to Meta WhatsApp servers
+   * Convert binary media buffer to Base64 data URI for UltraMsg
    */
   async uploadMedia(buffer: Buffer, mimeType: string, filename: string): Promise<string | null> {
-    try {
-      const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/media`;
-      const formData = new FormData();
-      const blob = new Blob([buffer], { type: mimeType });
-      formData.append('file', blob, filename);
-      formData.append('messaging_product', 'whatsapp');
-      formData.append('type', mimeType);
-
-      const res = await axios.post(url, formData, {
-        headers: {
-          Authorization: `Bearer ${getWhatsAppToken()}`,
-        },
-      });
-      return res.data.id;
-    } catch (err: any) {
-      console.error('Failed to upload media to Meta:', err.response?.data || err.message);
-      return null;
-    }
+    // UltraMsg natively accepts base64 data URI for images, documents, and audio
+    return `data:${mimeType};base64,${buffer.toString('base64')}`;
   },
 
   /**
-   * Send an image using Meta Media ID
+   * Send an image using Base64 URI or direct URL
    */
   async sendImageByMediaId(to: string, mediaId: string, caption?: string): Promise<boolean> {
+    const toClean = cleanPhoneNumber(to);
+    const cleanCaption = (caption || '').replace(/\*/g, '');
+
     try {
-      const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
-      await axios.post(
-        url,
-        {
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to,
-          type: 'image',
-          image: {
-            id: mediaId,
-            caption: caption,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getWhatsAppToken()}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      return true;
+      const res = await axios.post(`${ULTRAMSG_BASE_URL}/messages/image`, {
+        token: ULTRAMSG_TOKEN,
+        to: toClean,
+        image: mediaId,
+        caption: cleanCaption,
+      });
+      if (res.data?.sent === 'true' || res.data?.sent === true) {
+        return true;
+      }
+      console.warn('UltraMsg image send non-ok response:', res.data);
     } catch (err: any) {
-      console.error('Failed to send WhatsApp image by ID:', err.response?.data || err.message);
-      return false;
+      console.error('UltraMsg image send error:', err.response?.data || err.message);
     }
+
+    // Fallback: If mediaId is not a base64 string, try Meta Graph API
+    if (!mediaId.startsWith('data:')) {
+      try {
+        const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
+        await axios.post(
+          url,
+          {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: toClean,
+            type: 'image',
+            image: { id: mediaId, caption: cleanCaption },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${getWhatsAppToken()}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        return true;
+      } catch (err: any) {
+        console.error('Meta fallback image send failed:', err.response?.data || err.message);
+      }
+    }
+
+    return false;
   },
 
   /**
-   * Send a PDF / Document using Meta Media ID
+   * Send a PDF / Document using Base64 URI or direct URL
    */
   async sendDocumentByMediaId(to: string, mediaId: string, filename: string, caption?: string): Promise<boolean> {
+    const toClean = cleanPhoneNumber(to);
+    const cleanCaption = (caption || '').replace(/\*/g, '');
+
     try {
-      const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
-      await axios.post(
-        url,
-        {
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to,
-          type: 'document',
-          document: {
-            id: mediaId,
-            filename: filename,
-            caption: caption,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getWhatsAppToken()}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      return true;
+      const res = await axios.post(`${ULTRAMSG_BASE_URL}/messages/document`, {
+        token: ULTRAMSG_TOKEN,
+        to: toClean,
+        document: mediaId,
+        filename: filename,
+        caption: cleanCaption,
+      });
+      if (res.data?.sent === 'true' || res.data?.sent === true) {
+        return true;
+      }
+      console.warn('UltraMsg document send non-ok response:', res.data);
     } catch (err: any) {
-      console.error('Failed to send WhatsApp document by ID:', err.response?.data || err.message);
-      return false;
+      console.error('UltraMsg document send error:', err.response?.data || err.message);
     }
+
+    // Fallback: If mediaId is not a base64 string, try Meta Graph API
+    if (!mediaId.startsWith('data:')) {
+      try {
+        const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
+        await axios.post(
+          url,
+          {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: toClean,
+            type: 'document',
+            document: { id: mediaId, filename, caption: cleanCaption },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${getWhatsAppToken()}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        return true;
+      } catch (err: any) {
+        console.error('Meta fallback document send failed:', err.response?.data || err.message);
+      }
+    }
+
+    return false;
   },
 
   /**
-   * Send a document or image file to user
+   * Send a document or image file from public URL to user
    */
   async sendDocument(
     to: string,
@@ -202,37 +244,29 @@ export const whatsappService = {
     fileName: string,
     caption?: string
   ): Promise<boolean> {
+    const toClean = cleanPhoneNumber(to);
+    const cleanCaption = (caption || `${fileName} (AI DOST Vault)`).replace(/\*/g, '');
+
     try {
-      const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
-      await axios.post(
-        url,
-        {
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to,
-          type: 'document',
-          document: {
-            link: fileUrl,
-            caption: caption || `${fileName} (AI DOST Vault)`,
-            filename: fileName,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getWhatsAppToken()}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      return true;
+      const res = await axios.post(`${ULTRAMSG_BASE_URL}/messages/document`, {
+        token: ULTRAMSG_TOKEN,
+        to: toClean,
+        document: fileUrl,
+        filename: fileName,
+        caption: cleanCaption,
+      });
+      if (res.data?.sent === 'true' || res.data?.sent === true) {
+        return true;
+      }
     } catch (error: any) {
-      console.error('Failed to send WhatsApp document:', error.response?.data || error.message);
-      return false;
+      console.error('UltraMsg send document by URL error:', error.response?.data || error.message);
     }
+
+    return false;
   },
 
   /**
-   * Send pre-approved Utility Template for automated expiry alerts (allowed outside 24h window)
+   * Send automated expiry alerts with zero asterisks
    */
   async sendUtilityExpiryAlert(
     to: string,
@@ -240,53 +274,41 @@ export const whatsappService = {
     expiryDate: string,
     daysLeft: number
   ): Promise<boolean> {
-    try {
-      const url = `${GRAPH_API_BASE}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
-      // Template registered in Meta: `munshiji_expiry_alert`
-      // Parameters: {{1}} = Document Title, {{2}} = Expiry Date, {{3}} = Days Left
-      const response = await axios.post(
-        url,
-        {
-          messaging_product: 'whatsapp',
-          to,
-          type: 'template',
-          template: {
-            name: 'munshiji_expiry_alert',
-            language: { code: 'en' },
-            components: [
-              {
-                type: 'body',
-                parameters: [
-                  { type: 'text', text: docTitle },
-                  { type: 'text', text: expiryDate },
-                  { type: 'text', text: `${daysLeft}` },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getWhatsAppToken()}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      return true;
-    } catch (error: any) {
-      // If template not yet verified or active session exists, fallback to text message
-      console.warn('Template send failed, falling back to direct text:', error.response?.data?.error?.message || error.message);
-      const fallbackText = `⚠️ AI DOST Expiry Alert 🤖✨\n\nDhruv ji, aapka ${docTitle} agle ${daysLeft} din (${expiryDate}) mein expire ho raha hai.\n\nWaqt rehte renew kar lijiye taaki kisi fine ya pareshani se bacha ja sake. 🙏`;
-      return await this.sendTextMessage(to, fallbackText);
-    }
+    const alertText = `⚠️ AI DOST Expiry Alert 🤖✨\n\nDhruv ji, aapka ${docTitle} agle ${daysLeft} din (${expiryDate}) mein expire ho raha hai.\n\nWaqt rehte renew kar lijiye taaki kisi fine ya pareshani se bacha ja sake. 🙏`;
+    return await this.sendTextMessage(to, alertText);
   },
 
   /**
-   * Download media (photo, voice note, PDF) sent by user to WhatsApp
+   * Download media (photo, voice note, PDF) sent by user
+   * Supports UltraMsg direct download URL, Base64 data URI, and Meta Graph API fallback
    */
-  async downloadMedia(mediaId: string): Promise<{ buffer: Buffer; mimeType: string }> {
-    // 1. Get temporary media URL from Meta Graph
-    const mediaMetaUrl = `${GRAPH_API_BASE}/${mediaId}`;
+  async downloadMedia(mediaIdOrUrl: string): Promise<{ buffer: Buffer; mimeType: string }> {
+    if (mediaIdOrUrl.startsWith('http://') || mediaIdOrUrl.startsWith('https://')) {
+      const res = await axios.get(mediaIdOrUrl, { responseType: 'arraybuffer' });
+      const contentType = res.headers['content-type'];
+      let mimeType = typeof contentType === 'string' ? contentType : 'image/jpeg';
+      if (mimeType.includes(';')) {
+        mimeType = mimeType.split(';')[0].trim();
+      }
+      return {
+        buffer: Buffer.from(res.data),
+        mimeType,
+      };
+    }
+
+    // 2. Base64 data URI
+    if (mediaIdOrUrl.startsWith('data:')) {
+      const matches = mediaIdOrUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (matches && matches.length === 3) {
+        return {
+          buffer: Buffer.from(matches[2], 'base64'),
+          mimeType: matches[1],
+        };
+      }
+    }
+
+    // 3. Meta Graph API (Fallback for legacy Meta media IDs)
+    const mediaMetaUrl = `${GRAPH_API_BASE}/${mediaIdOrUrl}`;
     const metaRes = await axios.get(mediaMetaUrl, {
       headers: { Authorization: `Bearer ${getWhatsAppToken()}` },
     });
@@ -294,7 +316,6 @@ export const whatsappService = {
     const fileUrl = metaRes.data.url;
     const mimeType = metaRes.data.mime_type;
 
-    // 2. Download the binary payload using Authorization header
     const fileRes = await axios.get(fileUrl, {
       headers: { Authorization: `Bearer ${getWhatsAppToken()}` },
       responseType: 'arraybuffer',
@@ -304,5 +325,5 @@ export const whatsappService = {
       buffer: Buffer.from(fileRes.data),
       mimeType,
     };
-  }
+  },
 };

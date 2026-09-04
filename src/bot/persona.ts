@@ -57,6 +57,8 @@ export const personaService = {
         { id: 'btn_my_docs', title: '📂 Mere Kaagaz' },
         { id: 'btn_my_reminders', title: '⏰ Reminders' },
         { id: 'btn_my_numerology', title: '🔢 Mera Ank Jyotish' },
+        { id: 'btn_plans', title: '📋 Plans & Pricing' },
+        { id: 'btn_share_invite', title: '🎁 Dosto ko Invite' },
       ],
     };
   },

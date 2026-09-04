@@ -84,8 +84,28 @@ const inMemoryUsers: Map<string, UserRecord> = new Map();
 const inMemoryReminders: GeneralReminder[] = [];
 const inMemoryChatHistory: Map<string, Array<{ role: 'user' | 'model'; text: string; timestamp: string }>> = new Map();
 const inMemoryPendingNaming: Map<string, { docId: string; timestamp: number }> = new Map();
+const inMemoryPromptStates: Map<string, { state: string; timestamp: number }> = new Map();
 
 export const dbService = {
+  // Track prompt context (e.g. language picker, main menu)
+  setUserPromptState(userPhone: string, state: string): void {
+    inMemoryPromptStates.set(userPhone, { state, timestamp: Date.now() });
+  },
+
+  getUserPromptState(userPhone: string): string | null {
+    const entry = inMemoryPromptStates.get(userPhone);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > 15 * 60 * 1000) {
+      inMemoryPromptStates.delete(userPhone);
+      return null;
+    }
+    return entry.state;
+  },
+
+  clearUserPromptState(userPhone: string): void {
+    inMemoryPromptStates.delete(userPhone);
+  },
+
   // Set pending naming state for ambiguous doc or photo
   setPendingDocNaming(userPhone: string, docId: string): void {
     inMemoryPendingNaming.set(userPhone, { docId, timestamp: Date.now() });
