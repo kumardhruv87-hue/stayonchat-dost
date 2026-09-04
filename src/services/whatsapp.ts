@@ -213,7 +213,7 @@ export const whatsappService = {
           type: 'document',
           document: {
             link: fileUrl,
-            caption: caption || `${fileName} (MunshiJi Locker)`,
+            caption: caption || `${fileName} (AI DOST Vault)`,
             filename: fileName,
           },
         },

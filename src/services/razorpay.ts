@@ -9,6 +9,8 @@ import dotenv from 'dotenv';
 import { PLANS, PlanDetails } from '../config/constants.js';
 import { dbService } from '../db/supabase.js';
 
+import { whatsappService } from './whatsapp.js';
+
 dotenv.config();
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
@@ -43,9 +45,9 @@ export const paymentService = {
         amount: plan.priceInr * 100, // Amount in paise
         currency: 'INR',
         accept_partial: false,
-        description: `MunshiJi ${plan.name} - 1 Saal Subscription (stayonchat.com)`,
+        description: `AI DOST ${plan.name} - 1 Saal Subscription (stayonchat.com)`,
         customer: {
-          name: 'MunshiJi User',
+          name: 'AI DOST User',
           contact: `+${userPhone.replace(/\D/g, '')}`,
         },
         notify: {
@@ -95,12 +97,16 @@ export const paymentService = {
     if (event === 'payment_link.paid') {
       const paymentLink = payload.payload.payment_link.entity;
       const userPhone = paymentLink.notes?.phone_number;
-      const plan = paymentLink.notes?.plan;
+      const planKey = paymentLink.notes?.plan as 'yaad_149' | 'ghar_399' | 'vault_799';
       const paymentId = paymentLink.payment_id;
 
-      if (userPhone && plan) {
-        await dbService.upgradeUserPlan(userPhone, plan, paymentId);
-        console.log(`User ${userPhone} successfully upgraded to ${plan} via Razorpay`);
+      if (userPhone && planKey) {
+        await dbService.upgradeUserPlan(userPhone, planKey, paymentId);
+        console.log(`User ${userPhone} successfully upgraded to ${planKey} via Razorpay`);
+
+        const planName = PLANS[planKey]?.name || 'Plan';
+        const celebrationMsg = `🎉 Badhai ho! Aapka ${planName} successfully activate ho gaya hai! 🤖✨\n\nAb aapka account saal bhar ke liye upgrade ho chuka hai. Saare kaagaz aur reminders poore vishwas ke saath safe rahenge. AI DOST hamesha aapki seva mein hazir hai! 🙏`;
+        await whatsappService.sendTextMessage(userPhone, celebrationMsg);
       }
     }
 
