@@ -81,6 +81,7 @@ export interface DocumentRecord {
 // In-memory caching & resilient fallback store
 const inMemoryUsers: Map<string, UserRecord> = new Map();
 const inMemoryReminders: GeneralReminder[] = [];
+const inMemoryChatHistory: Map<string, Array<{ role: 'user' | 'model'; text: string; timestamp: string }>> = new Map();
 
 export const dbService = {
   // Get or auto-register user on first WhatsApp message
@@ -523,5 +524,203 @@ export const dbService = {
     }
 
     return { success: false };
-  }
+  },
+
+  // Get user profile data (DOB, vehicle plate, preferred name)
+  async getUserProfile(userPhone: string): Promise<{ dob?: string; vehiclePlate?: string; preferredName?: string }> {
+    try {
+      const { data } = await supabase
+        .from('documents')
+        .select('raw_extraction')
+        .eq('user_phone', userPhone)
+        .eq('title', 'SYSTEM_USER_PROFILE')
+        .maybeSingle();
+
+      if (data?.raw_extraction) {
+        return data.raw_extraction;
+      }
+    } catch {
+      // Fallback
+    }
+    return {};
+  },
+
+  // Save user profile data
+  async saveUserProfile(userPhone: string, profile: { dob?: string; vehiclePlate?: string; preferredName?: string }): Promise<void> {
+    try {
+      const existing = await this.getUserProfile(userPhone);
+      const updated = { ...existing, ...profile };
+
+      const { data: found } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('user_phone', userPhone)
+        .eq('title', 'SYSTEM_USER_PROFILE')
+        .maybeSingle();
+
+      if (found?.id) {
+        await supabase
+          .from('documents')
+          .update({ raw_extraction: updated, updated_at: new Date().toISOString() })
+          .eq('id', found.id);
+      } else {
+        await supabase
+          .from('documents')
+          .insert({
+            user_phone: userPhone,
+            storage_path: `system/profile_${userPhone}.json`,
+            file_name: 'profile.json',
+            file_type: 'application/json',
+            category: 'general',
+            title: 'SYSTEM_USER_PROFILE',
+            raw_extraction: updated,
+            is_active: false,
+          });
+      }
+    } catch (err) {
+      console.warn('Error saving user profile:', err);
+    }
+  },
+
+  // Get rich numerology data for user from documents, profile, and phone number
+  async getUserNumerologyData(userPhone: string): Promise<{
+    dob?: string;
+    vehiclePlate?: string;
+    mobile: string;
+    profileContext: string;
+  }> {
+    let dob: string | undefined;
+    let vehiclePlate: string | undefined;
+
+    // 1. Check user profile
+    const profile = await this.getUserProfile(userPhone);
+    if (profile.dob) dob = profile.dob;
+    if (profile.vehiclePlate) vehiclePlate = profile.vehiclePlate;
+
+    // 2. Scan active documents if not in profile
+    try {
+      const { data: docs } = await supabase
+        .from('documents')
+        .select('title, category, policy_or_bill_no, raw_extraction, summary')
+        .eq('user_phone', userPhone)
+        .eq('is_active', true);
+
+      if (docs && docs.length > 0) {
+        for (const doc of docs) {
+          // Extract DOB if present in PAN/Aadhaar/Identity doc
+          if (!dob && doc.raw_extraction?.dob) {
+            dob = doc.raw_extraction.dob;
+          }
+          // Extract vehicle plate
+          if (!vehiclePlate) {
+            if (doc.raw_extraction?.vehicle_number) {
+              vehiclePlate = doc.raw_extraction.vehicle_number;
+            } else if (doc.category === 'vehicle' && doc.policy_or_bill_no) {
+              vehiclePlate = doc.policy_or_bill_no;
+            } else {
+              const textToSearch = `${doc.title} ${doc.summary || ''} ${doc.policy_or_bill_no || ''}`;
+              const match = textToSearch.match(/\b([A-Z]{2}\s*[-]?\s*[0-9]{1,2}\s*[-]?\s*[A-Z]{0,3}\s*[-]?\s*[0-9]{4})\b/i);
+              if (match) {
+                vehiclePlate = match[1].replace(/[\s-]/g, '').toUpperCase();
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Error querying docs for numerology data:', err);
+    }
+
+    // 3. Generate profile using universal numerologyService
+    const { numerologyService } = await import('../services/numerology.js');
+    const numProfile = numerologyService.generateProfile(dob, vehiclePlate, userPhone);
+
+    let context = `Mobile Number: ${userPhone} (Vibration Number: ${numProfile.mobileNumber || 8})\n`;
+    if (dob) {
+      context += `Date of Birth: ${dob}\n`;
+      context += `Mulank (मूलांक - Day Vibration): ${numProfile.mulank} (Theme: ${numProfile.strengths.join(', ')})\n`;
+      context += `Bhagyank (भाग्यांक - Destiny Vibration): ${numProfile.bhagyank}\n`;
+      context += `Lucky Colors: ${numProfile.luckyColors.join(', ')}\n`;
+      context += `Favorable Days: ${numProfile.luckyDays.join(', ')}\n`;
+      context += `Counsel & Work Vibration: ${numProfile.counselAdvice}\n`;
+    }
+    if (vehiclePlate) {
+      context += `Vehicle Plate: ${vehiclePlate} (Vehicle Number Vibration: ${numProfile.vehicleNumber})\n`;
+      const vehicleAdv = numerologyService.calculateVehicleNumber(vehiclePlate);
+      context += `Road Safety & Driving Tip: ${vehicleAdv.advice}\n`;
+    }
+
+    return { dob, vehiclePlate, mobile: userPhone, profileContext: context.trim() };
+  },
+
+  // Save chat message for conversation continuity (persisted to Supabase documents)
+  async saveChatMessage(userPhone: string, role: 'user' | 'model', text: string): Promise<void> {
+    const list = inMemoryChatHistory.get(userPhone) || [];
+    list.push({ role, text, timestamp: new Date().toISOString() });
+    if (list.length > 20) list.shift(); // Sliding window of last 20 messages
+    inMemoryChatHistory.set(userPhone, list);
+
+    try {
+      const { data: existing } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('user_phone', userPhone)
+        .eq('title', 'SYSTEM_CHAT_MEMORY')
+        .maybeSingle();
+
+      if (existing?.id) {
+        await supabase
+          .from('documents')
+          .update({
+            raw_extraction: { history: list },
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+      } else {
+        await supabase
+          .from('documents')
+          .insert({
+            user_phone: userPhone,
+            storage_path: `system/memory_${userPhone}.json`,
+            file_name: 'chat_memory.json',
+            file_type: 'application/json',
+            category: 'general',
+            title: 'SYSTEM_CHAT_MEMORY',
+            raw_extraction: { history: list },
+            is_active: false,
+          });
+      }
+    } catch (err) {
+      console.warn('Chat memory persistence warning:', err);
+    }
+  },
+
+  // Get recent chat history for intelligent conversation context
+  async getRecentChatHistory(userPhone: string, limit: number = 8): Promise<Array<{ role: string; text: string }>> {
+    let list = inMemoryChatHistory.get(userPhone);
+    if (!list || list.length === 0) {
+      try {
+        const { data } = await supabase
+          .from('documents')
+          .select('raw_extraction')
+          .eq('user_phone', userPhone)
+          .eq('title', 'SYSTEM_CHAT_MEMORY')
+          .maybeSingle();
+
+        if (data?.raw_extraction?.history && Array.isArray(data.raw_extraction.history)) {
+          const loadedList = data.raw_extraction.history as Array<{ role: 'user' | 'model'; text: string; timestamp: string }>;
+          list = loadedList;
+          inMemoryChatHistory.set(userPhone, loadedList);
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (list && list.length > 0) {
+      return list.slice(-limit).map((m: any) => ({ role: m.role, text: m.text }));
+    }
+
+    return [];
+  },
 };

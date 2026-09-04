@@ -30,6 +30,8 @@ export const ExtractedDocSchema = z.object({
   amount: z.number().nullable().optional().describe('Total amount in INR if mentioned'),
   issue_date: z.string().nullable().optional().describe('Date of issuance or purchase in YYYY-MM-DD format'),
   expiry_date: z.string().nullable().optional().describe('Expiry date, renewal date, warranty end date, or next follow-up in YYYY-MM-DD format'),
+  dob: z.string().nullable().optional().describe('Date of birth in YYYY-MM-DD or DD/MM/YYYY format if this is an ID card or medical record'),
+  vehicle_number: z.string().nullable().optional().describe('Vehicle registration plate number (e.g. DL01AB1234, UP16CD5678) if this is an RC, PUC, or vehicle insurance'),
   summary: z.string().describe('One single line crisp summary in simple Hinglish / English'),
   tags: z.array(z.string()).describe('3 to 5 searchable keywords in lowercase, e.g. ["havells", "mixer", "warranty", "kitchen"]'),
   confidence_score: z.number().min(0).max(1).default(0.9),
@@ -65,8 +67,11 @@ IMPORTANT RULES FOR INDIAN DOCUMENTS:
    - For vehicle insurance, note policy end date.
    - For doctor prescriptions, if follow up is mentioned (e.g. "Visit after 15 days"), calculate expiry_date = prescription date + 15 days.
    - Format all dates strictly as YYYY-MM-DD. If year or date cannot be determined with confidence, return null.
-2. Handwritten text: Indian handwritten doctor prescriptions, local repair bills, and rough receipts may have messy handwriting. Do your best to identify the shop name, items, and total amount.
-3. Category classification:
+2. Identity & Vehicle Details (For Numerology & Vault):
+   - For identity cards (PAN, Aadhaar, Passport, DL), look for Date of Birth and extract as "dob" (YYYY-MM-DD or DD/MM/YYYY).
+   - For vehicle papers (RC, Insurance, PUC, Challan), extract the vehicle registration number as "vehicle_number" (e.g. UP16AB1234, DL3CAB5678).
+3. Handwritten text: Indian handwritten doctor prescriptions, local repair bills, and rough receipts may have messy handwriting. Do your best to identify the shop name, items, and total amount.
+4. Category classification:
    - vehicle: RC, PUC, DL, Car/Bike insurance, Service bills
    - appliance: Electronics, mobile, fridge, TV, mixer warranty cards and bills
    - insurance: Life, Health, Term policies (LIC, Star Health, HDFC Ergo, etc.)
@@ -75,7 +80,7 @@ IMPORTANT RULES FOR INDIAN DOCUMENTS:
    - property: Rent agreement, Registry, Electricity bill, Water bill
    - finance: FD slips, Bank receipts, Mutual funds
    - general: Misc receipts, rough notes
-4. User provided extra message/context: ${userNotes ? `"${userNotes}"` : 'None'}
+5. User provided extra message/context: ${userNotes ? `"${userNotes}"` : 'None'}
 
 Return a JSON object conforming strictly to this JSON schema:
 {
@@ -86,6 +91,8 @@ Return a JSON object conforming strictly to this JSON schema:
   "amount": number or null,
   "issue_date": "YYYY-MM-DD" or null,
   "expiry_date": "YYYY-MM-DD" or null,
+  "dob": "YYYY-MM-DD" or null,
+  "vehicle_number": "Vehicle plate string or null",
   "summary": "1 single line explanation",
   "tags": ["keyword1", "keyword2", "keyword3"],
   "confidence_score": 0.0 to 1.0
@@ -183,7 +190,8 @@ Return JSON:
     userMessage: string,
     history: Array<{ role: string; text: string }> = [],
     language: string = 'hinglish',
-    userName: string = 'Bhai'
+    userName: string = 'Bhai',
+    numerologyContext?: string
   ): Promise<string> {
     try {
       const model = genAI.getGenerativeModel({
@@ -200,8 +208,16 @@ Return JSON:
           ? 'Speak in polite, cultured, dignified, and warm Indian English.'
           : 'Hinglish mein baat karein, lekin hamesha purna aadar aur samman ke saath ("Aap", "Aapka", "Aapke").';
 
+      // Build conversation history context
+      let historySection = '';
+      if (history && history.length > 0) {
+        historySection = `RECENT CONVERSATION HISTORY (What happened earlier in this chat):\n` +
+          history.map(h => `${h.role === 'user' ? userName : 'DOST'}: "${h.text}"`).join('\n') +
+          `\n(IMPORTANT: Remember previous context above, references to photos, questions, and maintain seamless conversational memory!)\n\n`;
+      }
+
       const prompt = `
-You are "DOST 🤖✨" (stayonchat.com) — a deeply respectful, cultured, intelligent, and trustworthy personal digital companion.
+You are "DOST 🤖✨" (stayonchat.com) — a deeply respectful, cultured, intelligent, trustworthy personal digital companion and certified **Ank Jyotish Visheshagya (अंक ज्योतिष विशेषज्ञ / Universal Numerology Specialist)**.
 You are conversing with ${userName}.
 
 MANDATORY LANGUAGE & TONE RULES (STRICT COMPLIANCE REQUIRED):
@@ -209,14 +225,25 @@ MANDATORY LANGUAGE & TONE RULES (STRICT COMPLIANCE REQUIRED):
    - ALWAYS address the user with deep respect using "Aap" (आप), "Aapka" (आपका), "Aapke" (आपके), "Aapko" (आपको), and respectful verbs ("kijiye", "bataiye", "rakhein", "chaliye").
    - STRICTLY FORBIDDEN: NEVER EVER use "tu", "tera", "teri", "tujhe", "abe", "arre", "oye", "load mat le", "dimaag ka dahi", or cheap street slang.
    - Treat ${userName} like a respected gentleman, elder, or valued family friend (e.g. "Bhai Sahab", "${userName} ji").
+
 2. REFINED & CARING TONE:
    - Be genuinely supportive, wise, and calm. If they have stress or questions, offer thoughtful, practical solutions with empathy.
    - When speaking about papers or photos, say respectfully: "Aapka koi bhi zaroori kaagaz, bill, photo ya reminder ho toh kripya mujhe bhej dijiye, main hamesha surakshit rakhunga."
-3. FORMATTING:
+
+3. ANK JYOTISH SPECIALIST (अंक ज्योतिष विशेषज्ञ - UNIVERSAL FOR ALL RELIGIONS):
+   - You understand the science of numbers (मूलांक, भाग्यांक, वाहन अंक, मोबाइल अंक) which is completely neutral, secular, and applies to all faiths (Hindu, Muslim, Sikh, Christian, Jain).
+   - Whenever relevant (e.g. car number, mobile number, birth date, new beginnings, planning travel or investments), share uplifting numerological advice gracefully:
+     * Mulank (मूलांक: birth day 1-9)
+     * Bhagyank (भाग्यांक: total life path number)
+     * Vehicle Plate Number (वाहन अंक vibration)
+     * Lucky colors and favorable focus hours of the day
+   - Always keep it scientific, positive, and motivating. Never instill fear or dogma.
+
+4. FORMATTING:
    - ${langInstruction}
    - WhatsApp responses should be neat, clean, and dignified with pleasant emojis (2-3 short paragraphs max).
 
-USER MESSAGE: "${userMessage}"
+${historySection}${numerologyContext ? `USER NUMEROLOGICAL DATA:\n${numerologyContext}\n\n` : ''}USER MESSAGE: "${userMessage}"
 `;
 
       const result = await model.generateContent(prompt);
@@ -401,11 +428,11 @@ Return JSON:
   },
 
   /**
-   * Generate Daily 6:00 AM Universal Morning & Safety Guidance
-   * Inclusive for all faiths (Hindu, Muslim, Sikh, Christian, Secular)
+   * Generate Daily 6:00 AM Universal Numerology & Life Guidance (अंक ज्योतिष विशेषज्ञ)
+   * 100% Neutral & Inclusive for all faiths (Hindu, Muslim, Sikh, Christian, Jain)
    */
-  async generateDailyAstroGuide(
-    profile: { name?: string; dob?: string; tob?: string; pob?: string; rashi?: string },
+  async generateDailyNumerologyGuide(
+    profile: { name?: string; dob?: string; carNumber?: string; mobile?: string },
     language: string = 'hinglish'
   ): Promise<string> {
     try {
@@ -416,36 +443,42 @@ Return JSON:
         },
       });
 
-      const todayDate = new Date().toLocaleDateString('en-IN', {
+      const today = new Date();
+      const todayDate = today.toLocaleDateString('en-IN', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
       });
+      const dayDigit = ((today.getDate() - 1) % 9) + 1;
 
       const prompt = `
-You are "DOST 🤖✨", delivering the daily 6:00 AM personalized morning vibe & safety check for ${profile.name || 'Bhai'}.
-Today's Date: ${todayDate}
-User Profile: DOB: ${profile.dob || 'General'}, City: ${profile.pob || 'India'}.
-User Language: ${language}
+You are "DOST 🤖✨" (stayonchat.com) — a deeply respectful, cultured companion and expert **Ank Jyotish Visheshagya (अंक ज्योतिष विशेषज्ञ / Universal Numerology Specialist)**.
+Today's Date: ${todayDate} (Day Vibration Number: ${dayDigit})
+User: ${profile.name || 'Bhai Sahab'}, DOB: ${profile.dob || 'Not specified'}, Vehicle: ${profile.carNumber || 'Not specified'}.
+Preferred Language: ${language}
 
-INCLUSIVE & UNIVERSAL GUIDELINES:
-1. Warm, respectful morning greeting suitable for everyone across India (e.g. "Good morning / Suprabhat / Khush Raho / Salaam / Namaste").
-2. Day's Energy & Motivation: Focus on clarity of mind, positivity, and staying energized.
+UNIVERSAL NUMEROLOGY & LIFE GUIDELINES (ALL FAITHS):
+1. Warm, respectful morning greeting ("Namaste / Good morning / Khush Raho / Salaam / Sat Sri Akal").
+2. Today's Date Vibration (अंक ऊर्जा): Brief practical explanation of today's date vibration (e.g. Day number ${dayDigit} favors focus, commerce, harmony, or perseverance).
 3. Practical Life & Safety Check:
-   - Specific road & driving alert (e.g. rush hour traffic, cautious driving, patience on the road).
-   - Practical work/finance caution (e.g. double-check bills, avoid rash decisions, keep calm in discussions).
-4. Best Focus Hours: Suggest optimal productive hours of the day (e.g. 10 AM - 1 PM).
-5. (Optional): If the user specifically asked for Rashi/Astrology, provide a gentle planetary hint, else keep it universal and life-oriented.
-6. A punchy, caring one-liner from their trusted buddy DOST!
-7. Format with clean WhatsApp bullet points and emojis. Keep under 140 words.
+   - Road & Driving Alert (e.g. rush-hour vigilance, patience, caution).
+   - Financial & Work Caution (e.g. double-checking accounts, avoiding impulsive decisions).
+4. Best Focus Hours: Suggest optimal productive window (e.g. 10:00 AM – 1:00 PM).
+5. Lucky Color of the Day & Encouraging Signoff from DOST.
+6. Tone: ALWAYS use "Aap", "Aapka", "Aapko". NEVER use "tu", "tera", "abe", "arre". Keep under 140 words.
 `;
 
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
     } catch (err: any) {
-      console.error('Error in generateDailyAstroGuide:', err);
-      return `🌅 *Good Morning ${profile.name || 'Bhai'}!* ✨\n\nAaj ka din aapke liye nayi urja lekar aaya hai. Sadak par driving sambhal kar karein aur dimaag shaant rakhein. Koi bhi zaroori kaagaz ya reminder ho toh mujhe bhej dena! Have a wonderful day! ☀️`;
+      console.error('Error in generateDailyNumerologyGuide:', err);
+      return `🌅 *Good Morning ${profile.name || 'Bhai Sahab'}!* ✨\n\nAaj ka din aapke liye nayi sakaratmak urja lekar aaya hai. Sadak par driving sambhal kar kijiye aur dimaag shaant rakhein. Koi bhi zaroori kaagaz ya reminder ho toh mujhe bhej dijiye! Have a wonderful day! ☀️`;
     }
+  },
+
+  // Backwards compatible alias
+  async generateDailyAstroGuide(profile: any, language: string = 'hinglish') {
+    return this.generateDailyNumerologyGuide(profile, language);
   }
 };

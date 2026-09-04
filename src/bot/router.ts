@@ -210,12 +210,21 @@ export const botRouter = {
           return;
         }
 
-        // Conversational voice response
-        const chatReply = await geminiService.chatAsDost(voiceResult.transcript, [], userLang, userName);
+        const history = await dbService.getRecentChatHistory(fromPhone, 8);
+        const numerologyData = await dbService.getUserNumerologyData(fromPhone);
+        const chatReply = await geminiService.chatAsDost(
+          voiceResult.transcript,
+          history,
+          userLang,
+          userName,
+          numerologyData.profileContext
+        );
         await whatsappService.sendTextMessage(fromPhone, chatReply);
+        await dbService.saveChatMessage(fromPhone, 'user', `[Voice note: ${voiceResult.transcript}]`);
+        await dbService.saveChatMessage(fromPhone, 'model', chatReply);
       } catch (err) {
         console.error('Failed to process audio:', err);
-        await whatsappService.sendTextMessage(fromPhone, 'Awaaz saaf sun nahi paaya bhai. Ek baar dobara voice note bhejo ya type karo.');
+        await whatsappService.sendTextMessage(fromPhone, 'Kshama karein, awaaz saaf sun nahi paaya. Kripya dobara voice note bhejiye ya text type kijiye.');
       }
       return;
     }
@@ -226,6 +235,16 @@ export const botRouter = {
     if (message.type === 'text') {
       const text = (message.text?.body || '').trim();
       const lowerText = text.toLowerCase();
+
+      // Record incoming user message in conversation memory
+      await dbService.saveChatMessage(fromPhone, 'user', text);
+
+      // Check if user mentions a vehicle plate in text (e.g. "DL 01 AB 1234", "UP16 CD 5678")
+      const vehicleMatch = text.match(/\b([A-Z]{2}\s*[-]?\s*[0-9]{1,2}\s*[-]?\s*[A-Z]{0,3}\s*[-]?\s*[0-9]{4})\b/i);
+      if (vehicleMatch) {
+        const cleanPlate = vehicleMatch[1].replace(/[\s-]/g, '').toUpperCase();
+        await dbService.saveUserProfile(fromPhone, { vehiclePlate: cleanPlate });
+      }
 
       // 4.1 Language Selection Command
       if (['language', 'bhasha', 'lang', 'change language', 'bhasha badlo'].includes(lowerText)) {
@@ -249,6 +268,7 @@ export const botRouter = {
       ) {
         const shareMsg = personaService.getReferralShareMessage(fromPhone, user.referral_code || fromPhone.slice(-6));
         await whatsappService.sendTextMessage(fromPhone, shareMsg);
+        await dbService.saveChatMessage(fromPhone, 'model', shareMsg);
         return;
       }
 
@@ -257,12 +277,15 @@ export const botRouter = {
         const expiries = await dbService.getUserExpiries(fromPhone);
         const reply = personaService.formatExpiriesList(expiries);
         await whatsappService.sendTextMessage(fromPhone, reply);
+        await dbService.saveChatMessage(fromPhone, 'model', reply);
         return;
       }
 
       // 4.5 Succession / Nominee inquiry (WarisPath Kit)
       if (['waris', 'nominee', 'papa ke papers', 'baad mein', 'succession'].some(k => lowerText.includes(k))) {
-        await whatsappService.sendTextMessage(fromPhone, personaService.getWarisPathInfo());
+        const reply = personaService.getWarisPathInfo();
+        await whatsappService.sendTextMessage(fromPhone, reply);
+        await dbService.saveChatMessage(fromPhone, 'model', reply);
         return;
       }
 
@@ -283,6 +306,7 @@ export const botRouter = {
         await dbService.setUserLanguage(fromPhone, detectedLang.toLowerCase());
         const langAck = `✅ *Language set to ${detectedLang}!* 🤖✨\n\nAb se main aapse ${detectedLang} mein hi baat karunga aur aapke documents & reminders sambhalunga. Kahiye, aaj kya help karun?`;
         await whatsappService.sendTextMessage(fromPhone, langAck);
+        await dbService.saveChatMessage(fromPhone, 'model', langAck);
         return;
       }
 
@@ -292,12 +316,14 @@ export const botRouter = {
         await dbService.addGeneralReminder(fromPhone, reminderCheck.task, reminderCheck.remindAtIso);
         const reply = personaService.getReminderSavedMessage(reminderCheck.task, reminderCheck.remindAtIso, userLang);
         await whatsappService.sendTextMessage(fromPhone, reply);
+        await dbService.saveChatMessage(fromPhone, 'model', reply);
         return;
       }
 
-      // 4.9 Check for Astro / Birth Details (DOB, Time, Place, Kundali)
+      // 4.9 Check for Birth Details / DOB for Ank Jyotish (Universal Numerology)
       const astroCheck = await geminiService.parseAstroProfile(text);
       if (astroCheck.hasAstroData && astroCheck.dob) {
+        await dbService.saveUserProfile(fromPhone, { dob: astroCheck.dob });
         await dbService.setUserAstro(fromPhone, {
           dob: astroCheck.dob,
           tob: astroCheck.tob,
@@ -306,6 +332,7 @@ export const botRouter = {
         });
         const reply = personaService.getAstroSavedMessage(astroCheck, userLang);
         await whatsappService.sendTextMessage(fromPhone, reply);
+        await dbService.saveChatMessage(fromPhone, 'model', reply);
         return;
       }
 
@@ -352,6 +379,7 @@ export const botRouter = {
               if (mediaId) {
                 console.log(`Sending PDF document by mediaId ${mediaId} to ${fromPhone}...`);
                 await whatsappService.sendDocumentByMediaId(fromPhone, mediaId, docName, caption.trim());
+                await dbService.saveChatMessage(fromPhone, 'model', `[Bheja gaya PDF dastavez: ${doc.title}]`);
                 return;
               }
             } else {
@@ -360,6 +388,7 @@ export const botRouter = {
               if (mediaId) {
                 console.log(`Sending image by mediaId ${mediaId} to ${fromPhone}...`);
                 await whatsappService.sendImageByMediaId(fromPhone, mediaId, caption.trim());
+                await dbService.saveChatMessage(fromPhone, 'model', `[Bheji gayi photo: ${doc.title}]`);
                 return;
               }
             }
@@ -368,21 +397,34 @@ export const botRouter = {
           }
 
           // Fallback text if media upload fails
-          await whatsappService.sendTextMessage(fromPhone, `📸 *${doc.title}* 🤖✨\n\n${caption.trim()}\n\n_File details vault mein surakshit darj hain._`);
+          const fallbackText = `📸 *${doc.title}* 🤖✨\n\n${caption.trim()}\n\n_File details vault mein surakshit darj hain._`;
+          await whatsappService.sendTextMessage(fromPhone, fallbackText);
+          await dbService.saveChatMessage(fromPhone, 'model', fallbackText);
           return;
         }
 
         // Multiple results found: show formatted list
         const formatted = personaService.formatSearchResults(text, results, userLang);
         await whatsappService.sendTextMessage(fromPhone, formatted);
+        await dbService.saveChatMessage(fromPhone, 'model', formatted);
         return;
       }
 
-      // 4.11 Samajhdaar Dost Conversational AI
-      // When the user is simply chatting, sharing feelings, asking life/money advice, or greeting:
+      // 4.11 Samajhdaar Dost Conversational AI + Ank Jyotish Visheshagya
+      // Empathetic, polite "Aap/Aapka" conversation with continuous chat memory and universal numerology wisdom:
       const respectfulName = user.name && user.name !== 'Bhai' ? `${user.name} ji` : 'Bhai Sahab';
-      const dostReply = await geminiService.chatAsDost(text, [], userLang, respectfulName);
+      const history = await dbService.getRecentChatHistory(fromPhone, 10);
+      const numerologyData = await dbService.getUserNumerologyData(fromPhone);
+
+      const dostReply = await geminiService.chatAsDost(
+        text,
+        history,
+        userLang,
+        respectfulName,
+        numerologyData.profileContext
+      );
       await whatsappService.sendTextMessage(fromPhone, dostReply);
+      await dbService.saveChatMessage(fromPhone, 'model', dostReply);
     }
   }
 };
