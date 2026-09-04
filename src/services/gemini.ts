@@ -456,7 +456,7 @@ Return JSON:
       const dayDigit = ((today.getDate() - 1) % 9) + 1;
 
       const prompt = `
-You are "DOST 🤖✨" (stayonchat.com) — a deeply respectful, cultured companion and expert **Ank Jyotish Visheshagya (अंक ज्योतिष विशेषज्ञ / Universal Numerology Specialist)**.
+You are "AI DOST 🤖✨" (stayonchat.com) — a deeply respectful, cultured companion and expert Ank Jyotish Visheshagya (अंक ज्योतिष विशेषज्ञ / Universal Numerology Specialist).
 Today's Date: ${todayDate} (Day Vibration Number: ${dayDigit})
 User: ${profile.name || 'Bhai Sahab'}, DOB: ${profile.dob || 'Not specified'}, Vehicle: ${profile.carNumber || 'Not specified'}.
 Preferred Language: ${language}
@@ -470,13 +470,14 @@ UNIVERSAL NUMEROLOGY & LIFE GUIDELINES (ALL FAITHS):
 4. Best Focus Hours: Suggest optimal productive window (e.g. 10:00 AM – 1:00 PM).
 5. Lucky Color of the Day & Encouraging Signoff from DOST.
 6. Tone: ALWAYS use "Aap", "Aapka", "Aapko". NEVER use "tu", "tera", "abe", "arre". Keep under 140 words.
+7. Clean typography: NEVER use spam asterisks (* or **). Write cleanly and naturally.
 `;
 
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
     } catch (err: any) {
       console.error('Error in generateDailyNumerologyGuide:', err);
-      return `🌅 *Good Morning ${profile.name || 'Bhai Sahab'}!* ✨\n\nAaj ka din aapke liye nayi sakaratmak urja lekar aaya hai. Sadak par driving sambhal kar kijiye aur dimaag shaant rakhein. Koi bhi zaroori kaagaz ya reminder ho toh mujhe bhej dijiye! Have a wonderful day! ☀️`;
+      return `🌅 Good Morning ${profile.name || 'Bhai Sahab'}! ✨\n\nAaj ka din aapke liye nayi sakaratmak urja lekar aaya hai. Sadak par driving sambhal kar kijiye aur dimaag shaant rakhein. Koi bhi zaroori kaagaz ya reminder ho toh mujhe bhej dijiye! Have a wonderful day! ☀️`;
     }
   },
 

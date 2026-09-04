@@ -12,7 +12,7 @@ export const personaService = {
    */
   getLanguagePicker() {
     return {
-      text: `Namaste / Hello! 🙏✨\n\nMain hoon *AI DOST 🤖* — aapka apna digital dost! (powered by stayonchat.com)\n\nApni bhasha chunein:\n\n👉 Kisi aur bhasha (Marathi, Gujarati, Bengali, Tamil, etc.) ke liye bas uska naam type kar dein!`,
+      text: `Namaste / Hello! 🙏✨\n\nMain hoon AI DOST 🤖 — aapka apna digital dost! (powered by stayonchat.com)\n\nApni bhasha chunein:\n\n👉 Kisi aur bhasha (Marathi, Gujarati, Bengali, Tamil, etc.) ke liye bas uska naam type kar dein!`,
       buttons: [
         { id: 'lang_hinglish', title: 'Hinglish (Mix)' },
         { id: 'lang_hi', title: 'हिंदी' },
@@ -25,16 +25,40 @@ export const personaService = {
    * Warm, lovable welcome message after language selection
    */
   getWelcomeMessage(userName: string = 'Bhai Sahab', language: string = 'hinglish'): string {
+    const cleanName = userName && userName !== 'Bhai' ? `${userName} ji` : 'Bhai Sahab';
+
     if (language === 'hi') {
-      return `नमस्ते ${userName}! 🙏✨\n\nमैं हूँ आपका AI DOST 🤖 (stayonchat.com) — आपका अपना डिजिटल साथी!\n\nमैं आपकी क्या-क्या मदद कर सकता हूँ:\n• कागज़ व बिल लॉकर: कोई भी फोटो या PDF भेजिए, सुरक्षित रखूँगा और मांगने पर तुरंत भेज दूँगा।\n• स्मार्ट रिमाइंडर्स: किसी भी काम की याद दिलाने को कहिए (जैसे "कल सुबह 10 बजे बिल भरना है")।\n• अंक ज्योतिष व सलाह: अपनी जन्मतिथि या गाड़ी का नंबर बताइए, लकी रंग और ज़रूरी सलाह दूँगा।\n• आदरणीय साथी: कोई भी बात करनी हो या जीवन/काम की सलाह चाहिए, बेझिझक पूछिए।\n\nशुरुआत करने के लिए कृपया कोई भी फोटो, PDF या सवाल भेजकर देखिए! 😊`;
+      return `नमस्ते ${cleanName}! 🙏✨\n\nमैं हूँ आपका AI DOST 🤖 (stayonchat.com) — आपका अपना डिजिटल साथी और स्मार्ट असिस्टेंट!\n\nमैं आपकी क्या-क्या मदद कर सकता हूँ:\n📁 कागज़ व बिल लॉकर: कोई भी फोटो या PDF भेजिए (बिल, RC, इंश्योरेंस, पर्चा)। सुरक्षित रखूँगा और मांगते ही ओरिजिनल फ़ाइल वापस भेज दूँगा!\n⏰ स्मार्ट रिमाइंडर्स: किसी भी ज़रूरी काम का याद दिलाने को कहिए (जैसे "कल सुबह 10 बजे मम्मी की दवा")।\n🌅 सुबह 6 बजे डेली लाइफ व सेफ़्टी गाइड: हर सुबह ज़रूरी सेफ़्टी अलर्ट, मौसम, दिन के शुभ संकेत और लकी रंग।\n💬 समझदार साथी: कोई भी बात करनी हो या सलाह चाहिए, पूरे आदर के साथ बात कीजिए!\n\nशुरुआत करने के लिए कृपया कोई फोटो, PDF या सवाल भेज कर देखिए। 😊`;
     }
 
     if (language === 'en') {
-      return `Hello ${userName}! 👋✨\n\nI am AI DOST 🤖 (stayonchat.com) — your personal digital companion!\n\nHere is how I can assist you:\n• Smart Locker: Send any photo or PDF (bills, RC, insurance, prescription). I'll keep them safe and return original files whenever you ask.\n• Smart Reminders: Ask me to remind you about anything (e.g. "Remind me to pay electricity bill tomorrow").\n• Numerology & Insights: Share your date of birth or vehicle number for lucky colors and helpful guidance.\n• Trusted Companion: Feel free to chat anytime for advice or conversation.\n\nPlease send any document, photo, or question to get started! 😊`;
+      return `Hello ${cleanName}! 👋✨\n\nI am your AI DOST 🤖 (stayonchat.com) — your personal digital companion and smart assistant!\n\nHere is how I can assist you:\n📁 Paper & Bill Locker: Send any photo or PDF (Bill, RC, Insurance, Prescription). I will keep them safe and return original files whenever you ask!\n⏰ Smart Reminders: Ask me to remind you about any important task (e.g. "Tomorrow 10 AM medicine for mom").\n🌅 6:00 AM Daily Life & Safety Guide: Daily safety alerts, weather updates, day vibrations, and lucky colors.\n💬 Thoughtful Companion: Chat anytime for advice or conversation with complete warmth and respect!\n\nPlease send any photo, PDF, or question to get started! 😊`;
     }
 
     // Default: Hinglish
-    return `Namaste ${userName}! 🙏✨\n\nMain hoon aapka AI DOST 🤖 (stayonchat.com) — aapka apna digital dost!\n\nMain aapki kya-kya madad kar sakta hoon:\n• Kaagaz & Photo Vault: Koi bhi photo ya PDF bhej dijiye (Bill, RC, Insurance, Parcha). Safe rakhunga aur mangte hi turant bhej dunga!\n• Smart Reminders: Kisi bhi zaroori kaam ka yaad dilane ko kahiye (jaise "Kal subah 10 baje bill bharna hai").\n• Ank Jyotish: Apni birth date ya car number batayein, main shubh rang aur zaroori salah dunga.\n• Sacha Saathi: Koi bhi baat karni ho ya salah chahiye, aadar ke saath chat kijiye!\n\nShuruat karne ke liye kripya koi photo, PDF ya sawaal bhej kar dekhiye. 😊`;
+    return `Namaste ${cleanName}! 🙏✨\n\nMain hoon aapka AI DOST 🤖 (stayonchat.com) — aapka apna digital saathi aur smart assistant!\n\nMain aapki kya-kya madad kar sakta hoon:\n📁 Kaagaz & Bill Locker: Koi bhi photo ya PDF bhej dijiye (Bill, RC, Insurance, Parcha). Safe rakhunga aur mangte hi original file wapas bhej dunga!\n⏰ Smart Reminders: Kisi bhi zaroori kaam ka yaad dilane ko kahiye (jaise "Kal subah 10 baje mummy ki dawa").\n🌅 Subah 6 Baje Daily Life & Safety Guide: Har subah zaroori safety alert, mausam, din ke shubh sanket aur lucky color.\n💬 Samajhdaar Saathi: Koi bhi baat karni ho ya salah chahiye, aadar ke saath baat kijiye!\n\nShuruat karne ke liye kripya koi photo, PDF ya sawaal bhej kar dekhiye. 😊`;
+  },
+
+  /**
+   * Prompt user to name an ambiguous photo or document
+   */
+  getPhotoNamingPrompt(userName: string = 'Bhai Sahab'): string {
+    return `📸 Aapki photo vault mein bilkul surakshit save ho gayi hai! 🤖✨\n\nKripya batayein ise kis naam se save rakhna hai? (Jaise: "Tarangi Vacation Photo" ya "Ghar ki Registry") taaki aage mangne par main ise turant nikal kar aapko bhej sakoon.`;
+  },
+
+  /**
+   * Interactive 3-button main menu
+   */
+  getMenuMessage(userName: string = 'Bhai Sahab'): { text: string; buttons: { id: string; title: string }[] } {
+    const cleanName = userName && userName !== 'Bhai' ? `${userName} ji` : 'Bhai Sahab';
+    return {
+      text: `Namaste ${cleanName}! 🙏✨\n\nMain hoon aapka AI DOST 🤖 (stayonchat.com) — aapka apna digital saathi aur smart assistant!\n\nAap niche diye gaye vikalpon mein se chun sakte hain ya seedhe koi bhi photo, kaagaz ya sawaal bhej sakte hain:`,
+      buttons: [
+        { id: 'btn_my_docs', title: '📂 Mere Kaagaz' },
+        { id: 'btn_my_reminders', title: '⏰ Reminders' },
+        { id: 'btn_my_numerology', title: '🔢 Mera Ank Jyotish' },
+      ],
+    };
   },
 
   /**

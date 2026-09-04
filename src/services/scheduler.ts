@@ -43,7 +43,7 @@ export const schedulerService = {
       const dueReminders = await dbService.getDueGeneralReminders();
       for (const r of dueReminders) {
         console.log(`Delivering general reminder to ${r.user_phone}: ${r.task}`);
-        const msg = `⏰ *DOST Reminder!* 🤖✨\n\n📌 *${r.task}*\n\n_Bhai, aapne bola tha is samay yaad dilane ko. Kaam ho gaya na?_`;
+        const msg = `⏰ AI DOST Reminder! 🤖✨\n\n📌 ${r.task}\n\nAapne bola tha is samay yaad dilane ko. Kripya dekh lijiye!`;
         await whatsappService.sendTextMessage(r.user_phone, msg);
         await dbService.markGeneralReminderSent(r.id);
       }
@@ -130,7 +130,7 @@ export const schedulerService = {
         // Check if user is on free tier and already used their 1 free trial reminder
         if (user.plan === 'free' && user.reminder_count >= 1) {
           // Free tier exhausted reminders - send a respectful upgrade reminder
-          const alertMsg = `⚠️ *MunshiJi Alert*\n\nBhaiya, aapke *${doc.title}* ki expiry *${item.days_before} din* mein hai.\n\nFree Pack mein sirf 1 trial alert tha. Saare kaagzat ke waqt par WhatsApp alerts ke liye *Yaad Plan* (₹149/saal) activate karein:\nhttps://stayonchat.com/pay/yaad_149?phone=${userPhone}`;
+          const alertMsg = `⚠️ AI DOST Alert 🤖✨\n\nDhruv ji, aapke ${doc.title} ki expiry ${item.days_before} din mein hai.\n\nFree Pack mein 1 trial alert tha. Saare kaagzat ke waqt par WhatsApp alerts ke liye Yaad Plan (₹149/saal) activate karein:\nhttps://stayonchat.com/pay/yaad_149?phone=${userPhone}`;
           await whatsappService.sendTextMessage(userPhone, alertMsg);
         } else {
           // Paid user OR first free trial reminder

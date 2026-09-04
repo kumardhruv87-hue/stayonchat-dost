@@ -43,6 +43,7 @@ export interface UserRecord {
   tob?: string;
   pob?: string;
   rashi?: string;
+  vehicle_plate?: string;
   last_offer_sent_at?: string;
   created_at: string;
 }
@@ -82,8 +83,53 @@ export interface DocumentRecord {
 const inMemoryUsers: Map<string, UserRecord> = new Map();
 const inMemoryReminders: GeneralReminder[] = [];
 const inMemoryChatHistory: Map<string, Array<{ role: 'user' | 'model'; text: string; timestamp: string }>> = new Map();
+const inMemoryPendingNaming: Map<string, { docId: string; timestamp: number }> = new Map();
 
 export const dbService = {
+  // Set pending naming state for ambiguous doc or photo
+  setPendingDocNaming(userPhone: string, docId: string): void {
+    inMemoryPendingNaming.set(userPhone, { docId, timestamp: Date.now() });
+  },
+
+  // Get pending doc naming docId if set within last 15 minutes
+  getPendingDocNaming(userPhone: string): string | null {
+    const entry = inMemoryPendingNaming.get(userPhone);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > 15 * 60 * 1000) {
+      inMemoryPendingNaming.delete(userPhone);
+      return null;
+    }
+    return entry.docId;
+  },
+
+  // Clear pending naming
+  clearPendingDocNaming(userPhone: string): void {
+    inMemoryPendingNaming.delete(userPhone);
+  },
+
+  // Update title and tags of a document
+  async updateDocumentTitle(docId: string, newTitle: string): Promise<void> {
+    const cleanTitle = newTitle.trim().slice(0, 100);
+    try {
+      const { data: doc } = await supabase.from('documents').select('tags, raw_extraction').eq('id', docId).maybeSingle();
+      const tags = doc?.tags || [];
+      const tokens = cleanTitle.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter((w) => w.length > 1);
+      const newTags = Array.from(new Set([...tags, ...tokens]));
+
+      await supabase
+        .from('documents')
+        .update({
+          title: cleanTitle,
+          tags: newTags,
+          raw_extraction: { ...(doc?.raw_extraction || {}), title: cleanTitle, tags: newTags },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', docId);
+    } catch (err) {
+      console.warn('Error updating document title:', err);
+    }
+  },
+
   // Get or auto-register user on first WhatsApp message
   async getOrCreateUser(phoneNumber: string, name?: string): Promise<UserRecord> {
     // Check in-memory first for ultra-fast response
@@ -422,6 +468,23 @@ export const dbService = {
     }
 
     return reminder;
+  },
+
+  // Get all pending general reminders for a user
+  async getUserGeneralReminders(userPhone: string): Promise<GeneralReminder[]> {
+    const memoryMatches = inMemoryReminders.filter((r) => r.user_phone === userPhone && !r.is_sent);
+    try {
+      const { data } = await supabase
+        .from('general_reminders')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_sent', false)
+        .order('remind_at', { ascending: true });
+      if (data && data.length > 0) return data;
+    } catch {
+      // In-memory fallback
+    }
+    return memoryMatches;
   },
 
   // Get due general reminders that need to be delivered right now
