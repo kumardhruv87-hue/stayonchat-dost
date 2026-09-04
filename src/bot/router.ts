@@ -139,7 +139,11 @@ export const botRouter = {
           expiry_date: extracted.expiry_date || undefined,
           summary: extracted.summary,
           tags: extracted.tags,
-          raw_extraction: extracted,
+          raw_extraction: {
+            ...extracted,
+            media_id: mediaId,
+            base64_data: buffer.toString('base64'),
+          },
           is_encrypted: true,
           is_active: true,
         });
@@ -305,65 +309,79 @@ export const botRouter = {
         return;
       }
 
-      // 4.10 Document Search Query (e.g. "RC", "Havells bill", "LIC policy", "PUC")
-      const cleanQuery = text
-        .replace(/^(mera|meri|mere|apna|apni|bhai|dost)\s+/i, '')
-        .replace(/\s+(bhej|bhejo|dikha|dikhao|kahan hai|kaha h|send)$/i, '')
-        .trim();
+      // 4.10 Document & Photo Search Query (e.g. "RC", "Havells bill", "LIC policy", "PUC", "photo", "pic", "meri pic wapas do")
+      const isPhotoRequest = /\b(pic|photo|image|tasveer|picture|snap|camera|photo wapas|pic bhej|photo bhej|pic dikha|photo dikha|meri photo|meri pic)\b/i.test(text);
+      const isRetrievalRequest =
+        isPhotoRequest ||
+        /\b(bhej|bhejo|dikha|dikhao|kahan hai|kaha h|send|chahiye|de do|wapas de|wapas karo|nikal|nikalo|download|lao|pan|rc|bill|insurance|puc|aadhaar|dastavez|kaagaz|paper)\b/i.test(text);
 
-      const searchKeyword = cleanQuery || text;
-      const results = await dbService.searchDocuments(fromPhone, searchKeyword);
-
-      if (results.length === 1 && results[0].storage_path) {
-        // Single exact result found! Send details + original image OR PDF document
-        const doc = results[0];
-        let caption = `📄 *${doc.title}* 🤖✨\n`;
-        if (doc.entity_name) caption += `🏢 ${doc.entity_name}\n`;
-        if (doc.policy_or_bill_no) caption += `🔢 No: ${doc.policy_or_bill_no}\n`;
-        if (doc.expiry_date) caption += `⏳ Expiry: ${doc.expiry_date}\n`;
-        if (doc.summary) caption += `📝 ${doc.summary}\n`;
-
-        try {
-          const buffer = await storageService.downloadDocument(doc.storage_path);
-          const mimeType = doc.file_type || 'image/jpeg';
-          const isPdf = mimeType.includes('pdf') || doc.file_name?.toLowerCase().endsWith('.pdf');
-
-          if (isPdf) {
-            // PDF Document Delivery (Exact original PDF file back on WhatsApp!)
-            const docName = doc.file_name || `${doc.title}.pdf`;
-            const mediaId = await whatsappService.uploadMedia(buffer, 'application/pdf', docName);
-            if (mediaId) {
-              console.log(`Sending PDF document by mediaId ${mediaId} to ${fromPhone}...`);
-              await whatsappService.sendDocumentByMediaId(fromPhone, mediaId, docName, caption.trim());
-              return;
-            }
-          } else {
-            // Image Delivery (JPG/PNG)
-            const mediaId = await whatsappService.uploadMedia(buffer, mimeType, `${doc.title}.jpg`);
-            if (mediaId) {
-              console.log(`Sending image by mediaId ${mediaId} to ${fromPhone}...`);
-              await whatsappService.sendImageByMediaId(fromPhone, mediaId, caption.trim());
-              return;
-            }
-          }
-        } catch (mediaErr) {
-          console.error('Error sending media back to user:', mediaErr);
+      let results: any[] = [];
+      if (isRetrievalRequest) {
+        results = await dbService.searchDocuments(fromPhone, text);
+        if (results.length === 0 && isPhotoRequest) {
+          const latestPhoto = await dbService.getLatestUserPhoto(fromPhone);
+          if (latestPhoto) results = [latestPhoto];
         }
-
-        // Fallback text if media upload fails
-        await whatsappService.sendTextMessage(fromPhone, caption.trim());
-        return;
       }
 
-      if (results.length > 1) {
-        const formatted = personaService.formatSearchResults(searchKeyword, results, userLang);
+      if (results.length > 0) {
+        // If photo was specifically asked for, prioritize image file
+        let doc = results[0];
+        if (isPhotoRequest) {
+          const matchingImg = results.find(d => d.file_type?.startsWith('image') || d.title?.toLowerCase().includes('photo'));
+          if (matchingImg) doc = matchingImg;
+        }
+
+        // Deliver original file directly on WhatsApp!
+        if (results.length === 1 || isPhotoRequest || text.toLowerCase().includes('bhej') || text.toLowerCase().includes('send') || text.toLowerCase().includes('de')) {
+          let caption = `📄 *${doc.title}* 🤖✨\n`;
+          if (doc.entity_name) caption += `🏢 ${doc.entity_name}\n`;
+          if (doc.policy_or_bill_no) caption += `🔢 No: ${doc.policy_or_bill_no}\n`;
+          if (doc.expiry_date) caption += `⏳ Expiry: ${doc.expiry_date}\n`;
+          if (doc.summary) caption += `📝 ${doc.summary}\n`;
+
+          try {
+            const buffer = await storageService.downloadDocument(doc.storage_path);
+            const mimeType = doc.file_type || 'image/jpeg';
+            const isPdf = mimeType.includes('pdf') || doc.file_name?.toLowerCase().endsWith('.pdf');
+
+            if (isPdf) {
+              // PDF Document Delivery (Native WhatsApp document attachment)
+              const docName = doc.file_name || `${doc.title}.pdf`;
+              const mediaId = await whatsappService.uploadMedia(buffer, 'application/pdf', docName);
+              if (mediaId) {
+                console.log(`Sending PDF document by mediaId ${mediaId} to ${fromPhone}...`);
+                await whatsappService.sendDocumentByMediaId(fromPhone, mediaId, docName, caption.trim());
+                return;
+              }
+            } else {
+              // Image Delivery (Native WhatsApp image attachment)
+              const mediaId = await whatsappService.uploadMedia(buffer, mimeType, `${doc.title}.jpg`);
+              if (mediaId) {
+                console.log(`Sending image by mediaId ${mediaId} to ${fromPhone}...`);
+                await whatsappService.sendImageByMediaId(fromPhone, mediaId, caption.trim());
+                return;
+              }
+            }
+          } catch (mediaErr) {
+            console.error('Error sending media back to user:', mediaErr);
+          }
+
+          // Fallback text if media upload fails
+          await whatsappService.sendTextMessage(fromPhone, `📸 *${doc.title}* 🤖✨\n\n${caption.trim()}\n\n_File details vault mein surakshit darj hain._`);
+          return;
+        }
+
+        // Multiple results found: show formatted list
+        const formatted = personaService.formatSearchResults(text, results, userLang);
         await whatsappService.sendTextMessage(fromPhone, formatted);
         return;
       }
 
       // 4.11 Samajhdaar Dost Conversational AI
       // When the user is simply chatting, sharing feelings, asking life/money advice, or greeting:
-      const dostReply = await geminiService.chatAsDost(text, [], userLang, userName);
+      const respectfulName = user.name && user.name !== 'Bhai' ? `${user.name} ji` : 'Bhai Sahab';
+      const dostReply = await geminiService.chatAsDost(text, [], userLang, respectfulName);
       await whatsappService.sendTextMessage(fromPhone, dostReply);
     }
   }

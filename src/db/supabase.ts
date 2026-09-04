@@ -199,30 +199,99 @@ export const dbService = {
     }
   },
 
-  // Fuzzy search user's documents
+  // Smart search user's documents & photos with stopword filtering & synonym matching
   async searchDocuments(userPhone: string, query: string, limit: number = 5) {
-    // 1. Try PostgreSQL function `search_user_documents`
-    const { data: rpcData, error: rpcError } = await supabase.rpc('search_user_documents', {
-      p_user_phone: userPhone,
-      p_query: query,
-      p_limit: limit,
-    });
-
-    if (!rpcError && rpcData && rpcData.length > 0) {
-      return rpcData;
+    const rawQ = (query || '').trim().toLowerCase();
+    if (!rawQ) {
+      // Return recent docs if query is empty
+      const { data } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      return data || [];
     }
 
-    // 2. Fallback to ILIKE search if pg_trgm function is not loaded
+    // Check if query is asking for a photo / pic / image
+    const isPhotoIntent = /\b(pic|photo|image|tasveer|picture|snap|camera|photo wapas|pic bhej|photo bhej|pic dikha|photo dikha)\b/i.test(rawQ);
+
+    if (isPhotoIntent) {
+      // Check if user specifically named an entity or place (e.g. "tarangi photo" or "wedding pic")
+      const stripped = rawQ
+        .replace(/\b(pic|photo|image|tasveer|picture|snap|mera|meri|mere|apna|apni|mujhe|wapas|de|do|bhej|bhejo|dikha|dikhao|kahan|hai|send|chahiye|ki|ka|ke|wali|wala|wale)\b/gi, '')
+        .trim();
+
+      if (stripped.length >= 2) {
+        const { data: specificData } = await supabase
+          .from('documents')
+          .select('*')
+          .eq('user_phone', userPhone)
+          .eq('is_active', true)
+          .or(`title.ilike.%${stripped}%,entity_name.ilike.%${stripped}%,summary.ilike.%${stripped}%`)
+          .order('created_at', { ascending: false })
+          .limit(limit);
+        if (specificData && specificData.length > 0) return specificData;
+      }
+
+      // Return recent photos
+      const { data: photoData } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_active', true)
+        .or('file_type.ilike.%image%,title.ilike.%photo%,category.eq.general')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (photoData && photoData.length > 0) return photoData;
+    }
+
+    // Remove stop words to find the core subject (e.g. "mera pan card bhej do" => "pan")
+    const cleanTokens = rawQ
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => !['mera', 'meri', 'mere', 'apna', 'apni', 'mujhe', 'bhai', 'dost', 'bhej', 'bhejo', 'dikha', 'dikhao', 'kahan', 'kaha', 'hai', 'h', 'send', 'wapas', 'de', 'do', 'chahiye', 'ka', 'ki', 'ke', 'wali', 'wala', 'wale', 'the', 'is', 'ko', 'karo', 'karein'].includes(w))
+      .filter((w) => w.length > 1);
+
+    // Search by extracted core tokens
+    for (const token of cleanTokens) {
+      const { data: tokenData } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_active', true)
+        .or(`title.ilike.%${token}%,entity_name.ilike.%${token}%,summary.ilike.%${token}%,policy_or_bill_no.ilike.%${token}%`)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (tokenData && tokenData.length > 0) return tokenData;
+    }
+
+    // Fallback: search full query string
     const { data: ilikeData } = await supabase
       .from('documents')
       .select('*')
       .eq('user_phone', userPhone)
       .eq('is_active', true)
-      .or(`title.ilike.%${query}%,entity_name.ilike.%${query}%,summary.ilike.%${query}%`)
+      .or(`title.ilike.%${rawQ}%,entity_name.ilike.%${rawQ}%,summary.ilike.%${rawQ}%`)
       .order('created_at', { ascending: false })
       .limit(limit);
 
     return ilikeData || [];
+  },
+
+  // Get user's most recently uploaded photo
+  async getLatestUserPhoto(userPhone: string): Promise<DocumentRecord | null> {
+    const { data } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('user_phone', userPhone)
+      .eq('is_active', true)
+      .or('file_type.ilike.%image%,title.ilike.%photo%,category.eq.general')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data as DocumentRecord | null;
   },
 
   // Get all active expiries for a user

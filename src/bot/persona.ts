@@ -26,15 +26,15 @@ export const personaService = {
    */
   getWelcomeMessage(userName: string = 'Bhai', language: string = 'hinglish'): string {
     if (language === 'hi') {
-      return `नमस्ते ${userName}! 🙏✨\n\nमैं हूँ आपका **DOST 🤖** (stayonchat.com) — आपका अपना डिजिटल साथी!\n\nमैं आपकी क्या-क्या मदद कर सकता हूँ:\n📁 *कागज़ व बिल लॉकर:* फोटो या PDF भेजिए, सुरक्षित रखूँगा और मांगने पर सेकंड में लौटा दूँगा।\n⏰ *स्मार्ट रिमाइंडर्स:* किसी भी चीज़ की याद दिलवाने को कहिए (जैसे "कल 10 बजे मम्मी की दवा")।\n🌅 *सुबह 6 बजे ग्रह-नक्षत्र सलाह:* अपनी जन्मतिथि (DOB) बताइए, हर सुबह आपके दिन की खास सलाह दूँगा।\n💬 *सच्चा दोस्त:* कोई भी बात करनी हो या सलाह चाहिए, बेझिझक चैट कीजिए!\n\n_शुरुआत करने के लिए कोई भी फोटो, PDF या मैसेज भेजिए!_ 😊`;
+      return `नमस्ते ${userName} जी! 🙏✨\n\nमैं हूँ आपका **DOST 🤖** (stayonchat.com) — आपका अपना डिजिटल साथी!\n\nमैं आपकी क्या-क्या मदद कर सकता हूँ:\n📁 *कागज़ व बिल लॉकर:* कोई भी फोटो या PDF भेजिए, सुरक्षित रखूँगा और मांगने पर तुरंत लौटा दूँगा।\n⏰ *स्मार्ट रिमाइंडर्स:* किसी भी कार्य की याद दिलाने को कहिए (जैसे "कल 10 बजे मम्मी की दवा")।\n🌅 *सुबह 6 बजे शुभ प्रभात व सावधानी:* अपनी जन्मतिथि बताइए, प्रतिदिन सुबह दिन की खास सलाह भेजूँगा।\n💬 *आदरणीय साथी:* कोई भी बात करनी हो या सलाह चाहिए, बेझिझक चैट कीजिए!\n\n_शुरुआत करने के लिए कृपया कोई भी फोटो, PDF या संदेश भेजिए!_ 😊`;
     }
 
     if (language === 'en') {
-      return `Hey ${userName}! 👋✨\n\nI'm **DOST 🤖** (stayonchat.com) — your 24/7 personal WhatsApp companion!\n\nHere is how I make your life effortless:\n📁 *Smart Locker:* Send photos or PDFs (bills, RC, insurance, prescription). I'll keep them safe and return the original files instantly whenever you ask.\n⏰ *Reminders:* Ask me to remind you about anything (e.g. "Remind me to pay bill tomorrow at 10 AM").\n🌅 *Daily 6 AM Life & Astro Guide:* Share your date of birth, and I'll send daily personalized guidance & precautions.\n💬 *Friend on Chat:* Stressed? Need advice? Just talk to me anytime!\n\n_Send any document, photo, or message to get started!_ 😊`;
+      return `Hello ${userName} Ji! 👋✨\n\nI'm **DOST 🤖** (stayonchat.com) — your 24/7 personal WhatsApp companion!\n\nHere is how I assist you:\n📁 *Smart Locker:* Send photos or PDFs (bills, RC, insurance, prescription). I'll keep them safe and return the original files instantly whenever you ask.\n⏰ *Reminders:* Ask me to remind you about anything (e.g. "Remind me to pay bill tomorrow at 10 AM").\n🌅 *Daily 6 AM Guidance:* Share your date of birth, and I'll send daily personalized guidance & precautions.\n💬 *Friendly Chat:* Stressed? Need advice? Feel free to talk anytime!\n\n_Please send any document, photo, or message to get started!_ 😊`;
     }
 
     // Default: Hinglish
-    return `Arre ${userName}, Namaste! 🙏✨\n\nMain hoon tera **DOST 🤖** (stayonchat.com) — aapka apna digital saathi aur all-in-one assistant!\n\nMain aapki kya-kya madad karunga:\n📁 *Kaagaz & Bill Locker:* Koi bhi photo ya PDF bhej do (Bill, RC, Insurance, Parcha). Safe rakhunga aur mangte hi original file wapas bhej dunga!\n⏰ *Smart Reminders:* Kisi bhi cheez ka yaad dilane ko bolo (jaise "Kal subah 10 baje mummy ki dawa").\n🌅 *Subah 6 Baje Daily Astro Guide:* Apni date of birth (DOB) batao, roz subah grah-nakshatra aur safety caution dunga.\n💬 *Dost se Chat:* Koi bhi tension ho ya salah chahiye, bas dil khol ke baat karo!\n\n_Chalo shuruat karein! Koi photo, PDF ya sawaal bhej kar dekho._ 😊`;
+    return `Namaste ${userName} ji! 🙏✨\n\nMain hoon aapka **DOST 🤖** (stayonchat.com) — aapka apna digital saathi aur smart assistant!\n\nMain aapki kya-kya madad kar sakta hoon:\n📁 *Kaagaz & Bill Locker:* Koi bhi photo ya PDF bhej dijiye (Bill, RC, Insurance, Parcha). Safe rakhunga aur mangte hi original file wapas bhej dunga!\n⏰ *Smart Reminders:* Kisi bhi zaroori kaam ka yaad dilane ko kahiye (jaise "Kal subah 10 baje mummy ki dawa").\n🌅 *Subah 6 Baje Daily Life & Safety Guide:* Roz subah positivity, road safety aur important guidance dunga.\n💬 *Samajhdaar Saathi:* Koi bhi baat karni ho ya salah chahiye, aadar ke saath baat kijiye!\n\n_Shuruat karne ke liye kripya koi photo, PDF ya sawaal bhej kar dekhiye._ 😊`;
   },
 
   /**
@@ -53,7 +53,7 @@ export const personaService = {
       if (doc.amount) msg += `💰 *रकम:* ₹${doc.amount.toLocaleString('en-IN')}\n`;
       if (doc.expiry_date) {
         msg += `⏳ *अंतिम तिथि (Expiry):* **${doc.expiry_date}**\n`;
-        msg += `\n⏰ *चिंता मत कीजिए!* अंतिम तिथि से 30, 7 और 1 दिन पहले मैं आपको WhatsApp पर याद दिला दूँगा।`;
+        msg += `\n⏰ *निश्चिंत रहिए!* अंतिम तिथि से 30, 7 और 1 दिन पहले मैं आपको WhatsApp पर याद दिला दूँगा।`;
       } else {
         msg += `\n📁 *श्रेणी:* ${doc.category.toUpperCase()}\n`;
         msg += `📝 *विवरण:* ${doc.summary}`;
@@ -78,14 +78,14 @@ export const personaService = {
     }
 
     // Hinglish
-    let msg = `✅ *Bhai, kaagaz ekdum safe save ho gaya!* 🤖✨\n\n`;
+    let msg = `✅ *Aapka kaagaz safalta-poorvak vault mein save ho gaya hai!* 🤖✨\n\n`;
     msg += `📌 *Title:* ${doc.title}\n`;
     if (doc.entity_name) msg += `🏢 *Company/Shop:* ${doc.entity_name}\n`;
     if (doc.policy_or_bill_no) msg += `🔢 *No:* ${doc.policy_or_bill_no}\n`;
     if (doc.amount) msg += `💰 *Rakam:* ₹${doc.amount.toLocaleString('en-IN')}\n`;
     if (doc.expiry_date) {
       msg += `⏳ *Expiry / Renewal:* **${doc.expiry_date}**\n`;
-      msg += `\n⏰ *Reminder locked!* Expiry se 30, 7 aur 1 din pehle main khud WhatsApp par ping karunga taaki fine na lage.`;
+      msg += `\n⏰ *Reminder set!* Expiry se 30, 7 aur 1 din pehle main khud WhatsApp par aapko alert karunga taaki koi fine na lage.`;
     } else {
       msg += `\n📁 *Folder:* ${doc.category.toUpperCase()}\n`;
       msg += `📝 *Summary:* ${doc.summary}`;
@@ -152,12 +152,12 @@ export const personaService = {
     });
 
     if (language === 'hi') {
-      return `⏰ *रिमाइंडर सेट हो गया भाई!* 🤖✨\n\n📌 *काम:* ${task}\n⏳ *समय:* ${formattedDate}\n\n_बिल्कुल बेफिक्र रहें, इस समय मैं खुद आपको WhatsApp पर मैसेज कर दूँगा!_`;
+      return `⏰ *रिमाइंडर सेट हो गया है!* 🤖✨\n\n📌 *कार्य:* ${task}\n⏳ *समय:* ${formattedDate}\n\n_आप निश्चिंत रहें, ठीक इस समय मैं आपको WhatsApp पर संदेश भेज दूँगा!_`;
     }
     if (language === 'en') {
-      return `⏰ *Reminder Locked!* 🤖✨\n\n📌 *Task:* ${task}\n⏳ *When:* ${formattedDate}\n\n_Relax, I'll ping you right here on WhatsApp when the time comes!_`;
+      return `⏰ *Reminder Locked!* 🤖✨\n\n📌 *Task:* ${task}\n⏳ *When:* ${formattedDate}\n\n_Please relax, I will message you right here on WhatsApp when the time comes!_`;
     }
-    return `⏰ *Reminder pakka ho gaya bhai!* 🤖✨\n\n📌 *Task:* ${task}\n⏳ *Waqt:* ${formattedDate}\n\n_Tu bilkul tension mat le, theek is waqt main tujhe WhatsApp par ping kar dunga!_`;
+    return `⏰ *Reminder set ho gaya hai!* 🤖✨\n\n📌 *Task:* ${task}\n⏳ *Waqt:* ${formattedDate}\n\n_Aap nishchint rahein, theek is waqt main aapko WhatsApp par sandesh bhej doonga!_`;
   },
 
   /**
@@ -168,12 +168,12 @@ export const personaService = {
     language: string = 'hinglish'
   ): string {
     if (language === 'hi') {
-      return `🌅 *आपकी जन्म जानकारी दर्ज हो गई है!* 🪐✨\n\n📅 *जन्मतिथि (DOB):* ${astro.dob || 'दर्ज'}\n⏰ *समय:* ${astro.tob || 'सामान्य'}\n📍 *स्थान:* ${astro.pob || 'भारत'}\n\nअब हर सुबह **6:00 AM** पर मैं आपको आपके ग्रह-नक्षत्र, शुभ मुहूर्त और दिन की विशेष सावधानी की व्यक्तिगत सलाह WhatsApp पर भेजूँगा! ☀️`;
+      return `🌅 *आपकी जन्म जानकारी दर्ज हो गई है!* 🪐✨\n\n📅 *जन्मतिथि (DOB):* ${astro.dob || 'दर्ज'}\n⏰ *समय:* ${astro.tob || 'सामान्य'}\n📍 *स्थान:* ${astro.pob || 'भारत'}\n\nअब हर सुबह **6:00 AM** पर मैं आपको आपके दिन की विशेष सलाह और सावधानी WhatsApp पर भेजूँगा! ☀️`;
     }
     if (language === 'en') {
-      return `🌅 *Birth Profile Saved!* 🪐✨\n\n📅 *DOB:* ${astro.dob || 'Saved'}\n⏰ *Time:* ${astro.tob || 'Standard'}\n📍 *Place:* ${astro.pob || 'India'}\n\nStarting tomorrow at **6:00 AM**, I'll send your daily personalized planetary guidance, safe driving alerts, and lucky hours! ☀️`;
+      return `🌅 *Birth Profile Saved!* 🪐✨\n\n📅 *DOB:* ${astro.dob || 'Saved'}\n⏰ *Time:* ${astro.tob || 'Standard'}\n📍 *Place:* ${astro.pob || 'India'}\n\nStarting tomorrow at **6:00 AM**, I'll send your daily personalized morning guidance, safe driving alerts, and lucky hours! ☀️`;
     }
-    return `🌅 *Bhai teri kundali details lock ho gayi!* 🪐✨\n\n📅 *DOB:* ${astro.dob || 'Saved'}\n⏰ *Waqt:* ${astro.tob || 'Normal'}\n📍 *Jagah:* ${astro.pob || 'India'}\n\nAb roz subah **6:00 AM** par main tujhe WhatsApp par bataunga ki aaj ka din kaisa hai, grah kya keh rahe hain aur gaadi chalate ya kaam karte waqt kya savdhani rakhni hai! ☀️`;
+    return `🌅 *Aapki birth details surakshit darj ho gayi hain!* 🪐✨\n\n📅 *DOB:* ${astro.dob || 'Saved'}\n⏰ *Waqt:* ${astro.tob || 'Normal'}\n📍 *Jagah:* ${astro.pob || 'India'}\n\nAb roz subah **6:00 AM** par main aapko WhatsApp par sandesh bhejunga ki aaj ka din kaisa rahega aur gaadi chalate ya kaam karte waqt kya savdhani rakhni hai! ☀️`;
   },
 
   /**
@@ -234,16 +234,16 @@ export const personaService = {
    */
   getReferralShareMessage(userPhone: string, referralCode: string): string {
     const shareLink = `https://wa.me/15556681690?text=Hi%20DOST%20ref_${referralCode}`;
-    const clickToForward = `https://api.whatsapp.com/send?text=Bhai%20ye%20check%20kar,%20WhatsApp%20par%20AI%20Locker%20aur%20Reminders%20hai%20ekdum%20free:%20${encodeURIComponent(shareLink)}`;
+    const clickToForward = `https://api.whatsapp.com/send?text=Namaste!%20Ye%20check%20karein,%20WhatsApp%20par%20AI%20Locker%20aur%20Reminders%20hai%20ekdum%20free:%20${encodeURIComponent(shareLink)}`;
 
-    return `🎁 *Dosto ko Bhejo, Free Storage Badhao!* 🤖✨\n\nHar ek dost ke judne par aapko milenge:\n📁 *+5 Extra Files Free Storage*\n⏰ *+3 Extra Free Reminders*\n\n📲 *Aapka Personal Invite Link:*\n${shareLink}\n\n👉 *Direct WhatsApp Forward karne ke liye yahan tap karein:*\n${clickToForward}\n\n_Jaise hi aapka dost link se "Hi" bhejega, aapka extra quota turant unlock ho jayega!_ 🎉`;
+    return `🎁 *Aapka Personal Invite Link:* 🤖✨\n\nAapke link se kisi ke judne par aap dono ko milenge:\n📁 *+5 Extra Files Free Storage*\n⏰ *+3 Extra Free Reminders*\n\n📲 *Invite Link:*\n${shareLink}\n\n👉 *Direct WhatsApp Forward karne ke liye yahan tap karein:*\n${clickToForward}\n\n_Jaise hi naye user is link se join karenge, aapka extra storage turant unlock ho jayega!_ 🎉`;
   },
 
   /**
    * Confirmation to referrer when a friend joins
    */
   getReferralRewardMessage(friendName: string, totalFiles: number): string {
-    return `🎉 *Badhai ho bhai!* 🤖✨\n\nAapke dost (${friendName}) ne DOST join kar liya hai!\n\nAapko **+5 Extra Files & Reminders** free unlock ho gaye hain. Ab aapke account mein total **${totalFiles} files** ki jagah hai!\n\n_Aise hi aur dosto ko jodein aur storage badhate rahein._ 🚀`;
+    return `🎉 *Badhai ho!* 🤖✨\n\nAapke refer kiye gaye saathi (${friendName}) ne DOST join kar liya hai!\n\nAapko **+5 Extra Files & Reminders** free unlock ho gaye hain. Ab aapke account mein total **${totalFiles} files** ki jagah hai!\n\n_Aise hi aur saathiyon ko jodein aur storage badhate rahein._ 🚀`;
   },
 
   /**
@@ -251,11 +251,11 @@ export const personaService = {
    */
   getMilestoneMessage(type: 'penalty_saved' | 'five_files' | 'habit_week', data?: string): string {
     if (type === 'penalty_saved') {
-      return `🚨 *DOST Money Guard:* Bhai, tune is ${data || 'kaagaz'} ki date save karke seedha **₹10,000 ka traffic challan** ya warranty nuksaan bacha liya! Ek samajhdaar dost ka yahi kaam hota hai. ✨`;
+      return `🚨 *DOST Money Guard:* Is ${data || 'kaagaz'} ki date save karke aapne seedha **₹10,000 ka traffic challan** ya warranty nuksaan bacha liya hai! Ek samajhdaar saathi ka yahi farz hota hai. ✨`;
     }
     if (type === 'five_files') {
-      return `🏆 *5 Zaroori Kaagaz Safe!* Bhai, ab wallet ya almirah mein file dhoondhne ki tension hamesha ke liye khatam. Jab bhi zaroorat ho, bas naam likhna!`;
+      return `🏆 *5 Zaroori Kaagaz Safe!* Ab wallet ya file dhoondhne ki chinta hamesha ke liye khatam. Jab bhi zaroorat ho, bas naam likhiye!`;
     }
-    return `✨ *1 Hafta Saath:* Dosti ko 1 hafta ho gaya! Main hamesha 24/7 yahin hoon tera har kaagaz aur har baat sambhalne ke liye.`;
+    return `✨ *1 Hafta Saath:* Hamaare saath ko 1 hafta poora ho gaya! Main hamesha 24/7 yahin upasthit hoon aapke zaroori kaagaz aur har baat sambhalne ke liye.`;
   }
 };

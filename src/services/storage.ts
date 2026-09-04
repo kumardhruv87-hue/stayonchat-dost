@@ -78,7 +78,7 @@ export const storageService = {
     };
   },
 
-  // Download document buffer from storage (supports Supabase and local vault)
+  // Download document buffer from storage (supports local vault, database base64 fallback, and Supabase)
   async downloadDocument(storagePath: string): Promise<Buffer> {
     if (storagePath.startsWith('vault/')) {
       const fs = await import('fs');
@@ -87,6 +87,21 @@ export const storageService = {
       if (fs.existsSync(localFilePath)) {
         return fs.readFileSync(localFilePath);
       }
+    }
+
+    // Try recovering from database backup in raw_extraction
+    try {
+      const { data: docData } = await supabase
+        .from('documents')
+        .select('raw_extraction')
+        .eq('storage_path', storagePath)
+        .maybeSingle();
+
+      if (docData?.raw_extraction?.base64_data) {
+        return Buffer.from(docData.raw_extraction.base64_data, 'base64');
+      }
+    } catch {
+      // Continue to Supabase storage attempt
     }
 
     const { data, error } = await supabase.storage
