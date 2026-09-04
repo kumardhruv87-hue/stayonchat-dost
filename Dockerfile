@@ -1,5 +1,5 @@
-# Use official lightweight Node.js 20/22/26 LTS image
-FROM node:20-alpine AS builder
+# Use official lightweight Node.js 22 LTS image (native WebSocket supported)
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -17,14 +17,14 @@ COPY public ./public
 RUN npm run build
 
 # Production runner
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Copy compiled files and assets from builder
 COPY --from=builder /app/dist ./dist
