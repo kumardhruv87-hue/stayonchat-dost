@@ -8,9 +8,19 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || '';
-const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
-const GRAPH_API_BASE = 'https://graph.facebook.com/v20.0';
+const ACTIVE_TOKEN =
+  'EAAUU0G7bSl8BSVNpv55As86uPV8nwdcYkdJfZBSGemdmQubjZCIhwZBOHrJURg0mGtGUKcnFBCY8y5aN499HWdBNoRrGcKThx1sMVHVD6ZAOh1kszUf1ZCQcfHabXecPoAiCFz6wmczu01V3A6RZBNCEfZC6O3LpeL1ZBGpnYOCF6D9gTyYRTdaDAomMmvJmrrFBL3BP3mkVZAMpFKNhwVYBRVZB243ZBF9WmUXap7WroZAtyBZAiOErHCPDWRFF6taEIhUhfc8UZBoodpOItmPmvbB8H1oPtDNCVScZAvqswZDZD';
+
+export function getWhatsAppToken(): string {
+  const envToken = process.env.WHATSAPP_TOKEN || '';
+  if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7')) {
+    return ACTIVE_TOKEN;
+  }
+  return envToken;
+}
+
+const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '1145834371951879';
+const GRAPH_API_BASE = 'https://graph.facebook.com/v21.0';
 
 export interface WhatsAppButton {
   id: string;
@@ -35,7 +45,7 @@ export const whatsappService = {
         },
         {
           headers: {
-            Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+            Authorization: `Bearer ${getWhatsAppToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -83,7 +93,7 @@ export const whatsappService = {
 
       await axios.post(url, payload, {
         headers: {
-          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+          Authorization: `Bearer ${getWhatsAppToken()}`,
           'Content-Type': 'application/json',
         },
       });
@@ -108,7 +118,7 @@ export const whatsappService = {
 
       const res = await axios.post(url, formData, {
         headers: {
-          Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+          Authorization: `Bearer ${getWhatsAppToken()}`,
         },
       });
       return res.data.id;
@@ -138,7 +148,7 @@ export const whatsappService = {
         },
         {
           headers: {
-            Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+            Authorization: `Bearer ${getWhatsAppToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -171,7 +181,7 @@ export const whatsappService = {
         },
         {
           headers: {
-            Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+            Authorization: `Bearer ${getWhatsAppToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -209,7 +219,7 @@ export const whatsappService = {
         },
         {
           headers: {
-            Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+            Authorization: `Bearer ${getWhatsAppToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -257,7 +267,7 @@ export const whatsappService = {
         },
         {
           headers: {
-            Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+            Authorization: `Bearer ${getWhatsAppToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -278,7 +288,7 @@ export const whatsappService = {
     // 1. Get temporary media URL from Meta Graph
     const mediaMetaUrl = `${GRAPH_API_BASE}/${mediaId}`;
     const metaRes = await axios.get(mediaMetaUrl, {
-      headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` },
+      headers: { Authorization: `Bearer ${getWhatsAppToken()}` },
     });
 
     const fileUrl = metaRes.data.url;
@@ -286,7 +296,7 @@ export const whatsappService = {
 
     // 2. Download the binary payload using Authorization header
     const fileRes = await axios.get(fileUrl, {
-      headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` },
+      headers: { Authorization: `Bearer ${getWhatsAppToken()}` },
       responseType: 'arraybuffer',
     });
 
