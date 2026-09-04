@@ -85,8 +85,30 @@ const inMemoryReminders: GeneralReminder[] = [];
 const inMemoryChatHistory: Map<string, Array<{ role: 'user' | 'model'; text: string; timestamp: string }>> = new Map();
 const inMemoryPendingNaming: Map<string, { docId: string; timestamp: number }> = new Map();
 const inMemoryPromptStates: Map<string, { state: string; timestamp: number }> = new Map();
+const inMemoryBotSessions: Map<string, number> = new Map();
 
 export const dbService = {
+  // Check if user has an active bot session
+  isSessionActive(userPhone: string): boolean {
+    const expiry = inMemoryBotSessions.get(userPhone);
+    if (!expiry) return false;
+    if (Date.now() > expiry) {
+      inMemoryBotSessions.delete(userPhone);
+      return false;
+    }
+    return true;
+  },
+
+  // Start or extend bot session (default 30 mins)
+  startSession(userPhone: string, durationMinutes: number = 30): void {
+    inMemoryBotSessions.set(userPhone, Date.now() + durationMinutes * 60 * 1000);
+  },
+
+  // Stop bot session immediately
+  stopSession(userPhone: string): void {
+    inMemoryBotSessions.delete(userPhone);
+  },
+
   // Track prompt context (e.g. language picker, main menu)
   setUserPromptState(userPhone: string, state: string): void {
     inMemoryPromptStates.set(userPhone, { state, timestamp: Date.now() });

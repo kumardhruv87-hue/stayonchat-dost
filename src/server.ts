@@ -7,6 +7,8 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { botRouter } from './bot/router.js';
+import { dbService } from './db/supabase.js';
+import { whatsappService } from './services/whatsapp.js';
 import { paymentService } from './services/razorpay.js';
 import { schedulerService } from './services/scheduler.js';
 import { BRAND } from './config/constants.js';
@@ -122,8 +124,52 @@ app.post('/ultramsg-webhook', async (req: Request, res: Response) => {
     if (!cleanPhone) return;
 
     const contactName = data.pushname || 'Dhruv';
-    const textBody = (data.body || '').trim();
+    const rawText = (data.body || '').trim();
+    const lowerRaw = rawText.toLowerCase();
     const mediaUrl = data.media || '';
+
+    // =============================================================
+    // PRIVACY & ACTIVATION FILTER (Personal Number Protection)
+    // Ensures bot never intercepts personal, family, or work chats!
+    // =============================================================
+    const triggerModeEnabled = process.env.BOT_TRIGGER_MODE !== 'false';
+
+    if (triggerModeEnabled) {
+      // 1. Check if user wants to explicitly stop/exit the bot session
+      if (['exit', 'stop', 'quit', 'dost stop', 'dost off', 'bye dost'].includes(lowerRaw)) {
+        dbService.stopSession(cleanPhone);
+        await whatsappService.sendTextMessage(
+          cleanPhone,
+          'AI DOST session band kar diya gaya hai. Jab bhi zaroorat ho, bas "dost" ya "#dost" likhkar message bhejiye. 🙏'
+        );
+        return;
+      }
+
+      // 2. Check for trigger command: starts with "dost", "#dost", "!dost", "/dost", "ai"
+      const triggerRegex = /^(#dost|!dost|\/dost|dost\b|dost[:\s]|ai\b)/i;
+      const hasTrigger = triggerRegex.test(rawText);
+      const isSessionActive = dbService.isSessionActive(cleanPhone);
+
+      // 3. For media (images/documents/voice notes):
+      const captionText = (data.caption || '').trim();
+      const hasCaptionTrigger = triggerRegex.test(captionText);
+
+      // If neither trigger is present nor session is active -> SILENTLY IGNORE!
+      if (!hasTrigger && !hasCaptionTrigger && !isSessionActive) {
+        console.log(`[Personal Chat Protected] Ignoring message from ${cleanPhone} (no DOST trigger): "${rawText.substring(0, 30)}..."`);
+        return;
+      }
+
+      // 4. If trigger present, start/extend session for 30 minutes
+      if (hasTrigger || hasCaptionTrigger) {
+        dbService.startSession(cleanPhone, 30);
+      }
+    }
+
+    let textBody = rawText.replace(/^(#dost|!dost|\/dost|dost[:\s]*|ai[:\s]*)/i, '').trim();
+    if (!textBody && rawText) {
+      textBody = 'hi'; // If user just typed "dost" or "#dost", trigger welcome/menu
+    }
 
     let mappedType = 'text';
     if (data.type === 'image') mappedType = 'image';
