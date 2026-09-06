@@ -1,9 +1,9 @@
 // =================================================================
-// DOST (stayonchat.com) - Multi-Layer Smart Router
+// Keepr (usekeepr.com) - Multi-Layer Smart Router
 // Layer 1: Interactive Buttons & Language Selection
-// Layer 2: Natural Reminders & Astro Profiler (Gemini Flash)
+// Layer 2: Natural Reminders & Life Guidance (Gemini Flash)
 // Layer 3: Document Vault & Original PDF/Image Delivery
-// Layer 4: Samajhdaar Dost Conversational AI Companion
+// Layer 4: Autonomous Conversational AI Companion
 // =================================================================
 
 import { dbService } from '../db/supabase.js';
@@ -102,10 +102,10 @@ export const botRouter = {
   },
 
   /**
-   * Helper: Display DOST Parivaar Plans & Live Razorpay Links
+   * Helper: Display Plans & Live Razorpay Links
    */
   async showPlans(fromPhone: string): Promise<void> {
-    const plansMsg = `📋 AI DOST Plans (stayonchat.com) 🤖✨\n\n1️⃣ Yaad Plan (₹249/saal — Sirf ₹20/mahina)\n• 50 files vault storage + 25 auto WhatsApp alerts\n• Traffic challan, late fee aur warranty loss se 100% mukti\n👉 Instant UPI / Card: https://rzp.io/rzp/ukMXxGY\n\n2️⃣ Ghar Plan (₹499/saal — Sirf ₹41/mahina)\n• 200 files + 4 Family Members connected\n• Poore parivaar ke liye unlimited reminders & expiries\n👉 Instant UPI / Card: https://rzp.io/rzp/OOIVXyJ\n\n3️⃣ Vault Plan (₹899/saal — ₹75/mahina)\n• 500 files + CA link + Waris kit\n👉 Instant UPI / Card: https://rzp.io/rzp/SjNJKT0\n\n💡 Kisi bhi link par tap karke UPI (GPay/PhonePe/Paytm) se 1 second mein activate karein!`;
+    const plansMsg = `📋 ${BRAND.name} Plans 🤖✨\n\n1️⃣ Yaad Plan (₹249/saal — Sirf ₹20/mahina)\n• 50 files vault storage + 25 auto WhatsApp alerts\n• Traffic challan, late fee aur warranty loss se 100% mukti\n👉 Instant UPI / Card: https://rzp.io/rzp/ukMXxGY\n\n2️⃣ Ghar Plan (₹499/saal — Sirf ₹41/mahina)\n• 200 files + 4 Family Members connected\n• Poore parivaar ke liye unlimited reminders & expiries\n👉 Instant UPI / Card: https://rzp.io/rzp/OOIVXyJ\n\n3️⃣ Vault Plan (₹899/saal — ₹75/mahina)\n• 500 files + CA link + Waris kit\n👉 Instant UPI / Card: https://rzp.io/rzp/SjNJKT0\n\n💡 Kisi bhi link par tap karke UPI (GPay/PhonePe/Paytm) se 1 second mein activate karein!`;
     await whatsappService.sendTextMessage(fromPhone, plansMsg);
     await dbService.saveChatMessage(fromPhone, 'model', plansMsg);
   },
@@ -149,8 +149,10 @@ export const botRouter = {
       if (buttonId.startsWith('lang_')) {
         const chosenLang = buttonId.replace('lang_', '') as 'en' | 'hi' | 'hinglish';
         await dbService.setUserLanguage(fromPhone, chosenLang);
-        const welcome = personaService.getWelcomeMessage(resolvedName, chosenLang);
+        dbService.clearUserPromptState(fromPhone);
+        const welcome = personaService.getIntroMessage(resolvedName, chosenLang);
         await whatsappService.sendTextMessage(fromPhone, welcome);
+        await dbService.saveChatMessage(fromPhone, 'model', welcome);
         return;
       }
 
@@ -195,7 +197,7 @@ export const botRouter = {
 
       // 1.5 Dismiss
       if (buttonId === 'dismiss_upsell') {
-        await whatsappService.sendTextMessage(fromPhone, `Koi baat nahi ${resolvedName} ji! Aapka DOST hamesha aapki sewa ke liye taiyar hai. 🙏`);
+        await whatsappService.sendTextMessage(fromPhone, `Koi baat nahi ${resolvedName} ji! Aapka ${BRAND.name} hamesha aapki sewa ke liye taiyar hai. 🙏`);
         return;
       }
     }
@@ -209,9 +211,9 @@ export const botRouter = {
 
       // Check quota limit with referral bonus inclusion
       if (user.plan === 'free' && user.file_count >= effectiveMaxFiles) {
-        const quotaMsg = `📦 Free Storage Limit Reached (${effectiveMaxFiles} Files) 🤖✨\n\nPurani files 100% safe hain!\n\nAur jagah chahiye toh:\n1️⃣ Dosto ko Invite karein: Har friend par +5 files free (+30 files tak)\n2️⃣ Yaad Plan (₹149/saal): 50 files + 20 auto WhatsApp alerts!`;
+        const quotaMsg = `📦 Free Storage Limit Reached (${effectiveMaxFiles} Files) 🤖✨\n\nPurani files 100% safe hain!\n\nAur jagah chahiye toh:\n1️⃣ Dosto ko Invite karein: Har friend par +5 files free (+15 files tak)\n2️⃣ Yaad Plan (₹249/saal — sirf ₹20/mahina): 50 files + 25 auto WhatsApp alerts!`;
         await whatsappService.sendInteractiveButtons(fromPhone, quotaMsg, [
-          { id: 'upgrade_yaad_149', title: 'Yaad Plan (₹149)' },
+          { id: 'upgrade_yaad_249', title: 'Yaad Plan (₹249)' },
           { id: 'btn_share_invite', title: '🎁 Dosto ko Invite (+5)' },
           { id: 'dismiss_upsell', title: 'Baad Mein' },
         ]);
@@ -223,7 +225,7 @@ export const botRouter = {
       const fileName = message.document?.filename || (message.image ? `doc_${Date.now()}.jpg` : `file_${Date.now()}.pdf`);
       const caption = message.image?.caption || message.document?.caption || '';
 
-      await whatsappService.sendTextMessage(fromPhone, 'AI DOST aapka kaagaz dekh raha hai... kripya 1 second intezar karein! ⏳');
+      await whatsappService.sendTextMessage(fromPhone, `${BRAND.displayName} aapka kaagaz dekh raha hai... kripya 1 second intezar karein! ⏳`);
 
       try {
         const { buffer, mimeType } = await whatsappService.downloadMedia(mediaId);
@@ -387,31 +389,31 @@ export const botRouter = {
         await dbService.saveUserProfile(fromPhone, { vehiclePlate: cleanPlate });
       }
 
-      // 4.0 Check if user is replying to Language Picker
+      // 4.0 Check if user is in pending_language or replying to Language selection
       const promptState = dbService.getUserPromptState(fromPhone);
-      if (promptState === 'language_picker') {
+      if (promptState === 'pending_language' || promptState === 'language_picker') {
         if (['1', 'hinglish', 'mix'].includes(lowerText)) {
           dbService.clearUserPromptState(fromPhone);
           await dbService.setUserLanguage(fromPhone, 'hinglish');
-          const welcome = personaService.getWelcomeMessage(resolvedName, 'hinglish');
-          await whatsappService.sendTextMessage(fromPhone, welcome);
-          await dbService.saveChatMessage(fromPhone, 'model', welcome);
+          const intro = personaService.getIntroMessage(resolvedName, 'hinglish');
+          await whatsappService.sendTextMessage(fromPhone, intro);
+          await dbService.saveChatMessage(fromPhone, 'model', intro);
           return;
         }
         if (['2', 'hindi', 'hi', 'हिंदी'].includes(lowerText)) {
           dbService.clearUserPromptState(fromPhone);
           await dbService.setUserLanguage(fromPhone, 'hi');
-          const welcome = personaService.getWelcomeMessage(resolvedName, 'hi');
-          await whatsappService.sendTextMessage(fromPhone, welcome);
-          await dbService.saveChatMessage(fromPhone, 'model', welcome);
+          const intro = personaService.getIntroMessage(resolvedName, 'hi');
+          await whatsappService.sendTextMessage(fromPhone, intro);
+          await dbService.saveChatMessage(fromPhone, 'model', intro);
           return;
         }
         if (['3', 'english', 'en'].includes(lowerText)) {
           dbService.clearUserPromptState(fromPhone);
           await dbService.setUserLanguage(fromPhone, 'en');
-          const welcome = personaService.getWelcomeMessage(resolvedName, 'en');
-          await whatsappService.sendTextMessage(fromPhone, welcome);
-          await dbService.saveChatMessage(fromPhone, 'model', welcome);
+          const intro = personaService.getIntroMessage(resolvedName, 'en');
+          await whatsappService.sendTextMessage(fromPhone, intro);
+          await dbService.saveChatMessage(fromPhone, 'model', intro);
           return;
         }
       }
@@ -444,7 +446,7 @@ export const botRouter = {
       // 4.02 Check if user is replying with a name for a recently uploaded photo or document
       const pendingDocId = dbService.getPendingDocNaming(fromPhone);
       const isSystemCommand = [
-        'hi', 'hello', 'hey', 'namaste', 'pranam', 'dost', 'start', 'shuru',
+        'hi', 'hello', 'hey', 'namaste', 'pranam', 'dost', 'keepr', 'start', 'shuru',
         'menu', 'help', 'madad', 'options', 'language', 'bhasha', 'lang',
         'share', 'invite', 'refer', 'plan', 'pricing', 'kharidna',
         '1', '2', '3', '4', '5'
@@ -470,17 +472,19 @@ export const botRouter = {
 
       // 4.2 Language Selection Command
       if (['language', 'bhasha', 'lang', 'change language', 'bhasha badlo'].includes(lowerText)) {
-        dbService.setUserPromptState(fromPhone, 'language_picker');
-        const picker = personaService.getLanguagePicker();
-        await whatsappService.sendInteractiveButtons(fromPhone, picker.text, picker.buttons);
+        dbService.setUserPromptState(fromPhone, 'pending_language');
+        const picker = personaService.getLanguageSelectionMessage();
+        await whatsappService.sendTextMessage(fromPhone, picker);
+        await dbService.saveChatMessage(fromPhone, 'model', picker);
         return;
       }
 
-      // 4.3 Greeting / Start
-      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'dost'].includes(lowerText)) {
-        dbService.setUserPromptState(fromPhone, 'main_menu');
-        const menu = personaService.getMenuMessage(resolvedName);
-        await whatsappService.sendInteractiveButtons(fromPhone, menu.text, menu.buttons);
+      // 4.3 Greeting / Start -> Always ask language first!
+      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'dost', 'keepr'].includes(lowerText)) {
+        dbService.setUserPromptState(fromPhone, 'pending_language');
+        const langMsg = personaService.getLanguageSelectionMessage();
+        await whatsappService.sendTextMessage(fromPhone, langMsg);
+        await dbService.saveChatMessage(fromPhone, 'model', langMsg);
         return;
       }
 

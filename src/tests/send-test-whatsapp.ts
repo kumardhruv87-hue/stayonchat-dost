@@ -19,7 +19,7 @@ export async function sendTestMessage(recipientPhone: string) {
     to: cleanPhone,
     type: 'text',
     text: {
-      body: `Pranam! 🙏\n\nMain hoon *MunshiJi 🧞‍♂️* (stayonchat.com)!\n\nAapka WhatsApp bot successfully connect ho gaya hai.\n\nAb aap yahan koi bhi bill, warranty card ya RC ki photo bhej kar test kar sakte hain! 📄✨`,
+      body: `Pranam! 🙏\n\nMain hoon *Keepr 🤖* (usekeepr.com)!\n\nAapka WhatsApp bot successfully connect ho gaya hai.\n\nAb aap yahan koi bhi bill, warranty card ya RC ki photo bhej kar test kar sakte hain! 📄✨`,
     },
   };
 

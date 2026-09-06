@@ -1,7 +1,7 @@
 {
-  "name": "munshiji",
-  "version": "1.0.0",
-  "description": "WhatsApp-first AI Digital Locker & Personal Butler (stayonchat.com)",
+  "name": "keepr",
+  "version": "2.0.0",
+  "description": "Keepr — Autonomous AI Life Vault & Smart Assistant on WhatsApp (usekeepr.com)",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
@@ -17,12 +17,12 @@
     "ai",
     "gemini",
     "locker",
-    "munshiji",
-    "stayonchat",
+    "keepr",
     "ocr",
-    "reminders"
+    "reminders",
+    "saas"
   ],
-  "author": "stayonchat.com",
+  "author": "Keepr AI Technologies Inc.",
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.24.0",

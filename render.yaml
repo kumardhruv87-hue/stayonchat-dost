@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: dost-whatsapp-bot
+    name: keepr-whatsapp-bot
     env: node
     plan: free
     region: singapore
@@ -11,15 +11,17 @@ services:
         value: production
       - key: PORT
         value: 3000
-      - key: DOMAIN
-        value: stayonchat.com
+      - key: APP_NAME
+        value: Keepr
+      - key: APP_DOMAIN
+        value: usekeepr.com
+      - key: WHATSAPP_PRIMARY_GATEWAY
+        value: meta
       - key: WHATSAPP_VERIFY_TOKEN
         sync: false
       - key: WHATSAPP_TOKEN
         sync: false
       - key: WHATSAPP_PHONE_NUMBER_ID
-        sync: false
-      - key: WABA_ID
         sync: false
       - key: GEMINI_API_KEY
         sync: false

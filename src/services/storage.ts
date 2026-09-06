@@ -1,5 +1,5 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - Secure Storage & Encryption Service
+// Keepr (usekeepr.com) - Secure Storage & Encryption Service
 // AES-256 GCM client-side encryption before cloud storage
 // =================================================================
 
@@ -7,11 +7,11 @@ import crypto from 'crypto';
 import { supabase } from '../db/supabase.js';
 
 const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
-const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET || 'munshiji-vault';
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET || 'keepr-vault';
 
 // 32-byte key derived from secret
 const algorithm = 'aes-256-gcm';
-const key = crypto.scryptSync(ENCRYPTION_SECRET, 'munshiji_salt_2026', 32);
+const key = crypto.scryptSync(ENCRYPTION_SECRET, 'keepr_salt_2026', 32);
 
 export const storageService = {
   // Encrypt file buffer

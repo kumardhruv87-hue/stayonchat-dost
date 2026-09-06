@@ -1,5 +1,5 @@
 -- =================================================================
--- MunshiJi (stayonchat.com) - Supabase Database Schema
+-- Keepr (usekeepr.com) - Supabase Database Schema
 -- Run this script in the Supabase SQL Editor
 -- =================================================================
 

@@ -1,5 +1,5 @@
 // =================================================================
-// DOST (stayonchat.com) - Indian & Western Numerology Service
+// Keepr (usekeepr.com) - Universal Numerology Service
 // "अंक ज्योतिष विशेषज्ञ" (Universal Number Science for All Faiths)
 // =================================================================
 

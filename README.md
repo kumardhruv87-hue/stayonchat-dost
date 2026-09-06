@@ -1,203 +1,103 @@
-# 🧞‍♂️ MunshiJi (मुंशी जी) — stayonchat.com
-> **Aapka Digital Munshi. Kaagaz sambhale, waqt pe yaad dilaye.**  
-> Official Domain: [stayonchat.com](https://stayonchat.com) | Contact: `info@stayonchat.com`
+# 🤖 Keepr — Autonomous AI Life Vault & Smart Assistant
+> **Keep every document. Never miss an expiry.**  
+> Official Domain: [usekeepr.com](https://usekeepr.com) | Contact: `care@usekeepr.com`
 
 ---
 
-## 📌 Introduction
+## 📌 Executive Summary
 
-**MunshiJi** is an ultra-lean, high-retention WhatsApp-first AI digital locker and personal document assistant. It is designed to act like an **Aladdin's Jinn / Loyal Family Munshi** for Indian households:
-- Saves all documents: Bills, Warranty cards, Vehicle RC/PUC/Insurance, Handwritten doctor prescriptions, and LIC/Health policies.
-- Uses **Google Gemini Flash Vision** to extract dates and entities once upon upload.
-- Fast sub-millisecond retrieval on WhatsApp (`"mera RC"`, `"Havells bill"`, `"dates"`) with **zero ongoing LLM cost**.
-- Sends automated WhatsApp Utility reminders 30, 7, and 1 day before expiry to protect users from penalties (e.g. ₹10,000 PUC challan, lapsed insurance NCB).
-- Contextual, ethical upsells to transparent yearly plans (**Yaad ₹149/yr**, **Ghar ₹399/yr**, **Vault ₹799/yr**) via Razorpay.
+**Keepr** is a Silicon Valley grade, WhatsApp-native autonomous life vault and document assistant. It operates like an invisible personal butler for households and professionals:
+- **Instant Ingestion & OCR:** Saves bills, warranty cards, vehicle RC/PUC/insurance, handwritten doctor prescriptions, and insurance policies directly on WhatsApp.
+- **Single-Pass Intelligence:** Uses **Google Gemini 3.6 Flash Vision** to extract dates, policy numbers, amounts, and deadlines upon upload with strict schema validation.
+- **Zero Ongoing LLM Search Cost:** Sub-millisecond retrieval on WhatsApp (`"my RC"`, `"Havells bill"`, `"reminders"`) using PostgreSQL Trigram (`pg_trgm`) fuzzy matching.
+- **Proactive Protection:** Automated WhatsApp utility alerts sent at 30, 7, and 1 day before expiry to protect users from penalties (e.g. ₹10,000 traffic challans, lapsed NCB).
+- **Stateless & Scalable:** Redis-ready session caching and pluggable omnichannel gateway architecture (Meta Official Cloud API + UltraMsg fallback).
 
 ---
 
-## 🏗️ 3-Layer System Architecture
+## 🏗️ System Architecture
 
 ```
                        [ WhatsApp User ]
-                              │
-                    (Voice / Text / Image)
-                              │
-                              ▼
-                [ WhatsApp Cloud API (Meta) ]
-                              │
-                              ▼
-                [ MunshiJi Webhook (Express) ]
-               ┌──────────────┴──────────────┐
-               │                             │
-       (Text/Search Query)         (File/Voice Upload)
-               │                             │
-               ▼                             ▼
-       [ Fast Search Router ]       [ AI Padhaai Engine ]
-        - Keyword Match              - Gemini Flash Vision (OCR)
-        - Expiry List                - Gemini Multimodal Audio (Voice)
-        - Near 0 ms                  - Strict JSON: {title, expiry, etc.}
-               │                             │
-               └──────────────┬──────────────┘
-                              ▼
-                 [ Database: Supabase India ]
-                  - User Profile & Graph
-                  - Encrypted Storage (AES-256)
-                  - Daily 9:00 AM IST Expiry Scheduler
-                              │
-                              ▼
-           [ Automated Jinn Alerts & Upsells ]
+                               │
+                     (Voice / Text / Image)
+                               │
+                               ▼
+        [ Omnichannel Gateway: Meta Cloud API (Primary) / UltraMsg ]
+                               │
+                               ▼
+                   [ Keepr Core API (Express) ]
+                ┌──────────────┴──────────────┐
+                │                             │
+        (Text/Search Query)         (File/Voice Upload)
+                │                             │
+                ▼                             ▼
+       [ Fast Search Router ]       [ AI Vision & Voice Engine ]
+        - Keyword / Trigram Match    - Gemini 3.6 Flash Vision (OCR)
+        - Expiry List                - Multimodal Audio Transcription
+        - Sub-millisecond latency    - Strict Zod Schema Validation
+                │                             │
+                └──────────────┬──────────────┘
+                               ▼
+             [ Data & Storage: Supabase & Redis ]
+              - PostgreSQL RLS Multi-Tenant Schema
+              - Client-Side AES-256-GCM Encryption
+              - Redis Stateless Session & Prompt Cache
+                               │
+                               ▼
+            [ Automated Alert Engine & Schedulers ]
+              - 06:00 AM IST: Daily Morning Life Guidance
+              - 09:00 AM IST: Expiry & Renewal Alerts
+              - Every 1 Minute: Real-time Task Reminders
 ```
 
 ---
 
-## 💰 Public Menu & Business Rules
+## 💰 Subscription Plans
 
-1. **Free Pack (₹0):** 15 files, instant search, 1 free reminder trial.
-2. **Yaad Plan (₹149 / saal):** 50 files, 20 automated WhatsApp reminders, 30/7/1 day notifications.
-3. **Ghar Plan (₹399 / saal):** 200 files, 4 family members (Maa, Papa, Spouse, Self), unlimited reminders.
-4. **Vault Plan (₹799 / saal):** 500 files, Family + CA read-only access link, WarisPath kit priority access.
-
-**Anti-Spam Business Rule:** Max 1 upsell / offer message per 7 days per user.
+1. **Free Pack (₹0):** 5 files, instant search, 1 free reminder trial.
+2. **Yaad Plan (₹249 / year):** 50 files, 25 automated WhatsApp alerts, 30/7/1 day notifications. (~₹20/month)
+3. **Ghar Plan (₹499 / year):** 200 files, 4 family members, unlimited reminders. (~₹41/month)
+4. **Vault Plan (₹899 / year):** 500 files, Family + CA read-only access link, WarisPath succession kit. (~₹75/month)
 
 ---
 
-## 🚀 Quick Start & Local Setup
+## 🚀 Quick Start & Deployment
 
-### 1. Prerequisites
-- Node.js (v20+ or v26+)
-- npm (v10+)
-- Supabase account (Postgres + Storage)
-- Google AI Studio account (Gemini API Key)
-- Meta for Developers account (WhatsApp Cloud API)
-- Razorpay account (Test or Live mode)
-
-### 2. Installation
-```bash
-# Clone or navigate to the project directory
-cd C:\Users\kumar\.gemini\antigravity\scratch\munshiji
-
-# Install dependencies (already installed)
-npm install
-
-# Compile TypeScript
-npm run build
-```
-
-### 3. Environment Configuration
+### 1. Environment Setup
 Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
 Fill in the credentials in `.env`:
+- `APP_NAME`: `Keepr`
+- `APP_DOMAIN`: `usekeepr.com`
+- `WHATSAPP_PRIMARY_GATEWAY`: `meta`
 - `GEMINI_API_KEY`: From [Google AI Studio](https://aistudio.google.com/)
 - `WHATSAPP_TOKEN`: Permanent System User Token from Meta Developer Portal
 - `WHATSAPP_PHONE_NUMBER_ID`: From WhatsApp API Setup in Meta
-- `WHATSAPP_VERIFY_TOKEN`: `munshiji_secure_verify_token_2026`
-- `SUPABASE_URL`: From Supabase Project Settings -> API
+- `WHATSAPP_VERIFY_TOKEN`: `keepr_secure_verify_token_2026`
+- `SUPABASE_URL`: From Supabase Project Settings
 - `SUPABASE_SERVICE_ROLE_KEY`: Service role secret from Supabase
-- `RAZORPAY_KEY_ID`: From Razorpay Dashboard -> API Keys
+- `RAZORPAY_KEY_ID`: Razorpay API Key
 - `RAZORPAY_KEY_SECRET`: Razorpay Secret Key
 
----
-
-## 🗄️ Supabase Database Setup
-
-1. Open your project on [Supabase](https://supabase.com/).
-2. Navigate to the **SQL Editor** on the left menu.
-3. Open [`src/db/schema.sql`](file:///C:/Users/kumar/.gemini/antigravity/scratch/munshiji/src/db/schema.sql) and run the full script.
-4. Go to **Storage** -> **New Bucket**:
-   - Bucket Name: `munshiji-vault`
-   - Mark as **Private** (authenticated via signed URLs).
-
----
-
-## 📱 Meta WhatsApp Cloud API Setup
-
-1. Go to [Meta for Developers](https://developers.facebook.com/).
-2. Create an App -> Type: **Business**.
-3. Add the **WhatsApp** product.
-4. In WhatsApp -> **Configuration**:
-   - **Callback URL:** `https://your-domain.com/webhook` (or your ngrok URL for local dev)
-   - **Verify Token:** `munshiji_secure_verify_token_2026`
-   - Click **Verify and Save**.
-5. Under **Webhook Fields**, click **Manage** and subscribe to `messages`.
-6. Template Registration (For Outbound Expiry Alerts):
-   - Template Name: `munshiji_expiry_alert`
-   - Category: `UTILITY`
-   - Language: `English`
-   - Body:
-     ```
-     MunshiJi Expiry Alert: Your {{1}} is expiring on {{2}} (in {{3}} days). Please renew it in time to avoid penalties!
-     ```
-
----
-
-## 💳 Razorpay Webhook Setup
-
-1. In Razorpay Dashboard -> Settings -> **Webhooks**.
-2. Add New Webhook:
-   - **Webhook URL:** `https://your-domain.com/razorpay-webhook`
-   - **Secret:** Enter your `RAZORPAY_WEBHOOK_SECRET`
-   - **Active Events:** Select `payment_link.paid` and `payment.captured`.
-
----
-
-## 🧪 Testing Locally
-
-### Run Verification Test
+### 2. Run Locally
 ```bash
-npm run test:extraction
-```
-
-### Run Dev Server with Watch Mode
-```bash
+# Run Dev Server with tsx watch
 npm run dev
 ```
 
-### Expose with Ngrok for WhatsApp Webhook
-```bash
-ngrok http 3000
-```
-Copy your forwarding URL (e.g. `https://xyz.ngrok-free.app/webhook`) and paste it into the Meta WhatsApp Webhook settings!
+### 3. Production Deployment (Render / Hostinger VPS)
+* **Render.com:** Connect your repo with `render.yaml`. 1-click deploy with automatic HTTPS and environment variable configuration.
+* **VPS (PM2):** Start via `pm2 start ecosystem.config.cjs`.
 
 ---
 
-## 📁 Project Structure
-
-```
-munshiji/
-├── dist/                      # Compiled production JavaScript
-├── docs/                      # Architecture and Meta guidelines
-├── src/
-│   ├── bot/
-│   │   ├── persona.ts         # MunshiJi Hinglish voice & responses
-│   │   └── router.ts          # 3-Layer message & media router
-│   ├── config/
-│   │   └── constants.ts       # Plans (Yaad, Ghar, Vault) & rules
-│   ├── db/
-│   │   ├── schema.sql         # Supabase schema + Trigram fuzzy search
-│   │   └── supabase.ts        # Database client & queries
-│   ├── services/
-│   │   ├── gemini.ts          # Gemini Flash Vision & Voice extractor
-│   │   ├── razorpay.ts        # Payment links & webhook processing
-│   │   ├── scheduler.ts       # 9 AM IST Expiry cron engine
-│   │   ├── storage.ts         # AES-256 client-side file encryption
-│   │   └── whatsapp.ts        # Meta WhatsApp Cloud API client
-│   ├── tests/
-│   │   └── test-flow.ts       # Verification test suite
-│   └── server.ts              # Express server entrypoint
-├── .env.example               # Environment variables template
-├── package.json               # Dependencies & scripts
-└── tsconfig.json              # TypeScript compiler configuration
-```
+## 🛡️ Bank-Grade Security & Privacy
+- **Client-Side Encryption:** All uploads encrypted with AES-256-GCM before storage.
+- **No Shared Training:** User documents are never used to train public LLM models.
+- **Data Sovereignty:** Enterprise PostgreSQL with Row Level Security (RLS).
 
 ---
-
-## ⚖️ Privacy Pledge & Ethical AI
-- **No Shared Training:** User files are never used to train shared AI models.
-- **Client-Side Encryption:** All uploads are encrypted with AES-256 before storage.
-- **Transparent Pricing:** No dynamic wealth pricing; the public menu applies to everyone.
-- **Respectful Notifications:** Max 1 upsell per 7 days; silent on "No".
-
----
-© 2026 [stayonchat.com](https://stayonchat.com) • Support: `info@stayonchat.com`
+© 2026 Keepr AI Technologies Inc. • Support: `care@usekeepr.com`

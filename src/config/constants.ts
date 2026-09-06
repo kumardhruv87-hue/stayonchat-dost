@@ -1,17 +1,9 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - Core Constants & Business Rules
-// Support: info@stayonchat.com
+// Keepr (usekeepr.com) - Core Constants & Business Rules
+// Silicon Valley Grade SaaS Configuration Layer
 // =================================================================
 
-export const BRAND = {
-  name: "DOST",
-  displayName: "AI DOST 🤖✨",
-  tagline: "Aapka Apna Digital Saathi — Kaagaz Locker, Smart Reminders & Ank Jyotish.",
-  domain: "stayonchat.com",
-  supportEmail: "info@stayonchat.com",
-  supportWhatsApp: "+91-9870530066",
-  botPhone: "919870530066",
-};
+export { BRAND, type BrandConfig } from './brand.js';
 
 export const REFERRAL_RULES = {
   bonusFilesPerFriend: 5,

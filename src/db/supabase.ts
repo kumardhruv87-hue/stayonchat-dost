@@ -1,11 +1,13 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - Supabase Client & Database Services
+// Keepr (usekeepr.com) - Supabase Client & Database Services
+// Silicon Valley Grade Cloud Database & RLS Layer
 // =================================================================
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import WebSocket from 'ws';
 import dotenv from 'dotenv';
 import { PLANS, PlanId } from '../config/constants.js';
+import { cacheService } from '../services/cache.service.js';
 
 dotenv.config();
 
@@ -90,63 +92,45 @@ const inMemoryBotSessions: Map<string, number> = new Map();
 export const dbService = {
   // Check if user has an active bot session
   isSessionActive(userPhone: string): boolean {
-    const expiry = inMemoryBotSessions.get(userPhone);
-    if (!expiry) return false;
-    if (Date.now() > expiry) {
-      inMemoryBotSessions.delete(userPhone);
-      return false;
-    }
-    return true;
+    return cacheService.isSessionActive(userPhone);
   },
 
   // Start or extend bot session (default 30 mins)
   startSession(userPhone: string, durationMinutes: number = 30): void {
-    inMemoryBotSessions.set(userPhone, Date.now() + durationMinutes * 60 * 1000);
+    cacheService.startSession(userPhone, durationMinutes);
   },
 
   // Stop bot session immediately
   stopSession(userPhone: string): void {
-    inMemoryBotSessions.delete(userPhone);
+    cacheService.stopSession(userPhone);
   },
 
   // Track prompt context (e.g. language picker, main menu)
   setUserPromptState(userPhone: string, state: string): void {
-    inMemoryPromptStates.set(userPhone, { state, timestamp: Date.now() });
+    cacheService.setUserPromptState(userPhone, state);
   },
 
   getUserPromptState(userPhone: string): string | null {
-    const entry = inMemoryPromptStates.get(userPhone);
-    if (!entry) return null;
-    if (Date.now() - entry.timestamp > 15 * 60 * 1000) {
-      inMemoryPromptStates.delete(userPhone);
-      return null;
-    }
-    return entry.state;
+    return cacheService.getUserPromptState(userPhone);
   },
 
   clearUserPromptState(userPhone: string): void {
-    inMemoryPromptStates.delete(userPhone);
+    cacheService.clearUserPromptState(userPhone);
   },
 
   // Set pending naming state for ambiguous doc or photo
   setPendingDocNaming(userPhone: string, docId: string): void {
-    inMemoryPendingNaming.set(userPhone, { docId, timestamp: Date.now() });
+    cacheService.setPendingDocNaming(userPhone, docId);
   },
 
   // Get pending doc naming docId if set within last 15 minutes
   getPendingDocNaming(userPhone: string): string | null {
-    const entry = inMemoryPendingNaming.get(userPhone);
-    if (!entry) return null;
-    if (Date.now() - entry.timestamp > 15 * 60 * 1000) {
-      inMemoryPendingNaming.delete(userPhone);
-      return null;
-    }
-    return entry.docId;
+    return cacheService.getPendingDocNaming(userPhone);
   },
 
   // Clear pending naming
   clearPendingDocNaming(userPhone: string): void {
-    inMemoryPendingNaming.delete(userPhone);
+    cacheService.clearPendingDocNaming(userPhone);
   },
 
   // Update title and tags of a document

@@ -1,5 +1,5 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - Verification Test Script
+// Keepr (usekeepr.com) - Verification Test Script
 // Tests persona outputs, Zod schema validation, and plan logic
 // =================================================================
 
@@ -7,7 +7,7 @@ import { ExtractedDocSchema } from '../services/gemini.js';
 import { personaService } from '../bot/persona.js';
 import { PLANS } from '../config/constants.js';
 
-console.log('🧪 Starting MunshiJi System Test Suite...\n');
+console.log('🧪 Starting Keepr System Test Suite...\n');
 
 // 1. Test Schema Validation
 console.log('1. Testing Gemini ExtractedDocSchema validation...');

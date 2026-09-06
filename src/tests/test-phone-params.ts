@@ -6,7 +6,7 @@ dotenv.config();
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
 const NEW_WEBHOOK_URL = 'https://specified-affecting-shopzilla-supplied.trycloudflare.com/webhook';
-const VERIFY_TOKEN = 'munshiji_secure_verify_token_2026';
+const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'keepr_secure_verify_token_2026';
 
 async function testParams() {
   const attempts = [

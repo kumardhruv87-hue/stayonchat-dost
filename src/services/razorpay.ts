@@ -1,12 +1,11 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - Razorpay Subscriptions & Payment Links
-// Support: info@stayonchat.com
+// Keepr (usekeepr.com) - Razorpay Subscriptions & Payment Links
 // =================================================================
 
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { PLANS, PlanDetails } from '../config/constants.js';
+import { PLANS, PlanDetails, BRAND } from '../config/constants.js';
 import { dbService } from '../db/supabase.js';
 
 import { whatsappService } from './whatsapp.js';
@@ -15,7 +14,7 @@ dotenv.config();
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_live_TY25t7Ul2SDY2v';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'adoI8E18s8hax1YxiQg34azF';
-const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || 'dost_rzp_secure_webhook_2026';
+const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || 'keepr_rzp_secure_webhook_2026';
 
 // Razorpay client instance (lazily initialized if keys present)
 let rzp: Razorpay | null = null;
@@ -36,10 +35,19 @@ export const paymentService = {
     const plan: PlanDetails = PLANS[planKey];
     if (!plan) throw new Error('Invalid plan selected');
 
+    // Direct checkout payment links
+    const directLinks: Record<string, string> = {
+      yaad_249: 'https://rzp.io/rzp/ukMXxGY',
+      ghar_499: 'https://rzp.io/rzp/OOIVXyJ',
+      vault_899: 'https://rzp.io/rzp/SjNJKT0',
+      yaad_149: 'https://rzp.io/rzp/ukMXxGY',
+      ghar_399: 'https://rzp.io/rzp/OOIVXyJ',
+      vault_799: 'https://rzp.io/rzp/SjNJKT0',
+    };
+
     // If Razorpay keys are not configured yet (e.g. testing mode)
     if (!rzp) {
-      console.warn('Razorpay keys not configured. Returning mockup checkout link.');
-      return `https://stayonchat.com/pay/${planKey}?phone=${userPhone}`;
+      return directLinks[planKey] || 'https://rzp.io/rzp/ukMXxGY';
     }
 
     try {
@@ -47,7 +55,7 @@ export const paymentService = {
         amount: plan.priceInr * 100, // Amount in paise
         currency: 'INR',
         accept_partial: false,
-        description: `AI DOST ${plan.name} - 1 Saal Subscription (stayonchat.com)`,
+        description: `AI DOST ${plan.name} - 1 Saal Subscription`,
         customer: {
           name: 'AI DOST User',
           contact: `+${userPhone.replace(/\D/g, '')}`,
@@ -61,15 +69,15 @@ export const paymentService = {
           phone_number: userPhone,
           plan: planKey,
         },
-        callback_url: `https://stayonchat.com/payment-success`,
+        callback_url: `https://wa.me/919870530066?text=Payment%20Done`,
         callback_method: 'get',
       });
 
       return response.short_url;
     } catch (err: any) {
       console.error('Failed to create Razorpay payment link:', err);
-      // Fallback direct URL
-      return `https://stayonchat.com/upgrade?plan=${planKey}&user=${userPhone}`;
+      // Fallback to verified direct link
+      return directLinks[planKey] || 'https://rzp.io/rzp/ukMXxGY';
     }
   },
 
@@ -107,7 +115,7 @@ export const paymentService = {
         console.log(`User ${userPhone} successfully upgraded to ${planKey} via Razorpay`);
 
         const planName = PLANS[planKey]?.name || 'Plan';
-        const celebrationMsg = `🎉 Badhai ho! Aapka ${planName} successfully activate ho gaya hai! 🤖✨\n\nAb aapka account saal bhar ke liye upgrade ho chuka hai. Saare kaagaz aur reminders poore vishwas ke saath safe rahenge. AI DOST hamesha aapki seva mein hazir hai! 🙏`;
+        const celebrationMsg = `🎉 Badhai ho! Aapka ${planName} successfully activate ho gaya hai! 🤖✨\n\nAb aapka account saal bhar ke liye upgrade ho chuka hai. Saare kaagaz aur reminders poore vishwas ke saath safe rahenge. ${BRAND.name} hamesha aapki seva mein hazir hai! 🙏`;
         await whatsappService.sendTextMessage(userPhone, celebrationMsg);
       }
     }

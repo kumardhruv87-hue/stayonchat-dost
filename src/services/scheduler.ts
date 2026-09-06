@@ -1,21 +1,22 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - Daily Expiry & Reminder Scheduler
-// Runs every morning at 09:00 AM IST to send timely WhatsApp alerts
+// Keepr (usekeepr.com) - Daily Expiry & Reminder Scheduler
+// Runs automated cron jobs for alerts and morning guidance
 // =================================================================
 
 import cron from 'node-cron';
 import { supabase, dbService } from '../db/supabase.js';
 import { whatsappService } from './whatsapp.js';
+import { BRAND } from '../config/constants.js';
 
 export const schedulerService = {
   /**
    * Initialize cron jobs
    */
   startScheduler() {
-    console.log('DOST Multi-tier Scheduler initialized:');
-    console.log('- 06:00 AM IST: Daily Astro & Morning Vibe Check');
-    console.log('- 09:00 AM IST: Document Expiry Alerts');
-    console.log('- Every 1 Minute: Real-time General Task Reminders');
+    console.log(`${BRAND.name} Multi-tier Scheduler initialized:`);
+    console.log('- 06:00 AM IST: Daily Morning Life & Safety Guidance');
+    console.log('- 09:00 AM IST: Document Expiry Alerts (30, 7, 1 day)');
+    console.log('- Every 1 Minute: Real-time Task Reminders');
 
     // 1. Run every day at 06:00 AM IST (00:30 AM UTC): Daily Astro & Morning Guidance
     cron.schedule('30 0 * * *', async () => {
@@ -43,7 +44,7 @@ export const schedulerService = {
       const dueReminders = await dbService.getDueGeneralReminders();
       for (const r of dueReminders) {
         console.log(`Delivering general reminder to ${r.user_phone}: ${r.task}`);
-        const msg = `⏰ AI DOST Reminder! 🤖✨\n\n📌 ${r.task}\n\nAapne bola tha is samay yaad dilane ko. Kripya dekh lijiye!`;
+        const msg = `⏰ ${BRAND.displayName} Reminder!\n\n📌 ${r.task}\n\nAapne bola tha is samay yaad dilane ko. Kripya dekh lijiye!`;
         await whatsappService.sendTextMessage(r.user_phone, msg);
         await dbService.markGeneralReminderSent(r.id);
       }
@@ -130,7 +131,7 @@ export const schedulerService = {
         // Check if user is on free tier and already used their 1 free trial reminder
         if (user.plan === 'free' && user.reminder_count >= 1) {
           // Free tier exhausted reminders - send a respectful upgrade reminder
-          const alertMsg = `⚠️ AI DOST Alert 🤖✨\n\nDhruv ji, aapke ${doc.title} ki expiry ${item.days_before} din mein hai.\n\nFree Pack mein 1 trial alert tha. Saare kaagzat ke waqt par WhatsApp alerts ke liye Yaad Plan (₹149/saal) activate karein:\nhttps://stayonchat.com/pay/yaad_149?phone=${userPhone}`;
+          const alertMsg = `⚠️ AI DOST Alert 🤖✨\n\nDhruv ji, aapke ${doc.title} ki expiry ${item.days_before} din mein hai.\n\nFree Pack mein 1 trial alert tha. Saare kaagzat aur gaadiyon ke waqt par WhatsApp alerts ke liye Yaad Plan (₹249/saal — sirf ₹20/mahina) activate karein:\nhttps://rzp.io/rzp/ukMXxGY\n\n(Challan aur penalty se bachane ke liye AI DOST hamesha aapke saath hai! 🙏)`;
           await whatsappService.sendTextMessage(userPhone, alertMsg);
         } else {
           // Paid user OR first free trial reminder

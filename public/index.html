@@ -3,12 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI DOST 🤖 — Aapka Apna Digital Saathi & Smart Vault on WhatsApp | stayonchat.com</title>
-  <meta name="description" content="AI DOST is your personal digital companion and smart vault on WhatsApp. Encrypted documents & photo vault, instant voice reminders, 6 AM daily life & safety guide, and universal Ank Jyotish." />
+  <title>Keepr 🤖 — Autonomous AI Life Vault & Smart Assistant on WhatsApp</title>
+  
+  <!-- SEO & AI-SEO (Generative Engine Optimization - GEO) Meta Tags -->
+  <meta name="description" content="Meet Keepr: Your autonomous personal AI companion and encrypted document vault on WhatsApp. Talk freely, securely store bills, RC, and insurance with instant retrieval, set loss-preventing expiry reminders, and receive 6 AM daily life guidance." />
+  <meta name="keywords" content="WhatsApp AI Assistant, Autonomous AI Life Vault WhatsApp, Encrypted Document Locker, WhatsApp Bill Reminder, Traffic Challan Protection WhatsApp, Keepr AI" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="author" content="Keepr AI Technologies Inc." />
+  <link rel="canonical" href="https://usekeepr.com/" />
+
+  <!-- OpenGraph Social Metadata -->
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Keepr 🤖 — Autonomous AI Companion & Life Vault on WhatsApp" />
+  <meta property="og:description" content="ChatGPT-grade intelligence meets bank-grade privacy inside your WhatsApp. Zero app downloads. Encrypted document locker, 24/7 autonomous assistant, and automated money-saving reminders." />
+  <meta property="og:url" content="https://usekeepr.com/" />
+  <meta property="og:site_name" content="Keepr" />
+  <meta property="og:image" content="https://usekeepr.com/images/dost-logo.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter Card Metadata -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Keepr 🤖 — Autonomous AI Life Vault on WhatsApp" />
+  <meta name="twitter:description" content="Talk freely, store vital papers safely, and never miss a bill or insurance expiry. Free on WhatsApp." />
+  <meta name="twitter:image" content="https://usekeepr.com/images/dost-logo.jpg" />
+
+  <!-- Favicon -->
   <link rel="icon" type="image/jpeg" href="/images/dost-logo.jpg" />
+
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -18,157 +47,263 @@
             brand: {
               50: '#ecfdf5',
               100: '#d1fae5',
+              400: '#34d399',
               500: '#10b981',
               600: '#059669',
               700: '#047857',
               800: '#065f46',
               900: '#064e3b',
-            },
-            dostTeal: '#0d9488',
-            dostAmber: '#f59e0b',
+              950: '#022c22',
+            }
           },
           fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
             display: ['Outfit', 'sans-serif'],
           }
         }
       }
     }
   </script>
+
   <style>
-    .glass-card {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
+    .glass-nav {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .hero-gradient {
-      background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, rgba(245, 158, 11, 0.05) 40%, rgba(255, 255, 255, 0) 70%);
+    .hero-glow {
+      background: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.22) 0%, rgba(13, 148, 136, 0.08) 40%, rgba(15, 23, 42, 0) 70%);
+    }
+    .card-border-glow {
+      position: relative;
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-border-glow:hover {
+      border-color: rgba(52, 211, 153, 0.35);
+      box-shadow: 0 16px 40px -12px rgba(16, 185, 129, 0.12);
+      transform: translateY(-2px);
+    }
+    .shimmer-text {
+      background: linear-gradient(90deg, #ffffff 0%, #a7f3d0 50%, #ffffff 100%);
+      background-size: 200% auto;
+      color: transparent;
+      -webkit-background-clip: text;
+      animation: shine 4s linear infinite;
+    }
+    @keyframes shine {
+      to { background-position: 200% center; }
     }
   </style>
-</head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-emerald-500 selection:text-white">
 
-  <!-- ================= TOP NOTIFICATION BAR ================= -->
-  <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-amber-600 text-white text-xs py-2 px-4 text-center font-medium">
-    ✨ Meet <span class="font-bold">DOST</span> — India's 1st All-in-One AI Companion on WhatsApp. <a href="https://wa.me/919870530066?text=Hi%20DOST" class="underline ml-1 font-bold hover:text-amber-200">Start Free on WhatsApp &rarr;</a>
-  </div>
+  <!-- Schema.org Structured Data for Perplexity, ChatGPT, Gemini, Copilot Search Engines -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "AI DOST",
+        "operatingSystem": "WhatsApp (iOS, Android, Web, Desktop)",
+        "applicationCategory": "ProductivityApplication",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "14820",
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Free Pack",
+            "price": "0",
+            "priceCurrency": "INR"
+          },
+          {
+            "@type": "Offer",
+            "name": "Yaad Plan",
+            "price": "249",
+            "priceCurrency": "INR"
+          },
+          {
+            "@type": "Offer",
+            "name": "Ghar Plan",
+            "price": "499",
+            "priceCurrency": "INR"
+          }
+        ],
+        "description": "Keepr is an autonomous, intelligent companion and bank-grade personal document vault operating natively on WhatsApp."
+      },
+      {
+        "@type": "Organization",
+        "name": "Keepr",
+        "url": "https://usekeepr.com",
+        "logo": "https://usekeepr.com/images/dost-logo.jpg",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+91-9870530066",
+          "contactType": "Customer Support",
+          "email": "care@usekeepr.com",
+          "availableLanguage": ["Hindi", "English", "Hinglish"]
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- ================= TOP NOTICE BANNER ================= -->
+  <aside aria-label="Announcement" class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 border-b border-emerald-500/20 text-emerald-200 text-xs py-2 px-4 text-center font-medium">
+    ✨ <span class="text-white font-semibold">Keepr 🤖</span> is now live on our official WhatsApp line. 
+    <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="underline ml-1.5 font-bold text-white hover:text-emerald-300 transition-colors">Start Free on WhatsApp (+91 9870530066) &rarr;</a>
+  </aside>
 
   <!-- ================= NAVBAR ================= -->
-  <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-3 group">
-        <img src="/images/dost-logo.jpg" alt="DOST Mascot" class="w-10 h-10 rounded-full object-cover shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform" />
+  <nav class="sticky top-0 z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3.5 group">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/40 group-hover:scale-105 transition-transform">
+          K
+        </div>
         <div>
-          <span class="text-xl font-extrabold tracking-tight font-display text-slate-900">DOST <span class="text-emerald-600">🤖✨</span></span>
-          <span class="text-[11px] block text-slate-400 font-medium -mt-1">by stayonchat.com</span>
+          <span class="text-2xl font-black tracking-tight font-display text-white flex items-center gap-1.5">
+            Keepr <span class="text-emerald-400">🤖</span>
+          </span>
+          <span class="text-[11px] block text-slate-400 font-medium tracking-wide">Autonomous AI Life Vault</span>
         </div>
       </a>
-      <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-        <a href="#features" class="hover:text-emerald-600 transition-colors">Features</a>
-        <a href="#how-it-works" class="hover:text-emerald-600 transition-colors">How It Works</a>
-        <a href="#pricing" class="hover:text-emerald-600 transition-colors">Plans & Pricing</a>
-        <a href="#security" class="hover:text-emerald-600 transition-colors">Security & Privacy</a>
-        <a href="#faq" class="hover:text-emerald-600 transition-colors">FAQ</a>
+
+      <!-- Desktop Nav Links -->
+      <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
+        <a href="#features" class="hover:text-emerald-400 transition-colors">Superpowers</a>
+        <a href="#chatgpt-companion" class="hover:text-emerald-400 transition-colors">True Friend AI</a>
+        <a href="#vault" class="hover:text-emerald-400 transition-colors">Kaagaz Vault</a>
+        <a href="#pricing" class="hover:text-emerald-400 transition-colors">Plans &amp; Pricing</a>
+        <a href="#security" class="hover:text-emerald-400 transition-colors">Security &amp; DPDP</a>
+        <a href="#faq" class="hover:text-emerald-400 transition-colors">FAQ</a>
       </div>
+
+      <!-- Action Button -->
       <div>
-        <a href="https://wa.me/919870530066?text=Hi%20DOST" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow-md shadow-emerald-600/20 hover:bg-emerald-700 hover:shadow-lg transition-all active:scale-95">
+        <a href="https://wa.me/919870530066?text=Hi" class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 active:scale-95 transition-all">
           <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-          <span>Chat on WhatsApp</span>
+          <span>Open on WhatsApp</span>
         </a>
       </div>
     </div>
   </nav>
 
   <!-- ================= HERO SECTION ================= -->
-  <section class="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden hero-gradient">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <section class="relative pt-16 pb-24 md:pt-24 md:pb-36 overflow-hidden hero-glow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         <!-- Left Hero Copy -->
-        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold tracking-wide">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            NO APP DOWNLOAD • 100% ON WHATSAPP
+        <div class="lg:col-span-7 space-y-7 text-center lg:text-left">
+          
+          <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 text-xs font-bold tracking-wider uppercase shadow-inner">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            ZERO APP DOWNLOADS • 100% NATIVE ON WHATSAPP
           </div>
           
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-slate-900 leading-[1.12]">
-            Your AI Best Friend &amp; <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Life Guard</span> on WhatsApp.
+          <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight text-white leading-[1.08]">
+            Your True AI Best Friend &amp; <span class="shimmer-text">Life Guard</span> on WhatsApp.
           </h1>
           
-          <p class="text-lg text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-            Store critical documents &amp; PDFs with bank-grade safety, set instant voice reminders, receive personalized 6 AM astro &amp; driving guidance, and chat with a wise, caring friend anytime.
+          <p class="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+            Talk freely about anything like ChatGPT with a caring companion who treats you with uttermost respect. Safely store documents, never miss bills or vehicle renewals, and receive 6:00 AM personalized life guidance.
           </p>
 
-          <!-- CTAs -->
-          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-            <a href="https://wa.me/919870530066?text=Hi%20DOST" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-emerald-600 text-white font-bold text-base shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 hover:scale-[1.02] active:scale-95 transition-all">
+          <!-- Primary CTAs -->
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-3">
+            <a href="https://wa.me/919870530066?text=Hi" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base shadow-2xl shadow-emerald-500/30 hover:scale-[1.02] active:scale-95 transition-all">
               <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-              <span>Say "Hi" on WhatsApp</span>
+              <span>Say "Hi" on WhatsApp (+91 9870530066)</span>
             </a>
-            <div class="text-xs text-slate-500 flex items-center gap-2">
-              <span class="text-emerald-600 font-bold">✓ 5 Files Free Forever</span>
+            
+            <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+              <span class="text-emerald-400 font-bold">✓ 5 Files Free Forever</span>
               <span>•</span>
-              <span>No Credit Card</span>
+              <span>No Credit Card Required</span>
             </div>
           </div>
 
-          <!-- Trust Badges -->
-          <div class="pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-500 font-medium">
-            <div class="flex items-center gap-1.5">
-              <span class="text-emerald-600 text-base">🛡️</span>
-              <span>AES-256 Bit Encryption</span>
+          <!-- Enterprise Trust Indicators -->
+          <div class="pt-6 border-t border-slate-800 flex flex-wrap items-center justify-center lg:justify-start gap-8 text-xs text-slate-400 font-medium">
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-400 text-base">🛡️</span>
+              <span>AES-256 GCM Bank Encryption</span>
             </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-emerald-600 text-base">⚖️</span>
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-400 text-base">⚖️</span>
               <span>DPDP Act 2023 Compliant</span>
             </div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-emerald-600 text-base">🚫</span>
-              <span>Zero Spam / No Sales Calls</span>
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-400 text-base">🚫</span>
+              <span>Zero Model Training on Your Files</span>
             </div>
           </div>
+
         </div>
 
-        <!-- Right Hero: Lovable Mascot + Live WhatsApp Simulator -->
+        <!-- Right Hero: Live Interactive Simulator -->
         <div class="lg:col-span-5 relative">
-          <div class="relative mx-auto max-w-sm rounded-[2.5rem] bg-slate-900 p-4 shadow-2xl shadow-emerald-950/20 border-4 border-slate-800">
-            <div class="w-24 h-4 bg-slate-800 rounded-full mx-auto mb-3"></div>
-            <div class="bg-emerald-800 -mx-4 -mt-3 px-4 py-3 text-white flex items-center gap-3 rounded-t-[2rem]">
-              <img src="/images/dost-logo.jpg" alt="DOST" class="w-10 h-10 rounded-full border-2 border-emerald-400 object-cover" />
+          <div class="relative mx-auto max-w-sm rounded-[3rem] bg-slate-900 p-4 shadow-2xl shadow-emerald-500/10 border-4 border-slate-800">
+            
+            <!-- Phone Notch -->
+            <div class="w-28 h-4 bg-slate-800 rounded-full mx-auto mb-3"></div>
+            
+            <!-- WhatsApp Chat Header -->
+            <div class="bg-emerald-900/90 -mx-4 -mt-3 px-4 py-3 text-white flex items-center gap-3 rounded-t-[2.5rem] border-b border-emerald-800">
+              <img src="/images/dost-logo.jpg" alt="AI DOST Avatar" class="w-10 h-10 rounded-full ring-2 ring-emerald-400 object-cover" />
               <div class="flex-1">
-                <div class="font-bold text-sm flex items-center gap-1">
-                  <span>DOST 🤖✨</span>
-                  <span class="text-[10px] bg-emerald-600 px-1.5 py-0.5 rounded text-white">Verified</span>
+                <div class="font-bold text-sm flex items-center gap-1.5">
+                  <span>AI DOST 🤖</span>
+                  <span class="text-[9px] bg-emerald-500 text-slate-950 font-extrabold px-1.5 py-0.2 rounded-full uppercase">Official</span>
                 </div>
                 <div class="text-[11px] text-emerald-200 flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                  <span>online • stayonchat.com</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>online • +91 9870530066</span>
                 </div>
               </div>
             </div>
 
-            <div class="bg-[#efeae2] -mx-4 p-4 space-y-3 text-[13px] min-h-[360px] rounded-b-[2rem] overflow-hidden flex flex-col justify-end">
-              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[90%] space-y-1">
-                <p class="font-semibold text-emerald-800 text-xs">AI DOST 🤖</p>
-                <p class="text-slate-800 text-xs">Namaste Dhruv ji! 🙏 Main hoon aapka <b>AI DOST</b>. Koi bhi photo, bill, RC ya PDF bhej dijiye — safe rakhunga aur maangte hi original file wapas bhej dunga!</p>
+            <!-- WhatsApp Chat Body Simulator -->
+            <div class="bg-[#efeae2] -mx-4 p-4 space-y-3 text-[13px] min-h-[400px] rounded-b-[2.5rem] overflow-hidden flex flex-col justify-end">
+              
+              <!-- Inbound Greeting -->
+              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[92%] space-y-1 text-slate-800">
+                <p class="font-bold text-emerald-900 text-xs">AI DOST 🤖</p>
+                <p class="text-xs">Namaste Dhruv ji! 🙏 Main hoon aapka <b>AI DOST</b> — saccha saathi aur personal locker! Kripya bhasha chunein: 1️⃣ Hinglish, 2️⃣ हिंदी, 3️⃣ English</p>
               </div>
 
-              <div class="bg-[#d9fdd3] p-2 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-slate-800 text-xs">
-                <p>📸 [Resort Photo attached]</p>
+              <!-- User Selection -->
+              <div class="bg-[#d9fdd3] p-2 px-3 rounded-2xl rounded-tr-none shadow-sm max-w-[80%] self-end text-slate-800 text-xs">
+                <p>1</p>
               </div>
 
-              <div class="bg-white p-2.5 rounded-2xl rounded-tl-none shadow-sm max-w-[90%] space-y-1 text-xs">
-                <p class="text-slate-800">📸 Photo safe save ho gayi! Kripya batayein ise kis naam se save rakhna hai? (Jaise: "Tarangi Vacation Photo")</p>
+              <!-- Bot Response -->
+              <div class="bg-white p-2.5 rounded-2xl rounded-tl-none shadow-sm max-w-[92%] space-y-1 border-l-4 border-emerald-500 text-xs text-slate-800">
+                <p class="font-bold text-emerald-800 text-[11px]">✨ Namaste Dhruv ji! Main hazir hoon!</p>
+                <p class="text-[11px]">Koi bhi baat ho dil khol kar kahiye, ya car RC, bill ya parcha bhej dijiye — safe rakhunga aur mangte hi original file wapas bhej dunga!</p>
               </div>
 
-              <div class="bg-[#d9fdd3] p-2 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-slate-800 text-xs">
-                <p>Tarangi Vacation Photo</p>
+              <!-- User Uploads Document -->
+              <div class="bg-[#d9fdd3] p-2 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-slate-800 text-xs flex items-center gap-2">
+                <span>📄 car_insurance_policy.pdf</span>
               </div>
 
-              <div class="bg-white p-2.5 rounded-2xl rounded-tl-none shadow-sm max-w-[90%] space-y-1 border-l-4 border-emerald-500 text-xs">
-                <p class="text-[11px] text-emerald-800 font-bold">✅ "Tarangi Vacation Photo" darj ho gayi!</p>
-                <p class="text-[10px] text-slate-600">Ab jab bhi aap "Tarangi photo" mangenge, main turant bhej dunga! ✨</p>
+              <!-- Bot Auto-Extraction & Loss-Prevention Alert -->
+              <div class="bg-white p-2.5 rounded-2xl rounded-tl-none shadow-sm max-w-[92%] space-y-1 text-xs text-slate-800 border-l-4 border-amber-500">
+                <p class="font-bold text-slate-900 text-[11px]">✅ Car Insurance Safe Saved!</p>
+                <p class="text-[10px] text-slate-600">• Expiry: 14 Oct 2026 (Reminder locked)</p>
+                <p class="text-[10px] text-emerald-700 font-semibold">📦 Safe Vault: 1/5 files used • Free Plan</p>
               </div>
+
             </div>
           </div>
         </div>
@@ -414,17 +549,19 @@
   <footer class="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
       <div class="flex items-center gap-3">
-        <img src="/images/dost-logo.jpg" alt="DOST" class="w-8 h-8 rounded-full object-cover" />
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 font-black text-sm shadow">
+          K
+        </div>
         <div>
-          <span class="text-white font-extrabold text-base font-display">DOST 🤖✨</span>
-          <span class="text-[11px] block text-slate-500">Official Product of stayonchat.com</span>
+          <span class="text-white font-extrabold text-base font-display">Keepr 🤖✨</span>
+          <span class="text-[11px] block text-slate-500">Autonomous AI Life Vault</span>
         </div>
       </div>
       <p class="text-xs text-slate-500 text-center sm:text-left">
-        © 2026 stayonchat.com • Contact: <a href="mailto:info@stayonchat.com" class="text-emerald-400 underline">info@stayonchat.com</a>
+        © 2026 Keepr AI Technologies Inc. • Contact: <a href="mailto:care@usekeepr.com" class="text-emerald-400 underline">care@usekeepr.com</a>
       </p>
       <div class="flex items-center gap-6 text-xs font-medium">
-        <a href="https://wa.me/919870530066?text=Hi%20DOST" class="text-emerald-400 hover:text-emerald-300 font-bold">Chat on WhatsApp</a>
+        <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="text-emerald-400 hover:text-emerald-300 font-bold">Chat on WhatsApp</a>
         <a href="#security" class="hover:text-white transition-colors">Privacy Policy</a>
         <a href="#pricing" class="hover:text-white transition-colors">Terms of Service</a>
       </div>

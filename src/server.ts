@@ -1,6 +1,6 @@
 // =================================================================
-// MunshiJi (stayonchat.com) - Main Express Application Server
-// Support: info@stayonchat.com
+// Keepr (usekeepr.com) - Main Express Application Server
+// Silicon Valley Grade API Server & Webhook Gateway
 // =================================================================
 
 import express, { Request, Response } from 'express';
@@ -17,7 +17,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'munshiji_secure_verify_token_2026';
+const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'keepr_secure_verify_token_2026';
 
 import path from 'path';
 
@@ -29,7 +29,7 @@ app.use(express.json({
 }));
 app.use(cors());
 
-// Serve public static website (Landing Page on stayonchat.com)
+// Serve public static website (Landing Page on usekeepr.com)
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 // =================================================================
@@ -141,8 +141,8 @@ app.post('/ultramsg-webhook', async (req: Request, res: Response) => {
     const triggerModeEnabled = process.env.BOT_TRIGGER_MODE === 'true';
 
     if (triggerModeEnabled) {
-      // Check for trigger command: starts with "dost", "#dost", "!dost", "/dost", "ai"
-      const triggerRegex = /^(#dost|!dost|\/dost|dost\b|dost[:\s]|ai\b)/i;
+      // Check for trigger command: starts with "keepr", "#keepr", "dost", "#dost", "ai"
+      const triggerRegex = /^(#keepr|!keepr|\/keepr|keepr\b|keepr[:\s]|#dost|!dost|\/dost|dost\b|dost[:\s]|ai\b)/i;
       const hasTrigger = triggerRegex.test(rawText);
       const isSessionActive = dbService.isSessionActive(cleanPhone);
 
@@ -151,7 +151,7 @@ app.post('/ultramsg-webhook', async (req: Request, res: Response) => {
 
       // If neither trigger is present nor session is active -> SILENTLY IGNORE
       if (!hasTrigger && !hasCaptionTrigger && !isSessionActive) {
-        console.log(`[Trigger Mode] Ignoring message from ${cleanPhone} (no DOST trigger): "${rawText.substring(0, 30)}..."`);
+        console.log(`[Trigger Mode] Ignoring message from ${cleanPhone} (no trigger): "${rawText.substring(0, 30)}..."`);
         return;
       }
 
@@ -160,9 +160,9 @@ app.post('/ultramsg-webhook', async (req: Request, res: Response) => {
       }
     }
 
-    let textBody = rawText.replace(/^(#dost|!dost|\/dost|dost[:\s]*|ai[:\s]*)/i, '').trim();
+    let textBody = rawText.replace(/^(#keepr|!keepr|\/keepr|keepr[:\s]*|#dost|!dost|\/dost|dost[:\s]*|ai[:\s]*)/i, '').trim();
     if (!textBody && rawText) {
-      textBody = 'hi'; // If user just typed "dost" or "#dost", trigger welcome/menu
+      textBody = 'hi'; // If user just typed "keepr" or "dost", trigger welcome/menu
     }
 
     let mappedType = 'text';
@@ -245,7 +245,7 @@ app.post('/razorpay-webhook', async (req: any, res: Response) => {
 // =================================================================
 app.listen(PORT, () => {
   console.log(`=================================================`);
-  console.log(`🧞‍♂️ MunshiJi Server is live on port ${PORT}`);
+  console.log(`🤖 ${BRAND.name} Server is live on port ${PORT}`);
   console.log(`🌐 Domain: ${BRAND.domain} | Support: ${BRAND.supportEmail}`);
   console.log(`📡 Webhook URL: http://localhost:${PORT}/webhook`);
   console.log(`=================================================`);
