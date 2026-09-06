@@ -19,8 +19,10 @@ export const REFERRAL_RULES = {
   maxReferralsAllowed: 6, // Up to 30 bonus files free
 };
 
+export type PlanId = "free" | "yaad_249" | "ghar_499" | "vault_899" | "yaad_149" | "ghar_399" | "vault_799";
+
 export interface PlanDetails {
-  id: "free" | "yaad_149" | "ghar_399" | "vault_799";
+  id: PlanId;
   name: string;
   priceInr: number;
   period: string;
@@ -37,42 +39,43 @@ export const PLANS: Record<string, PlanDetails> = {
     name: "Free Pack",
     priceInr: 0,
     period: "Lifetime",
-    maxFiles: 10, // 10 files base limit + can earn up to 30 more via referrals!
-    maxReminders: 2, // 2 free reminder trials
+    maxFiles: 5,
+    maxReminders: 1,
     familySeats: 1,
-    description: "Shuruat ke liye 10 files aur instant search",
+    description: "Shuruat ke liye 5 files aur instant search",
     features: [
-      "10 files encrypted storage (refer karke 40 tak badhayein)",
+      "5 files encrypted storage (refer karke 15 tak badhayein)",
       "Instant WhatsApp search (0 ms)",
-      "2 free reminder trials",
-      "No auto-debit, no credit card required"
+      "1 free reminder trial",
+      "Lifetime free access"
     ]
   },
-  yaad_149: {
-    id: "yaad_149",
+  yaad_249: {
+    id: "yaad_249",
     name: "Yaad Plan",
-    priceInr: 149,
+    priceInr: 249,
     period: "1 Saal",
     maxFiles: 50,
-    maxReminders: 20,
+    maxReminders: 25,
     familySeats: 1,
-    description: "Challan, penalty aur warranty lapse se mukti",
+    description: "Challan, penalty aur warranty lapse se mukti (Sirf ₹20/mahina)",
     features: [
-      "50 files storage",
-      "20 automated reminders / saal",
+      "50 files storage (RC, Bill, Insurance, Parcha)",
+      "25 automated reminders / saal",
       "30, 7, aur 1 din pehle WhatsApp alert",
-      "Handwritten bills aur parchas supported"
+      "Subah 6 baje daily life & safety guide",
+      "Saves ₹2,000+ in traffic challans and late fees"
     ]
   },
-  ghar_399: {
-    id: "ghar_399",
+  ghar_499: {
+    id: "ghar_499",
     name: "Ghar Plan (Family Pack)",
-    priceInr: 399,
+    priceInr: 499,
     period: "1 Saal",
     maxFiles: 200,
     maxReminders: 999999, // Unlimited
-    familySeats: 4, // 4 family members
-    description: "Poore parivaar ke kaagaz ek surakshit jagah",
+    familySeats: 4,
+    description: "Poore parivaar ke kaagaz ek surakshit jagah (Sirf ₹41/mahina)",
     features: [
       "200 files storage",
       "4 Family Seats (Maa, Papa, Spouse, Aap)",
@@ -80,21 +83,55 @@ export const PLANS: Record<string, PlanDetails> = {
       "All family expiries ek hi list mein"
     ]
   },
-  vault_799: {
-    id: "vault_799",
+  vault_899: {
+    id: "vault_899",
     name: "Vault Plan",
-    priceInr: 799,
+    priceInr: 899,
     period: "1 Saal",
     maxFiles: 500,
     maxReminders: 999999,
     familySeats: 6,
-    description: "Property, investments aur CA read-only access",
+    description: "Property, investments aur CA read-only access (Sirf ₹75/mahina)",
     features: [
       "500 files storage",
       "Family + CA/Advisor read-only access link",
       "Unlimited automated reminders",
-      "Priority WarisPath Kit Add-on access"
+      "WarisPath Succession Kit Add-on"
     ]
+  },
+  // Backward compatibility aliases
+  yaad_149: {
+    id: "yaad_249",
+    name: "Yaad Plan",
+    priceInr: 249,
+    period: "1 Saal",
+    maxFiles: 50,
+    maxReminders: 25,
+    familySeats: 1,
+    description: "Yaad Plan",
+    features: []
+  },
+  ghar_399: {
+    id: "ghar_499",
+    name: "Ghar Plan",
+    priceInr: 499,
+    period: "1 Saal",
+    maxFiles: 200,
+    maxReminders: 999999,
+    familySeats: 4,
+    description: "Ghar Plan",
+    features: []
+  },
+  vault_799: {
+    id: "vault_899",
+    name: "Vault Plan",
+    priceInr: 899,
+    period: "1 Saal",
+    maxFiles: 500,
+    maxReminders: 999999,
+    familySeats: 6,
+    description: "Vault Plan",
+    features: []
   }
 };
 

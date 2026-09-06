@@ -26,11 +26,13 @@ if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
   });
 }
 
+export type PaidPlanKey = 'yaad_249' | 'ghar_499' | 'vault_899' | 'yaad_149' | 'ghar_399' | 'vault_799';
+
 export const paymentService = {
   /**
    * Generate an instant Razorpay Payment Link for a user & plan
    */
-  async createPaymentLink(userPhone: string, planKey: 'yaad_149' | 'ghar_399' | 'vault_799'): Promise<string> {
+  async createPaymentLink(userPhone: string, planKey: PaidPlanKey): Promise<string> {
     const plan: PlanDetails = PLANS[planKey];
     if (!plan) throw new Error('Invalid plan selected');
 
@@ -97,7 +99,7 @@ export const paymentService = {
     if (event === 'payment_link.paid') {
       const paymentLink = payload.payload.payment_link.entity;
       const userPhone = paymentLink.notes?.phone_number;
-      const planKey = paymentLink.notes?.plan as 'yaad_149' | 'ghar_399' | 'vault_799';
+      const planKey = paymentLink.notes?.plan as PaidPlanKey;
       const paymentId = paymentLink.payment_id;
 
       if (userPhone && planKey) {

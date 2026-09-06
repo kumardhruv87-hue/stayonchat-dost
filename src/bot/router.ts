@@ -105,7 +105,7 @@ export const botRouter = {
    * Helper: Display DOST Parivaar Plans & Live Razorpay Links
    */
   async showPlans(fromPhone: string): Promise<void> {
-    const plansMsg = `📋 DOST Parivaar Plans (stayonchat.com) 🤖✨\n\n1️⃣ Yaad Plan (₹149/saal)\n• 50 files vault storage + 20 auto WhatsApp alerts\n👉 Payment link: https://rzp.io/rzp/ukMXxGY\n\n2️⃣ Ghar Plan (₹399/saal)\n• 200 files + 4 Family seats + Unlimited reminders\n👉 Payment link: https://rzp.io/rzp/OOIVXyJ\n\n3️⃣ Vault Plan (₹799/saal)\n• 500 files + CA link + Waris kit\n👉 Payment link: https://rzp.io/rzp/SjNJKT0\n\n💡 Kisi bhi plan ki link par click karke turant UPI/Card se activate karein!`;
+    const plansMsg = `📋 AI DOST Plans (stayonchat.com) 🤖✨\n\n1️⃣ Yaad Plan (₹249/saal — Sirf ₹20/mahina)\n• 50 files vault storage + 25 auto WhatsApp alerts\n• Traffic challan, late fee aur warranty loss se 100% mukti\n👉 Instant UPI / Card: https://rzp.io/rzp/ukMXxGY\n\n2️⃣ Ghar Plan (₹499/saal — Sirf ₹41/mahina)\n• 200 files + 4 Family Members connected\n• Poore parivaar ke liye unlimited reminders & expiries\n👉 Instant UPI / Card: https://rzp.io/rzp/OOIVXyJ\n\n3️⃣ Vault Plan (₹899/saal — ₹75/mahina)\n• 500 files + CA link + Waris kit\n👉 Instant UPI / Card: https://rzp.io/rzp/SjNJKT0\n\n💡 Kisi bhi link par tap karke UPI (GPay/PhonePe/Paytm) se 1 second mein activate karein!`;
     await whatsappService.sendTextMessage(fromPhone, plansMsg);
     await dbService.saveChatMessage(fromPhone, 'model', plansMsg);
   },
@@ -417,25 +417,25 @@ export const botRouter = {
       }
 
       // 4.01 Direct Plan checkout shortcuts (e.g. user types "yaad", "ghar", "vault")
-      if (['yaad', 'yaad plan', '149', 'rs 149', '₹149'].includes(lowerText)) {
-        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'yaad_149');
-        const responseText = `✨ Yaad Plan Activate karein 🤖✨\n\nRakam: ₹149/saal\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
+      if (['yaad', 'yaad plan', '249', 'rs 249', '₹249', '149'].includes(lowerText)) {
+        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'yaad_249');
+        const responseText = `✨ Yaad Plan Activate karein 🤖✨\n\nRakam: ₹249/saal (Sirf ₹20/mahina)\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
         await whatsappService.sendTextMessage(fromPhone, responseText);
         await dbService.saveChatMessage(fromPhone, 'model', responseText);
         return;
       }
 
-      if (['ghar', 'ghar plan', '399', 'rs 399', '₹399'].includes(lowerText)) {
-        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'ghar_399');
-        const responseText = `✨ Ghar Plan Activate karein 🤖✨\n\nRakam: ₹399/saal\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
+      if (['ghar', 'ghar plan', '499', 'rs 499', '₹499', '399'].includes(lowerText)) {
+        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'ghar_499');
+        const responseText = `✨ Ghar Plan Activate karein 🤖✨\n\nRakam: ₹499/saal (Sirf ₹41/mahina for entire family)\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
         await whatsappService.sendTextMessage(fromPhone, responseText);
         await dbService.saveChatMessage(fromPhone, 'model', responseText);
         return;
       }
 
-      if (['vault', 'vault plan', '799', 'rs 799', '₹799'].includes(lowerText)) {
-        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'vault_799');
-        const responseText = `✨ Vault Plan Activate karein 🤖✨\n\nRakam: ₹799/saal\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
+      if (['vault', 'vault plan', '899', 'rs 899', '₹899', '799'].includes(lowerText)) {
+        const paymentLink = await paymentService.createPaymentLink(fromPhone, 'vault_899');
+        const responseText = `✨ Vault Plan Activate karein 🤖✨\n\nRakam: ₹899/saal (Business + CA Access)\n\nIs link par click karke UPI / Card se payment karein. Payment hote hi aapka plan turant chaloo ho jayega:\n${paymentLink}\n\nKoi auto-debit nahi hoga. Sirf 1 saal ka ek baar payment.`;
         await whatsappService.sendTextMessage(fromPhone, responseText);
         await dbService.saveChatMessage(fromPhone, 'model', responseText);
         return;

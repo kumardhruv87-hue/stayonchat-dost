@@ -5,7 +5,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import WebSocket from 'ws';
 import dotenv from 'dotenv';
-import { PLANS } from '../config/constants.js';
+import { PLANS, PlanId } from '../config/constants.js';
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ export interface UserRecord {
   phone_number: string;
   name: string;
   language: string;
-  plan: 'free' | 'yaad_149' | 'ghar_399' | 'vault_799';
+  plan: PlanId;
   plan_activated_at?: string;
   plan_expires_at?: string;
   file_count: number;
@@ -403,7 +403,7 @@ export const dbService = {
   },
 
   // Update user subscription plan
-  async upgradeUserPlan(userPhone: string, plan: 'yaad_149' | 'ghar_399' | 'vault_799', razorpayPaymentId?: string) {
+  async upgradeUserPlan(userPhone: string, plan: PlanId, razorpayPaymentId?: string) {
     const oneYearLater = new Date();
     oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
 
