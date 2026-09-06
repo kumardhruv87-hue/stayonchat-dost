@@ -10,7 +10,7 @@ import { BRAND } from '../config/constants.js';
 
 dotenv.config();
 
-const apiKey = process.env.GEMINI_API_KEY || '';
+const apiKey = process.env.GEMINI_API_KEY || 'placeholder_key';
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // Strict Zod schema for extracted document metadata
