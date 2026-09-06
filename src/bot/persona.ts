@@ -259,7 +259,7 @@ export const personaService = {
    * Viral Marketing: Referral invite link message
    */
   getReferralShareMessage(userPhone: string, referralCode: string): string {
-    const shareLink = `https://wa.me/15556681690?text=Hi%20DOST%20ref_${referralCode}`;
+    const shareLink = `https://wa.me/919870530066?text=Hi%20DOST%20ref_${referralCode}`;
     const clickToForward = `https://api.whatsapp.com/send?text=Namaste!%20Ye%20check%20karein,%20WhatsApp%20par%20AI%20Locker%20aur%20Reminders%20hai%20ekdum%20free:%20${encodeURIComponent(shareLink)}`;
 
     return `🎁 Aapka Personal Invite Link: 🤖✨\n\nAapke link se kisi ke judne par aap dono ko milenge:\n• +5 Extra Files Free Storage\n• +3 Extra Free Reminders\n\nInvite Link:\n${shareLink}\n\nWhatsApp par direct forward karne ke liye yahan tap karein:\n${clickToForward}\n\nJaise hi naye user is link se join karenge, aapka extra storage turant unlock ho jayega! 🎉`;

@@ -36,7 +36,7 @@ async function runTest() {
   await botRouter.handleIncomingMessage(hiEvent);
   const promptState = dbService.getUserPromptState(TEST_PHONE);
   console.log('Prompt state after greeting:', promptState);
-  console.log('Test 2 Result:', promptState === 'language_picker' ? 'PASSED ✅' : 'FAILED ❌');
+  console.log('Test 2 Result:', promptState === 'main_menu' ? 'PASSED ✅' : 'FAILED ❌');
 
   // Test 3: Language Selection "1" (Hinglish)
   console.log('\n--- TEST 3: Language Selection "1" (Hinglish) ---');

@@ -5,11 +5,12 @@
 
 export const BRAND = {
   name: "DOST",
-  displayName: "DOST 🤖✨",
-  tagline: "Aapka Apna Digital Saathi — Commitment se zyada samajhdaar.",
+  displayName: "AI DOST 🤖✨",
+  tagline: "Aapka Apna Digital Saathi — Kaagaz Locker, Smart Reminders & Ank Jyotish.",
   domain: "stayonchat.com",
   supportEmail: "info@stayonchat.com",
-  supportWhatsApp: "+91-XXXXXXXXXX",
+  supportWhatsApp: "+91-9870530066",
+  botPhone: "919870530066",
 };
 
 export const REFERRAL_RULES = {

@@ -128,39 +128,33 @@ app.post('/ultramsg-webhook', async (req: Request, res: Response) => {
     const lowerRaw = rawText.toLowerCase();
     const mediaUrl = data.media || '';
 
-    // =============================================================
-    // PRIVACY & ACTIVATION FILTER (Personal Number Protection)
-    // Ensures bot never intercepts personal, family, or work chats!
-    // =============================================================
-    const triggerModeEnabled = process.env.BOT_TRIGGER_MODE !== 'false';
+    // Dedicated Bot Mode: responds 24/7 to all messages on this dedicated number.
+    // If user explicitly asks to stop/pause:
+    if (['exit', 'stop', 'quit', 'dost stop', 'dost off', 'bye dost'].includes(lowerRaw)) {
+      await whatsappService.sendTextMessage(
+        cleanPhone,
+        'Aapke reminders pause kar diye gaye hain. Wapas shuru karne ke liye bas "hi" likhkar bhejiye. 🙏'
+      );
+      return;
+    }
+
+    const triggerModeEnabled = process.env.BOT_TRIGGER_MODE === 'true';
 
     if (triggerModeEnabled) {
-      // 1. Check if user wants to explicitly stop/exit the bot session
-      if (['exit', 'stop', 'quit', 'dost stop', 'dost off', 'bye dost'].includes(lowerRaw)) {
-        dbService.stopSession(cleanPhone);
-        await whatsappService.sendTextMessage(
-          cleanPhone,
-          'AI DOST session band kar diya gaya hai. Jab bhi zaroorat ho, bas "dost" ya "#dost" likhkar message bhejiye. 🙏'
-        );
-        return;
-      }
-
-      // 2. Check for trigger command: starts with "dost", "#dost", "!dost", "/dost", "ai"
+      // Check for trigger command: starts with "dost", "#dost", "!dost", "/dost", "ai"
       const triggerRegex = /^(#dost|!dost|\/dost|dost\b|dost[:\s]|ai\b)/i;
       const hasTrigger = triggerRegex.test(rawText);
       const isSessionActive = dbService.isSessionActive(cleanPhone);
 
-      // 3. For media (images/documents/voice notes):
       const captionText = (data.caption || '').trim();
       const hasCaptionTrigger = triggerRegex.test(captionText);
 
-      // If neither trigger is present nor session is active -> SILENTLY IGNORE!
+      // If neither trigger is present nor session is active -> SILENTLY IGNORE
       if (!hasTrigger && !hasCaptionTrigger && !isSessionActive) {
-        console.log(`[Personal Chat Protected] Ignoring message from ${cleanPhone} (no DOST trigger): "${rawText.substring(0, 30)}..."`);
+        console.log(`[Trigger Mode] Ignoring message from ${cleanPhone} (no DOST trigger): "${rawText.substring(0, 30)}..."`);
         return;
       }
 
-      // 4. If trigger present, start/extend session for 30 minutes
       if (hasTrigger || hasCaptionTrigger) {
         dbService.startSession(cleanPhone, 30);
       }

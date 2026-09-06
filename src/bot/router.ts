@@ -476,11 +476,11 @@ export const botRouter = {
         return;
       }
 
-      // 4.3 First-time greeting / Start
-      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'dost', 'start', 'shuru'].includes(lowerText)) {
-        dbService.setUserPromptState(fromPhone, 'language_picker');
-        const picker = personaService.getLanguagePicker();
-        await whatsappService.sendInteractiveButtons(fromPhone, picker.text, picker.buttons);
+      // 4.3 Greeting / Start
+      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'dost'].includes(lowerText)) {
+        dbService.setUserPromptState(fromPhone, 'main_menu');
+        const menu = personaService.getMenuMessage(resolvedName);
+        await whatsappService.sendInteractiveButtons(fromPhone, menu.text, menu.buttons);
         return;
       }
 
