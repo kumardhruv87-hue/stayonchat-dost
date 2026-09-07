@@ -101,9 +101,10 @@ export class MetaCloudAdapter implements ChannelAdapter {
 
     // WhatsApp Cloud API supports up to 3 interactive reply buttons
     if (buttons.length <= 3) {
+      let payload: any = null;
       try {
         const url = `${this.graphBase}/${this.getPhoneId()}/messages`;
-        const payload: any = {
+        payload = {
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
           to: toClean,
@@ -135,7 +136,21 @@ export class MetaCloudAdapter implements ChannelAdapter {
         });
         return true;
       } catch (err: any) {
-        console.warn('[MetaCloudAdapter] Interactive buttons fallback to formatted text:', err.response?.data?.error?.message || err.message);
+        console.warn('[MetaCloudAdapter] Interactive buttons error on primary:', err.response?.data?.error?.message || err.message);
+        if (this.getPhoneId() !== '1145834371951879' && payload) {
+          try {
+            const fallbackUrl = `${this.graphBase}/1145834371951879/messages`;
+            await axios.post(fallbackUrl, payload, {
+              headers: {
+                Authorization: `Bearer ${this.getToken()}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            return true;
+          } catch (fallbackErr: any) {
+            console.warn('[MetaCloudAdapter] Interactive buttons fallback error:', fallbackErr.response?.data?.error?.message || fallbackErr.message);
+          }
+        }
       }
     }
 
@@ -157,10 +172,11 @@ export class MetaCloudAdapter implements ChannelAdapter {
   async sendImage(to: string, buffer: Buffer, mimeType: string, caption?: string): Promise<boolean> {
     const toClean = this.cleanPhone(to);
     const cleanCaption = (caption || '').replace(/\*/g, '');
+    let mediaId: string | null = null;
 
     try {
       // 1. Upload media to Meta
-      const mediaId = await this.uploadToMeta(buffer, mimeType, 'image.jpg');
+      mediaId = await this.uploadToMeta(buffer, mimeType, 'image.jpg');
       if (!mediaId) return false;
 
       // 2. Send image message using mediaId
@@ -183,7 +199,27 @@ export class MetaCloudAdapter implements ChannelAdapter {
       );
       return true;
     } catch (err: any) {
-      console.error('[MetaCloudAdapter] Image send failed:', err.response?.data || err.message);
+      console.error('[MetaCloudAdapter] Image send failed on primary:', err.response?.data?.error?.message || err.message);
+      if (this.getPhoneId() !== '1145834371951879' && mediaId) {
+        try {
+          const fallbackUrl = `${this.graphBase}/1145834371951879/messages`;
+          await axios.post(fallbackUrl, {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: toClean,
+            type: 'image',
+            image: { id: mediaId, caption: cleanCaption },
+          }, {
+            headers: {
+              Authorization: `Bearer ${this.getToken()}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          return true;
+        } catch (fallbackErr: any) {
+          console.error('[MetaCloudAdapter] Image send fallback failed:', fallbackErr.response?.data?.error?.message || fallbackErr.message);
+        }
+      }
       return false;
     }
   }
@@ -191,9 +227,10 @@ export class MetaCloudAdapter implements ChannelAdapter {
   async sendDocument(to: string, buffer: Buffer, mimeType: string, filename: string, caption?: string): Promise<boolean> {
     const toClean = this.cleanPhone(to);
     const cleanCaption = (caption || '').replace(/\*/g, '');
+    let mediaId: string | null = null;
 
     try {
-      const mediaId = await this.uploadToMeta(buffer, mimeType, filename);
+      mediaId = await this.uploadToMeta(buffer, mimeType, filename);
       if (!mediaId) return false;
 
       const url = `${this.graphBase}/${this.getPhoneId()}/messages`;
@@ -215,7 +252,27 @@ export class MetaCloudAdapter implements ChannelAdapter {
       );
       return true;
     } catch (err: any) {
-      console.error('[MetaCloudAdapter] Document send failed:', err.response?.data || err.message);
+      console.error('[MetaCloudAdapter] Document send failed on primary:', err.response?.data?.error?.message || err.message);
+      if (this.getPhoneId() !== '1145834371951879' && mediaId) {
+        try {
+          const fallbackUrl = `${this.graphBase}/1145834371951879/messages`;
+          await axios.post(fallbackUrl, {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: toClean,
+            type: 'document',
+            document: { id: mediaId, filename, caption: cleanCaption },
+          }, {
+            headers: {
+              Authorization: `Bearer ${this.getToken()}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          return true;
+        } catch (fallbackErr: any) {
+          console.error('[MetaCloudAdapter] Document send fallback failed:', fallbackErr.response?.data?.error?.message || fallbackErr.message);
+        }
+      }
       return false;
     }
   }
