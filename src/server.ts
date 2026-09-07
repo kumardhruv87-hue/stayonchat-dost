@@ -47,7 +47,32 @@ app.get('/api/info', (req: Request, res: Response) => {
 });
 
 app.get('/health', (req: Request, res: Response) => {
-  res.json({ status: 'HEALTHY', uptime: process.uptime() });
+  res.json({
+    status: 'HEALTHY',
+    uptime: process.uptime(),
+    gateway: whatsappService.getPrimaryAdapter().name,
+    tokenPrefix: (process.env.WHATSAPP_TOKEN || '').substring(0, 15),
+    phoneId: process.env.WHATSAPP_PHONE_NUMBER_ID || 'missing',
+  });
+});
+
+app.get('/api/test-reply', async (req: Request, res: Response) => {
+  const phone = (req.query.phone as string) || '919560931596';
+  try {
+    const success = await whatsappService.sendTextMessage(
+      phone,
+      'Keepr AI Live Test from Render Cloud Server! 🤖✨'
+    );
+    res.json({
+      success,
+      gateway: whatsappService.getPrimaryAdapter().name,
+      phone,
+      tokenPrefix: (process.env.WHATSAPP_TOKEN || '').substring(0, 15),
+      phoneId: process.env.WHATSAPP_PHONE_NUMBER_ID || 'missing',
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // =================================================================
