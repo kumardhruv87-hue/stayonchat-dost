@@ -19,11 +19,11 @@ const AISENSY_API_KEY = process.env.AISENSY_API_KEY || 'e0024fe53f0c2c2c42bf4';
 const AISENSY_PROJECT_ID = process.env.AISENSY_PROJECT_ID || '6a9ec55f4de96179c2effd1e';
 
 const ACTIVE_META_TOKEN =
-  'EAAWvsn3pnYEBSUUbXEOfLEZCujL79WPB4mnIh4ZBQ5ee1Jekg3FmGJUbKVVXl9VhPr4HsJSXHMZCvgic0YuVKMAraL7bk8ptrQgBeCkT3O9hUiFJProyZB4AiO7ZCf72z2JKwAFNVEn99SP2nO9fh05yaFUBmuErt8c8CMfduRaW2aPbvI8FIIU8kMoLArJq7JGmujHrLBZC2BMKCI0ZBSVQz6xuf7oYr9TeNJbnSq3IiZByWGGZALGzhDsppNRY7GRjPfaBVoCtkXKYOhC9g4b4v0lKav0GXrm0wTQZDZD';
+  'EAAWvsn3pnYEBSVtpnOZBcfqOXpvTmMTbjdVwA3IVBPtr9HB1LffjufOiZAurBuKe2kyLtg7Pl1ZCMaCICyjpDl5bEYpHsypMTUZAZCYwEWzCjVmSVYsnMPLPcNb7c4byi2tXdYvqUZAQd67wUJL6ZBSH6YK7I5XOPANogN6jaZA6N4Pigtuqi2UpwmpmbU0ikgZDZD';
 
 export function getWhatsAppToken(): string {
   const envToken = process.env.WHATSAPP_TOKEN || '';
-  if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7') || envToken.startsWith('EAAWvsn3pnYEBSX')) {
+  if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7') || envToken.startsWith('EAAWvsn3pnYEBSX') || envToken.startsWith('EAAWvsn3pnYEBSU')) {
     return ACTIVE_META_TOKEN;
   }
   return envToken;
