@@ -19,13 +19,13 @@ const AISENSY_API_KEY = process.env.AISENSY_API_KEY || 'e0024fe53f0c2c2c42bf4';
 const AISENSY_PROJECT_ID = process.env.AISENSY_PROJECT_ID || '6a9ec55f4de96179c2effd1e';
 
 const ACTIVE_META_TOKEN =
-  'EAAWvsn3pnYEBSRERPt47yMDO4TERJsN1q5WUZB6jD6iYJSS3PZBuximfgE8XrzHw0cTLU4g1LQpXAAWGNiuStV5DEg6H1RRourYg1AqmxWGssM74zFXJgLaweZCvK91LpmNTjnSZBlirFG4lw59EuxlQ4yztFl3yIBCgq4ZAWzQZBcOHRfLSO04TsITXR33wZDZD';
+  'EAAWvsn3pnYEBSaJZCQrgahakWTe9VjcL51trsgM4YMKfPm3QLbmAilQLEwXTcAbQfundZCBKAIwMS7ZCwFzkR4OAOoi9Gk5lLXfdOnb1kICjPYZAAerAQrCZAnSB3IklNN1J51sTy6YpsZAhAwEfoGB8W8L9lW5KiZAZCti2LdBlNzweaY4ZCZCNxSY0RxwGKZCFQZDZD';
 
 const ACTIVE_META_PHONE_ID = '1214464925094820'; // +91 98705 30066
 
 export function getWhatsAppToken(): string {
   const envToken = process.env.WHATSAPP_TOKEN || '';
-  if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7') || envToken.startsWith('EAAWvsn3pnYEBSX') || envToken.startsWith('EAAWvsn3pnYEBSU')) {
+  if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7') || envToken.startsWith('EAAWvsn3pnYEBSX') || envToken.startsWith('EAAWvsn3pnYEBSU') || envToken.startsWith('EAAWvsn3pnYEBSR')) {
     return ACTIVE_META_TOKEN;
   }
   return envToken;
