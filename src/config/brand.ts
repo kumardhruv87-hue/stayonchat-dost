@@ -20,7 +20,7 @@ export interface BrandConfig {
 }
 
 const APP_NAME = process.env.APP_NAME || 'Keepr';
-const APP_DOMAIN = process.env.APP_DOMAIN || 'usekeepr.com';
+const APP_DOMAIN = process.env.APP_DOMAIN || 'keepr-bot.onrender.com';
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || `care@${APP_DOMAIN}`;
 const SUPPORT_PHONE = process.env.SUPPORT_PHONE || '+91 9870530066';
 const BOT_PHONE = process.env.BOT_PHONE || '919870530066';
