@@ -7,7 +7,7 @@ import { ChannelAdapter, WhatsAppButton } from './channel.interface.js';
 
 export class AiSensyAdapter implements ChannelAdapter {
   public name = 'aisensy';
-  private apiUrl = 'https://api.aisensy.io/v1/messages';
+  private apiUrl: string;
   private projectId: string;
 
   constructor(
@@ -15,6 +15,7 @@ export class AiSensyAdapter implements ChannelAdapter {
     projectId: string = process.env.AISENSY_PROJECT_ID || '6a9ec55f4de96179c2effd1e'
   ) {
     this.projectId = projectId;
+    this.apiUrl = `https://apis.aisensy.com/project-apis/v1/project/${this.projectId}/messages`;
   }
 
   private cleanPhone(phone: string): string {
@@ -28,13 +29,19 @@ export class AiSensyAdapter implements ChannelAdapter {
     return clean;
   }
 
+  private getHeaders() {
+    return {
+      'X-AiSensy-Project-API-Pwd': this.apiKey,
+      'Content-Type': 'application/json',
+    };
+  }
+
   async sendTextMessage(to: string, text: string): Promise<boolean> {
     const toClean = this.cleanPhone(to);
     const cleanBody = text.replace(/\*/g, '');
 
-    // 1. Primary: Standard AiSensy v1 Messages API
     try {
-      await axios.post(
+      const res = await axios.post(
         this.apiUrl,
         {
           to: toClean,
@@ -42,37 +49,11 @@ export class AiSensyAdapter implements ChannelAdapter {
           text: { body: cleanBody },
         },
         {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
-          },
+          headers: this.getHeaders(),
           timeout: 10000,
         }
       );
-      return true;
-    } catch (err: any) {
-      console.warn('[AiSensyAdapter] Standard v1 messages failed, trying project API fallback:', err.response?.data || err.message);
-    }
-
-    // 2. Fallback: Project-specific endpoint
-    try {
-      await axios.post(
-        `https://apis.aisensy.com/project-apis/v1/project/${this.projectId}/messages`,
-        {
-          to: toClean,
-          type: 'text',
-          text: { body: cleanBody },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'X-AiSensy-Project-API-Pwd': this.apiKey,
-            'Content-Type': 'application/json',
-          },
-          timeout: 10000,
-        }
-      );
-      return true;
+      return res.status === 200;
     } catch (err: any) {
       console.error('[AiSensyAdapter] Send text error:', err.response?.data || err.message);
       return false;
@@ -111,14 +92,11 @@ export class AiSensyAdapter implements ChannelAdapter {
         if (headerText) payload.interactive.header = { type: 'text', text: headerText };
         if (footerText) payload.interactive.footer = { text: footerText };
 
-        await axios.post(this.apiUrl, payload, {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json',
-          },
+        const res = await axios.post(this.apiUrl, payload, {
+          headers: this.getHeaders(),
           timeout: 10000,
         });
-        return true;
+        if (res.status === 200) return true;
       } catch (err: any) {
         console.warn('[AiSensyAdapter] Interactive button failed, falling back to numbered text:', err.response?.data || err.message);
       }
