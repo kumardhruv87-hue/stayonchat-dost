@@ -16,6 +16,14 @@ export class MetaCloudAdapter implements ChannelAdapter {
     private token: string
   ) {}
 
+  private getPhoneId(): string {
+    return process.env.WHATSAPP_PHONE_NUMBER_ID || this.phoneNumberId;
+  }
+
+  private getToken(): string {
+    return process.env.WHATSAPP_TOKEN || this.token;
+  }
+
   private cleanPhone(phone: string): string {
     let clean = (phone || '').replace('@c.us', '').replace(/[^0-9]/g, '');
     if (clean.length === 10 && /^[6-9]/.test(clean)) {
@@ -29,7 +37,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
     const cleanBody = text.replace(/\*/g, '');
 
     try {
-      const url = `${this.graphBase}/${this.phoneNumberId}/messages`;
+      const url = `${this.graphBase}/${this.getPhoneId()}/messages`;
       await axios.post(
         url,
         {
@@ -41,7 +49,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.token}`,
+            Authorization: `Bearer ${this.getToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -66,7 +74,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
     // WhatsApp Cloud API supports up to 3 interactive reply buttons
     if (buttons.length <= 3) {
       try {
-        const url = `${this.graphBase}/${this.phoneNumberId}/messages`;
+        const url = `${this.graphBase}/${this.getPhoneId()}/messages`;
         const payload: any = {
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
@@ -93,7 +101,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
 
         await axios.post(url, payload, {
           headers: {
-            Authorization: `Bearer ${this.token}`,
+            Authorization: `Bearer ${this.getToken()}`,
             'Content-Type': 'application/json',
           },
         });
@@ -128,7 +136,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
       if (!mediaId) return false;
 
       // 2. Send image message using mediaId
-      const url = `${this.graphBase}/${this.phoneNumberId}/messages`;
+      const url = `${this.graphBase}/${this.getPhoneId()}/messages`;
       await axios.post(
         url,
         {
@@ -140,7 +148,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.token}`,
+            Authorization: `Bearer ${this.getToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -160,7 +168,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
       const mediaId = await this.uploadToMeta(buffer, mimeType, filename);
       if (!mediaId) return false;
 
-      const url = `${this.graphBase}/${this.phoneNumberId}/messages`;
+      const url = `${this.graphBase}/${this.getPhoneId()}/messages`;
       await axios.post(
         url,
         {
@@ -172,7 +180,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
         },
         {
           headers: {
-            Authorization: `Bearer ${this.token}`,
+            Authorization: `Bearer ${this.getToken()}`,
             'Content-Type': 'application/json',
           },
         }
@@ -196,14 +204,14 @@ export class MetaCloudAdapter implements ChannelAdapter {
     // Direct Meta Media ID lookup
     const mediaMetaUrl = `${this.graphBase}/${mediaIdOrUrl}`;
     const metaRes = await axios.get(mediaMetaUrl, {
-      headers: { Authorization: `Bearer ${this.token}` },
+      headers: { Authorization: `Bearer ${this.getToken()}` },
     });
 
     const fileUrl = metaRes.data.url;
     const mimeType = metaRes.data.mime_type || 'image/jpeg';
 
     const fileRes = await axios.get(fileUrl, {
-      headers: { Authorization: `Bearer ${this.token}` },
+      headers: { Authorization: `Bearer ${this.getToken()}` },
       responseType: 'arraybuffer',
     });
 
@@ -217,10 +225,10 @@ export class MetaCloudAdapter implements ChannelAdapter {
       form.append('file', buffer, { filename, contentType: mimeType });
       form.append('type', mimeType);
 
-      const res = await axios.post(`${this.graphBase}/${this.phoneNumberId}/media`, form, {
+      const res = await axios.post(`${this.graphBase}/${this.getPhoneId()}/media`, form, {
         headers: {
           ...form.getHeaders(),
-          Authorization: `Bearer ${this.token}`,
+          Authorization: `Bearer ${this.getToken()}`,
         },
       });
       return res.data?.id || null;
