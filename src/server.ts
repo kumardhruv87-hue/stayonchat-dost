@@ -8,7 +8,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { botRouter } from './bot/router.js';
 import { dbService } from './db/supabase.js';
-import { whatsappService } from './services/whatsapp.js';
+import { whatsappService, getWhatsAppToken, getWhatsAppPhoneId } from './services/whatsapp.js';
 import { paymentService } from './services/razorpay.js';
 import { schedulerService } from './services/scheduler.js';
 import { BRAND } from './config/constants.js';
@@ -59,8 +59,8 @@ app.get('/health', (req: Request, res: Response) => {
     status: 'HEALTHY',
     uptime: process.uptime(),
     gateway: whatsappService.getPrimaryAdapter().name,
-    tokenPrefix: (process.env.WHATSAPP_TOKEN || '').substring(0, 15),
-    phoneId: process.env.WHATSAPP_PHONE_NUMBER_ID || 'missing',
+    tokenPrefix: getWhatsAppToken().substring(0, 15),
+    phoneId: getWhatsAppPhoneId(),
   });
 });
 
@@ -75,8 +75,8 @@ app.get('/api/test-reply', async (req: Request, res: Response) => {
       success,
       gateway: whatsappService.getPrimaryAdapter().name,
       phone,
-      tokenPrefix: (process.env.WHATSAPP_TOKEN || '').substring(0, 15),
-      phoneId: process.env.WHATSAPP_PHONE_NUMBER_ID || 'missing',
+      tokenPrefix: getWhatsAppToken().substring(0, 15),
+      phoneId: getWhatsAppPhoneId(),
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
