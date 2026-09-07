@@ -30,11 +30,11 @@ export function getWhatsAppToken(): string {
 }
 
 const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '1145834371951879';
-const PRIMARY_GATEWAY = process.env.WHATSAPP_PRIMARY_GATEWAY || 'aisensy';
+const PRIMARY_GATEWAY = process.env.WHATSAPP_PRIMARY_GATEWAY || 'meta';
 
 // Initialize Adapters
-const aisensyAdapter = new AiSensyAdapter(AISENSY_API_KEY, AISENSY_PROJECT_ID);
 const metaAdapter = new MetaCloudAdapter(WHATSAPP_PHONE_NUMBER_ID, getWhatsAppToken());
+const aisensyAdapter = new AiSensyAdapter(AISENSY_API_KEY, AISENSY_PROJECT_ID);
 const ultraMsgAdapter = new UltraMsgAdapter(ULTRAMSG_INSTANCE_ID, ULTRAMSG_TOKEN);
 
 export { WhatsAppButton };
@@ -51,12 +51,12 @@ export const whatsappService = {
   getPrimaryAdapter(): ChannelAdapter {
     if (PRIMARY_GATEWAY === 'aisensy') return aisensyAdapter;
     if (PRIMARY_GATEWAY === 'ultramsg') return ultraMsgAdapter;
-    return metaAdapter;
+    return metaAdapter; // Default Meta Cloud API
   },
 
   getSecondaryAdapter(): ChannelAdapter {
-    if (PRIMARY_GATEWAY === 'aisensy') return ultraMsgAdapter;
-    return aisensyAdapter;
+    if (PRIMARY_GATEWAY === 'ultramsg') return aisensyAdapter;
+    return ultraMsgAdapter;
   },
 
   async sendTextMessage(to: string, text: string): Promise<boolean> {
