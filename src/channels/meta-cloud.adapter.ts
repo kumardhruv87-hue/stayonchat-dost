@@ -21,7 +21,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
   }
 
   private getToken(): string {
-    return process.env.WHATSAPP_TOKEN || this.token;
+    return this.token || process.env.WHATSAPP_TOKEN || '';
   }
 
   private cleanPhone(phone: string): string {

@@ -93,6 +93,26 @@ app.get('/webhook', (req: Request, res: Response) => {
   }
 });
 
+// In-memory audit log of incoming webhooks
+interface WebhookLogEntry {
+  timestamp: string;
+  source: string;
+  senderPhone?: string;
+  text?: string;
+  type?: string;
+  status: string;
+  rawPayload?: any;
+  error?: string;
+}
+export const webhookAuditLogs: WebhookLogEntry[] = [];
+
+app.get('/api/webhook-logs', (req: Request, res: Response) => {
+  res.json({
+    total: webhookAuditLogs.length,
+    logs: webhookAuditLogs.slice(-25).reverse(),
+  });
+});
+
 // =================================================================
 // 3. WhatsApp Cloud API Inbound Message Handler (POST /webhook)
 // =================================================================
@@ -107,11 +127,26 @@ app.post('/webhook', async (req: Request, res: Response) => {
     const changes = entry?.changes?.[0]?.value;
 
     if (changes && changes.messages) {
+      const msg = changes.messages[0];
+      webhookAuditLogs.push({
+        timestamp: new Date().toISOString(),
+        source: 'meta_cloud_api',
+        senderPhone: msg?.from,
+        text: msg?.text?.body,
+        type: msg?.type,
+        status: 'received',
+      });
       // Process message asynchronously
       await botRouter.handleIncomingMessage(changes);
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error handling incoming WhatsApp webhook event:', err);
+    webhookAuditLogs.push({
+      timestamp: new Date().toISOString(),
+      source: 'meta_cloud_api',
+      status: 'error',
+      error: err?.message || String(err),
+    });
   }
 });
 

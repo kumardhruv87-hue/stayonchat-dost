@@ -23,7 +23,7 @@ const ACTIVE_META_TOKEN =
 
 export function getWhatsAppToken(): string {
   const envToken = process.env.WHATSAPP_TOKEN || '';
-  if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7')) {
+  if (!envToken || envToken.startsWith('EAAUU0G7bSl8BSdh7') || envToken.startsWith('EAAWvsn3pnYEBSX')) {
     return ACTIVE_META_TOKEN;
   }
   return envToken;

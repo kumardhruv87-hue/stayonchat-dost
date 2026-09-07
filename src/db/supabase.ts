@@ -11,8 +11,8 @@ import { cacheService } from '../services/cache.service.js';
 
 dotenv.config();
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_key';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://qopihozjwbxeykefrzpl.supabase.co';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'sb_publishable_10SPMrCpJXbMQhMFAgzi-w_dRWxzxYt';
 
 export const supabase: SupabaseClient = createClient(
   SUPABASE_URL,
