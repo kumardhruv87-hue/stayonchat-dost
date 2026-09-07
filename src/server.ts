@@ -32,6 +32,14 @@ app.use(cors());
 // Serve public static website (Landing Page on usekeepr.com)
 app.use(express.static(path.join(process.cwd(), 'public')));
 
+app.get('/privacy', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'privacy.html'));
+});
+
+app.get('/terms', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'terms.html'));
+});
+
 // =================================================================
 // 1. Health & Landing Endpoint
 // =================================================================
