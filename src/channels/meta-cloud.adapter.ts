@@ -35,9 +35,10 @@ export class MetaCloudAdapter implements ChannelAdapter {
   async sendTextMessage(to: string, text: string): Promise<boolean> {
     const toClean = this.cleanPhone(to);
     const cleanBody = text.replace(/\*/g, '');
+    const primaryId = this.getPhoneId();
 
     try {
-      const url = `${this.graphBase}/${this.getPhoneId()}/messages`;
+      const url = `${this.graphBase}/${primaryId}/messages`;
       await axios.post(
         url,
         {
@@ -56,7 +57,34 @@ export class MetaCloudAdapter implements ChannelAdapter {
       );
       return true;
     } catch (err: any) {
-      console.error('[MetaCloudAdapter] Text send error:', err.response?.data || err.message);
+      console.warn(`[MetaCloudAdapter] Text send error on phoneId ${primaryId}:`, err.response?.data?.error?.message || err.message);
+
+      // Resilient Fallback: If sending failed on primary Indian phone ID (e.g. pending Meta approval), send via fallback ID
+      if (primaryId !== '1145834371951879') {
+        try {
+          console.log('[MetaCloudAdapter] Retrying via fallback phone ID 1145834371951879...');
+          const fallbackUrl = `${this.graphBase}/1145834371951879/messages`;
+          await axios.post(
+            fallbackUrl,
+            {
+              messaging_product: 'whatsapp',
+              recipient_type: 'individual',
+              to: toClean,
+              type: 'text',
+              text: { preview_url: false, body: cleanBody },
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${this.getToken()}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          return true;
+        } catch (fallbackErr: any) {
+          console.error('[MetaCloudAdapter] Fallback send error:', fallbackErr.response?.data?.error?.message || fallbackErr.message);
+        }
+      }
       return false;
     }
   }
