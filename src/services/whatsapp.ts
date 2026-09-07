@@ -19,7 +19,9 @@ const AISENSY_API_KEY = process.env.AISENSY_API_KEY || 'e0024fe53f0c2c2c42bf4';
 const AISENSY_PROJECT_ID = process.env.AISENSY_PROJECT_ID || '6a9ec55f4de96179c2effd1e';
 
 const ACTIVE_META_TOKEN =
-  'EAAWvsn3pnYEBSVtpnOZBcfqOXpvTmMTbjdVwA3IVBPtr9HB1LffjufOiZAurBuKe2kyLtg7Pl1ZCMaCICyjpDl5bEYpHsypMTUZAZCYwEWzCjVmSVYsnMPLPcNb7c4byi2tXdYvqUZAQd67wUJL6ZBSH6YK7I5XOPANogN6jaZA6N4Pigtuqi2UpwmpmbU0ikgZDZD';
+  'EAAWvsn3pnYEBSVPgYbHNTFIrDWZBl2m3D4LHaHU8ZBUJX9jXEZAXKFxquh8FFh8VHd82mt44GAZADrW6bv2IDrNNzZByO2cdiFBiuXy1StDIlxzyCwxf4jTEJQ1ZAcapOXZB6Xa0CL3PeZC3ZBHPWjmlQjHYl7dWuBWMr0FztDPVbHuVUzKkpXnUC6x2kmtfLEAZDZD';
+
+const ACTIVE_META_PHONE_ID = '1214464925094820'; // +91 98705 30066
 
 export function getWhatsAppToken(): string {
   const envToken = process.env.WHATSAPP_TOKEN || '';
@@ -29,11 +31,18 @@ export function getWhatsAppToken(): string {
   return envToken;
 }
 
-const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '1145834371951879';
+export function getWhatsAppPhoneId(): string {
+  const envId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+  if (!envId || envId === '1145834371951879') {
+    return ACTIVE_META_PHONE_ID;
+  }
+  return envId;
+}
+
 const PRIMARY_GATEWAY = process.env.WHATSAPP_PRIMARY_GATEWAY || 'meta';
 
 // Initialize Adapters
-const metaAdapter = new MetaCloudAdapter(WHATSAPP_PHONE_NUMBER_ID, getWhatsAppToken());
+const metaAdapter = new MetaCloudAdapter(getWhatsAppPhoneId(), getWhatsAppToken());
 const aisensyAdapter = new AiSensyAdapter(AISENSY_API_KEY, AISENSY_PROJECT_ID);
 const ultraMsgAdapter = new UltraMsgAdapter(ULTRAMSG_INSTANCE_ID, ULTRAMSG_TOKEN);
 
