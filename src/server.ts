@@ -91,6 +91,93 @@ app.post('/webhook', async (req: Request, res: Response) => {
 });
 
 // =================================================================
+// 3c. AiSensy Official WhatsApp Webhook Handler (/aisensy-webhook)
+// Handles incoming messages, media, and verification from AiSensy
+// =================================================================
+app.all('/aisensy-webhook', async (req: Request, res: Response) => {
+  // 1. GET Handshake / verification
+  if (req.method === 'GET') {
+    const challenge = req.query['hub.challenge'] || req.query.challenge || 'OK';
+    return res.status(200).send(challenge);
+  }
+
+  // 2. Immediate 200 OK acknowledgement
+  res.status(200).json({ status: 'ok', received: true });
+
+  try {
+    const body = req.body;
+    console.log('📥 AiSensy Inbound Event:', JSON.stringify(body, null, 2));
+
+    if (!body) return;
+
+    // A. If AiSensy forwards raw Meta Graph API event
+    if (body.entry?.[0]?.changes?.[0]?.value) {
+      await botRouter.handleIncomingMessage(body.entry[0].changes[0].value);
+      return;
+    }
+
+    // B. AiSensy standard notification payload
+    const data = body.data || body;
+    const rawFrom =
+      data.from ||
+      data.sender ||
+      data.mobile ||
+      data.destination ||
+      data.user_phone ||
+      body.from ||
+      body.sender ||
+      '';
+
+    if (!rawFrom) return;
+
+    let cleanPhone = String(rawFrom).replace('@c.us', '').replace(/[^0-9]/g, '');
+    if (cleanPhone.length === 10 && /^[6-9]/.test(cleanPhone)) {
+      cleanPhone = '91' + cleanPhone;
+    }
+    if (!cleanPhone) return;
+
+    const contactName = data.userName || data.name || data.senderName || 'Friend';
+    const textContent = (data.text || data.message || data.body || data.content || '').trim();
+    const mediaUrl = data.mediaUrl || data.media?.url || data.url || '';
+    const messageType = data.type || (mediaUrl ? 'image' : 'text');
+
+    const simulatedEvent: any = {
+      contacts: [
+        {
+          profile: { name: contactName },
+          wa_id: cleanPhone,
+        },
+      ],
+      messages: [
+        {
+          from: cleanPhone,
+          id: data.id || data.messageId || `aisensy_${Date.now()}`,
+          timestamp: String(Math.floor(Date.now() / 1000)),
+          type: messageType === 'image' ? 'image' : messageType === 'document' ? 'document' : 'text',
+        },
+      ],
+    };
+
+    if (messageType === 'image' || mediaUrl) {
+      simulatedEvent.messages[0].type = 'image';
+      simulatedEvent.messages[0].image = {
+        id: mediaUrl,
+        caption: textContent,
+        mime_type: 'image/jpeg',
+      };
+    } else {
+      simulatedEvent.messages[0].type = 'text';
+      simulatedEvent.messages[0].text = { body: textContent };
+    }
+
+    console.log(`🤖 Dispatching AiSensy message from ${cleanPhone} (${contactName}):`, textContent || mediaUrl);
+    await botRouter.handleIncomingMessage(simulatedEvent);
+  } catch (err) {
+    console.error('[AiSensy Webhook Error]:', err);
+  }
+});
+
+// =================================================================
 // 3b. UltraMsg Webhook Handler (POST /ultramsg-webhook)
 // Primary live gateway for incoming WhatsApp messages & media
 // =================================================================

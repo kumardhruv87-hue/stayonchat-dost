@@ -8,12 +8,15 @@ import dotenv from 'dotenv';
 import { ChannelAdapter, WhatsAppButton } from '../channels/channel.interface.js';
 import { MetaCloudAdapter } from '../channels/meta-cloud.adapter.js';
 import { UltraMsgAdapter } from '../channels/ultramsg.adapter.js';
+import { AiSensyAdapter } from '../channels/aisensy.adapter.js';
 import { BRAND } from '../config/constants.js';
 
 dotenv.config();
 
 const ULTRAMSG_INSTANCE_ID = process.env.ULTRAMSG_INSTANCE_ID || 'instance190648';
 const ULTRAMSG_TOKEN = process.env.ULTRAMSG_TOKEN || 'knnyrkcj26wp4jyf';
+const AISENSY_API_KEY = process.env.AISENSY_API_KEY || 'e0024fe53f0c2c2c42bf4';
+const AISENSY_PROJECT_ID = process.env.AISENSY_PROJECT_ID || '6a9ec55f4de96179c2effd1e';
 
 const ACTIVE_META_TOKEN =
   'EAAUU0G7bSl8BSVNpv55As86uPV8nwdcYkdJfZBSGemdmQubjZCIhwZBOHrJURg0mGtGUKcnFBCY8y5aN499HWdBNoRrGcKThx1sMVHVD6ZAOh1kszUf1ZCQcfHabXecPoAiCFz6wmczu01V3A6RZBNCEfZC6O3LpeL1ZBGpnYOCF6D9gTyYRTdaDAomMmvJmrrFBL3BP3mkVZAMpFKNhwVYBRVZB243ZBF9WmUXap7WroZAtyBZAiOErHCPDWRFF6taEIhUhfc8UZBoodpOItmPmvbB8H1oPtDNCVScZAvqswZDZD';
@@ -27,9 +30,10 @@ export function getWhatsAppToken(): string {
 }
 
 const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID || '1145834371951879';
-const PRIMARY_GATEWAY = process.env.WHATSAPP_PRIMARY_GATEWAY || 'meta';
+const PRIMARY_GATEWAY = process.env.WHATSAPP_PRIMARY_GATEWAY || 'aisensy';
 
 // Initialize Adapters
+const aisensyAdapter = new AiSensyAdapter(AISENSY_API_KEY, AISENSY_PROJECT_ID);
 const metaAdapter = new MetaCloudAdapter(WHATSAPP_PHONE_NUMBER_ID, getWhatsAppToken());
 const ultraMsgAdapter = new UltraMsgAdapter(ULTRAMSG_INSTANCE_ID, ULTRAMSG_TOKEN);
 
@@ -45,11 +49,14 @@ export function cleanPhoneNumber(phone: string): string {
 
 export const whatsappService = {
   getPrimaryAdapter(): ChannelAdapter {
-    return PRIMARY_GATEWAY === 'ultramsg' ? ultraMsgAdapter : metaAdapter;
+    if (PRIMARY_GATEWAY === 'aisensy') return aisensyAdapter;
+    if (PRIMARY_GATEWAY === 'ultramsg') return ultraMsgAdapter;
+    return metaAdapter;
   },
 
   getSecondaryAdapter(): ChannelAdapter {
-    return PRIMARY_GATEWAY === 'ultramsg' ? metaAdapter : ultraMsgAdapter;
+    if (PRIMARY_GATEWAY === 'aisensy') return ultraMsgAdapter;
+    return aisensyAdapter;
   },
 
   async sendTextMessage(to: string, text: string): Promise<boolean> {
