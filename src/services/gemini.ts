@@ -13,28 +13,43 @@ dotenv.config();
 const apiKey = process.env.GEMINI_API_KEY || 'placeholder_key';
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// Strict Zod schema for extracted document metadata
+// Strict Zod schema for extracted document metadata (6 Life Packs)
 export const ExtractedDocSchema = z.object({
   category: z.enum([
+    'identity',
+    'family_school',
+    'health_medicine',
+    'money_assets',
+    'promises_tasks',
+    'quick_notes',
     'vehicle',
     'appliance',
     'insurance',
     'medical',
-    'identity',
     'property',
     'finance',
     'general',
   ]).default('general'),
-  title: z.string().describe('Clear, concise name of the document, e.g. "Havells Mixer Grinder Bill", "Swift Dzire PUC", "LIC Policy"'),
-  entity_name: z.string().nullable().optional().describe('Brand, company, shop, vehicle model, doctor or insurer name'),
+  title: z.string().describe('Clear, concise name of the document, e.g. "Havells Mixer Grinder Bill", "Swift Dzire RC", "DPS School Fee Slip", "Dr Mehta Prescription"'),
+  entity_name: z.string().nullable().optional().describe('Brand, company, school, hospital, vehicle model, doctor or insurer name'),
   policy_or_bill_no: z.string().nullable().optional().describe('Invoice number, policy number, registration number, or prescription ID'),
   amount: z.number().nullable().optional().describe('Total amount in INR if mentioned'),
   issue_date: z.string().nullable().optional().describe('Date of issuance or purchase in YYYY-MM-DD format'),
-  expiry_date: z.string().nullable().optional().describe('Expiry date, renewal date, warranty end date, or next follow-up in YYYY-MM-DD format'),
+  expiry_date: z.string().nullable().optional().describe('Expiry date, renewal date, fee due date, warranty end date, or next follow-up in YYYY-MM-DD format'),
   dob: z.string().nullable().optional().describe('Date of birth in YYYY-MM-DD or DD/MM/YYYY format if this is an ID card or medical record'),
   vehicle_number: z.string().nullable().optional().describe('Vehicle registration plate number (e.g. DL01AB1234, UP16CD5678) if this is an RC, PUC, or vehicle insurance'),
+  person: z.string().nullable().optional().describe('Person or family member associated, e.g. "Papa", "Mummy", "Beti", "Self", or specific name'),
+  medicines: z.array(z.object({
+    name: z.string(),
+    dosage: z.string().optional(),
+    timing: z.string().optional(),
+    relation_to_food: z.string().optional(),
+  })).nullable().optional().describe('Prescribed medicines with dosages and timings if this is a doctor prescription'),
+  is_uncertain: z.boolean().default(false).describe('True if the image is blurry, poorly lit, cut off, or critical amounts/dates are ambiguous'),
+  clarification_prompt: z.string().nullable().optional().describe('Honest question in simple Hinglish if photo is unclear or amount is ambiguous'),
+  action_proposed: z.string().nullable().optional().describe('Actionable reminder proposal, e.g. "Reminder 10 Sept subah 9 baje laga doon?"'),
   summary: z.string().describe('One single line crisp summary in simple Hinglish / English'),
-  tags: z.array(z.string()).describe('3 to 5 searchable keywords in lowercase, e.g. ["havells", "mixer", "warranty", "kitchen"]'),
+  tags: z.array(z.string()).describe('3 to 5 searchable keywords in lowercase, e.g. ["rc", "swift", "vehicle", "dl8c"]'),
   confidence_score: z.number().min(0).max(1).default(0.9),
 });
 
@@ -58,44 +73,60 @@ export const geminiService = {
     });
 
     const prompt = `
-You are the document intelligence engine for "${BRAND.displayName}", a bank-grade trusted personal digital vault.
-Your job is to read images, scanned PDFs, bills, warranty cards, vehicle papers, insurance policies, or handwritten doctor prescriptions/chits and extract structured metadata.
+You are the document intelligence engine for "${BRAND.displayName}", a bank-grade trusted personal digital vault and life COO.
+Your job is to read images, scanned PDFs, bills, warranty cards, vehicle papers, insurance policies, school fee receipts, or handwritten doctor prescriptions and extract structured metadata into one of our 6 Life Packs.
 
-IMPORTANT RULES FOR INDIAN DOCUMENTS:
-1. Dates: Look carefully for dates.
-   - If issue_date and warranty period (e.g. "2 Years Warranty") are mentioned, calculate the expiry_date = issue_date + warranty_period.
-   - For PUC / Pollution certificates, expiry date is typically 6 months or 1 year from test date.
-   - For vehicle insurance, note policy end date.
-   - For doctor prescriptions, if follow up is mentioned (e.g. "Visit after 15 days"), calculate expiry_date = prescription date + 15 days.
-   - Format all dates strictly as YYYY-MM-DD. If year or date cannot be determined with confidence, return null.
-2. Identity & Vehicle Details (For Numerology & Vault):
-   - For identity cards (PAN, Aadhaar, Passport, DL), look for Date of Birth and extract as "dob" (YYYY-MM-DD or DD/MM/YYYY).
-   - For vehicle papers (RC, Insurance, PUC, Challan), extract the vehicle registration number as "vehicle_number" (e.g. UP16AB1234, DL3CAB5678).
-3. Handwritten text: Indian handwritten doctor prescriptions, local repair bills, and rough receipts may have messy handwriting. Do your best to identify the shop name, items, and total amount.
+IMPORTANT RULES FOR INDIAN LIFE OBJECTS:
+1. Honesty & Blur Detection (CRUCIAL):
+   - If the image is blurry, handwritten text is illegible, numbers are cut off, or you are <80% confident about key amounts/dates:
+     Set "is_uncertain": true, and provide a polite, honest "clarification_prompt" in Hinglish (e.g. "Photo thodi blur hai. Amount ~₹18,400 dikh raha hai — yehi maanun ya close-up bhejoge?").
+   - NEVER invent or hallucinate dates, policy numbers, or amounts. If not clearly visible, set to null.
+
+2. Dates & Expiry Calculations:
+   - For School Fees: Expiry_date is the "Due Date" or "Last date of payment".
+   - For Vehicle RC: RC validity is typically 15 years from registration date.
+   - For PUC / Pollution: 6 months or 1 year from test date.
+   - For Insurance: Policy end / renewal date.
+   - For Doctor Prescriptions: Calculate expiry_date as follow-up date (e.g. "Review after 15 days").
+   - For Warranties: Calculate expiry_date = issue_date + warranty period.
+   - All dates strictly YYYY-MM-DD.
+
+3. Health & Doctor Prescriptions:
+   - Identify the patient/person if mentioned ("Papa", "Mummy", kid's name).
+   - Extract prescribed medicines into the "medicines" list with name, dosage (e.g. "40mg", "1 tablet"), timing ("morning", "dinner", "twice daily"), and relation_to_food ("after food", "empty stomach").
+
 4. Category classification:
-   - vehicle: RC, PUC, DL, Car/Bike insurance, Service bills
-   - appliance: Electronics, mobile, fridge, TV, mixer warranty cards and bills
-   - insurance: Life, Health, Term policies (LIC, Star Health, HDFC Ergo, etc.)
-   - medical: Doctor prescriptions, blood reports, test results, hospital discharge summaries
-   - identity: Aadhaar, PAN, Voter card, Passport
-   - property: Rent agreement, Registry, Electricity bill, Water bill
-   - finance: FD slips, Bank receipts, Mutual funds
-   - general: Misc receipts, rough notes
-5. User provided extra message/context: ${userNotes ? `"${userNotes}"` : 'None'}
+   - "identity": Aadhaar, PAN, Voter card, Passport, Driving License
+   - "family_school": School fee slip, tuition receipt, report card, vaccine chart, school ID
+   - "health_medicine": Doctor prescription, lab blood test, hospital discharge summary, medical bill
+   - "money_assets": Car/bike RC, insurance policy, PUC, electricity bill, gas bill, rent agreement, appliance warranty
+   - "promises_tasks": Forwarded chat commitments, task slips, invoices
+   - "quick_notes": Passwords, account details, rough notes
+   (Legacy categories 'vehicle', 'appliance', 'insurance', 'medical', 'property', 'finance', 'general' are also valid)
 
-Return a JSON object conforming strictly to this JSON schema:
+5. Proposed Action:
+   - Suggest a crisp proactive next step in "action_proposed" (e.g. "10 Sept ko reminder laga doon?", "PUC renew karwane ka alert set karun?").
+
+User provided extra message/context: ${userNotes ? `"${userNotes}"` : 'None'}
+
+Return a JSON object conforming strictly to this schema:
 {
-  "category": "vehicle" | "appliance" | "insurance" | "medical" | "identity" | "property" | "finance" | "general",
-  "title": "Clear title in English/Hinglish",
-  "entity_name": "Brand / Company / Doctor / Shop name or null",
-  "policy_or_bill_no": "Number or null",
+  "category": "identity" | "family_school" | "health_medicine" | "money_assets" | "promises_tasks" | "quick_notes" | "vehicle" | "appliance" | "insurance" | "medical" | "property" | "finance" | "general",
+  "title": "Clear concise title",
+  "entity_name": "School / Company / Doctor / Shop name or null",
+  "policy_or_bill_no": "Policy, bill, or reg number or null",
   "amount": number or null,
   "issue_date": "YYYY-MM-DD" or null,
   "expiry_date": "YYYY-MM-DD" or null,
   "dob": "YYYY-MM-DD" or null,
-  "vehicle_number": "Vehicle plate string or null",
-  "summary": "1 single line explanation",
-  "tags": ["keyword1", "keyword2", "keyword3"],
+  "vehicle_number": "Registration number string or null",
+  "person": "Family member/person or null",
+  "medicines": [{"name": "Medicine name", "dosage": "5mg", "timing": "night", "relation_to_food": "after dinner"}] or null,
+  "is_uncertain": false,
+  "clarification_prompt": null,
+  "action_proposed": "1-line prompt or null",
+  "summary": "1 single line summary in Hinglish",
+  "tags": ["tag1", "tag2", "tag3"],
   "confidence_score": 0.0 to 1.0
 }
 `;
@@ -115,7 +146,6 @@ Return a JSON object conforming strictly to this JSON schema:
       return ExtractedDocSchema.parse(parsed);
     } catch (parseErr) {
       console.error('Error parsing Gemini extraction JSON:', parseErr, 'Raw response:', responseText);
-      // Fallback object
       return {
         category: 'general',
         title: userNotes ? userNotes.substring(0, 50) : 'Zaroori Kaagaz',
@@ -124,6 +154,11 @@ Return a JSON object conforming strictly to this JSON schema:
         amount: null,
         issue_date: null,
         expiry_date: null,
+        person: null,
+        medicines: null,
+        is_uncertain: false,
+        clarification_prompt: null,
+        action_proposed: null,
         summary: 'Kaagaz successfully save kar liya gaya hai.',
         tags: ['document', 'kaagaz'],
         confidence_score: 0.5,
@@ -482,5 +517,127 @@ UNIVERSAL NUMEROLOGY & LIFE GUIDELINES (ALL FAITHS):
   // Backwards compatible alias
   async generateDailyAstroGuide(profile: any, language: string = 'hinglish') {
     return this.generateDailyNumerologyGuide(profile, language);
-  }
+  },
+
+  /**
+   * Extract Structured Life Memory or Promise from Casual Text / Forwarded WhatsApp Chats
+   * (e.g. "Bhai quote kal shaam 5 baje tak bhej dunga", "Ghar ka WiFi password Airtel@123", "Papa BP dawa Telma 40")
+   */
+  async extractFactOrPromise(
+    text: string,
+    currentIsoTime: string = new Date().toISOString()
+  ): Promise<{
+    isFactOrPromise: boolean;
+    category?: 'health' | 'family' | 'finance' | 'home' | 'promise' | 'note' | 'general';
+    person?: string;
+    keyFact?: string;
+    dueDate?: string;
+    amount?: number;
+    replyReceipt?: string;
+  }> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1,
+        },
+      });
+
+      const prompt = `
+Analyze if this text or forwarded WhatsApp chat contains an actionable promise, medical fact, family note, WiFi/account detail, or crucial life fact to remember:
+Current time: ${currentIsoTime}
+User Text: "${text}"
+
+Life Fact Categories:
+- "promise": A commitment made to someone or owed by someone (e.g. "Quote kal bhejunga", "Sharma ji ko ₹10k dene hain", "I will send file by Tuesday")
+- "health": Family medicine, dosage, timing, health allergy, doctor note (e.g. "Papa ki BP dawa Telma 40 dinner ke baad")
+- "family": Kids school, fee, tuition, PTM, vaccine (e.g. "Beti ki school fee 18400 due 12 Sept")
+- "home": WiFi password, appliance note, repair guy number, maid timing
+- "finance": EMI, bill, bank account, IFSC, UPI ID, rent
+- "note": General fact or important detail to recall later
+
+If it contains a life fact or promise:
+Return JSON:
+{
+  "isFactOrPromise": true,
+  "category": "health" | "family" | "finance" | "home" | "promise" | "note" | "general",
+  "person": "Person involved (e.g. Papa, Mummy, Beti, Sharma ji, Client) or null",
+  "keyFact": "Concise clean summary of the fact/promise in 1 line",
+  "dueDate": "YYYY-MM-DD or null if a deadline exists",
+  "amount": number or null,
+  "replyReceipt": "Crisp 1-line human receipt in Hinglish confirming what was saved (e.g. 'Save ho gaya ✅ Sharma ji ko 15 Sept tak ₹10,000. 14 Sept ko yaad dilau?')"
+}
+
+If it is just casual greeting, general chat, or inquiry:
+Return JSON:
+{
+  "isFactOrPromise": false
+}
+`;
+
+      const result = await model.generateContent(prompt);
+      return JSON.parse(result.response.text());
+    } catch (err) {
+      console.error('Error in extractFactOrPromise:', err);
+      return { isFactOrPromise: false };
+    }
+  },
+
+  /**
+   * Unified 8:05 AM Morning COO Briefing Engine
+   * Combines Today's Expiries + Medicine Timings + Promises + Road Safety Alert into 1 clean card
+   */
+  async generateUnifiedDailyBrief(
+    userName: string = 'Bhai Sahab',
+    memories: any[] = [],
+    upcomingDocs: any[] = [],
+    reminders: any[] = [],
+    numerologyContext?: string
+  ): Promise<string> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          temperature: 0.5,
+        },
+      });
+
+      const todayStr = new Date().toLocaleDateString('en-IN', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'short',
+      });
+
+      const prompt = `
+You are "${BRAND.displayName}" — the personal life COO on WhatsApp.
+Create the single unified 8:05 AM morning brief for ${userName}.
+Today is ${todayStr}.
+
+Active Data:
+- Upcoming/Due Document Expiries & Bills: ${JSON.stringify(upcomingDocs.map(d => ({ title: d.title, date: d.expiry_date, amount: d.amount })))}
+- Active Reminders/Tasks for today: ${JSON.stringify(reminders.map(r => ({ task: r.task, time: r.remind_at })))}
+- Stored Family & Health Memories (e.g. medicines, promises): ${JSON.stringify(memories.map(m => m.key_fact))}
+- Numerology / Road Safety Context: ${numerologyContext || 'Drive carefully during evening rush hour.'}
+
+MANDATORY RULES:
+1. Short & crisp (NO long essays, max 4-6 bullet points).
+2. Format:
+   Suprabhat ${userName}! ☀️ Aaj ka schedule:
+   1. [Task/Bill due today or soon]
+   2. [Family medicine or promise]
+   3. [Travel / Road safety warning]
+   4. [Lucky color / Focus window if applicable]
+   
+   Kisi cheez par reminder lagana hai?
+3. Natural, respectful Hinglish. NEVER spam asterisks.
+`;
+
+      const result = await model.generateContent(prompt);
+      return result.response.text().trim();
+    } catch (err) {
+      console.error('Error in generateUnifiedDailyBrief:', err);
+      return `Suprabhat ${userName}! ☀️\n\nAaj ka din shubh rahe. Sadak par driving sambhal kar kijiye aur apne zaroori kaamo par dhyan dein. Kisi bhi kaagaz ya reminder ke liye main yahin hoon! 🙏`;
+    }
+  },
 };

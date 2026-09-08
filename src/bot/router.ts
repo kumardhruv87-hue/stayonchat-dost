@@ -225,8 +225,6 @@ export const botRouter = {
       const fileName = message.document?.filename || (message.image ? `doc_${Date.now()}.jpg` : `file_${Date.now()}.pdf`);
       const caption = message.image?.caption || message.document?.caption || '';
 
-      await whatsappService.sendTextMessage(fromPhone, `${BRAND.displayName} aapka kaagaz dekh raha hai... kripya 1 second intezar karein! ⏳`);
-
       try {
         const { buffer, mimeType } = await whatsappService.downloadMedia(mediaId);
 
@@ -241,6 +239,14 @@ export const botRouter = {
         // Extract metadata using Gemini Flash Vision
         const extracted = await geminiService.extractDocumentMetadata(buffer, mimeType, caption);
         console.log('📄 Gemini Extracted Metadata:', JSON.stringify(extracted, null, 2));
+
+        // 1. Honest Failure & Blur UX
+        if (extracted.is_uncertain) {
+          const blurReply = extracted.clarification_prompt || `Photo thodi blur lag rahi hai. Details saaf nahi dikh rahi — ek aur saaf photo bhej doge?`;
+          await whatsappService.sendTextMessage(fromPhone, blurReply);
+          await dbService.saveChatMessage(fromPhone, 'model', blurReply);
+          return;
+        }
 
         // Save into Database
         const savedDoc = await dbService.saveDocument({
@@ -267,55 +273,30 @@ export const botRouter = {
           is_active: true,
         });
 
-        // If expiry found, automatically schedule reminders
+        // Auto-save Health Memory if doctor prescription with medicines
+        if (extracted.medicines && extracted.medicines.length > 0) {
+          const medsSummary = extracted.medicines.map((m: any) => `${m.name} (${m.dosage || ''} ${m.timing || ''} ${m.relation_to_food || ''})`).join(', ');
+          await dbService.saveUserMemory({
+            user_phone: fromPhone,
+            category: 'health',
+            person: extracted.person || 'Family',
+            key_fact: `${extracted.person || 'Family'} dawai: ${medsSummary}`,
+            raw_text: caption || extracted.summary,
+          });
+        }
+
+        // Auto-schedule reminders if expiry date exists
         if (extracted.expiry_date && savedDoc.id) {
           await dbService.createReminders(fromPhone, savedDoc.id, extracted.expiry_date);
         }
 
-        // Check if this upload is a photo/picture or an ambiguous document without policy/bill no or expiry
-        const isPhoto = message.type === 'image';
-        const isGenericDoc =
-          extracted.category === 'general' ||
-          (!extracted.policy_or_bill_no && !extracted.expiry_date) ||
-          extracted.title.toLowerCase().includes('photo') ||
-          extracted.title.toLowerCase().includes('document') ||
-          extracted.title.toLowerCase().includes('image');
-
-        if ((isPhoto || isGenericDoc) && savedDoc.id) {
-          // Set pending naming state for this document
-          dbService.setPendingDocNaming(fromPhone, savedDoc.id);
-
-          const photoNamingPrompt = personaService.getPhotoNamingPrompt(resolvedName);
-          await whatsappService.sendTextMessage(fromPhone, photoNamingPrompt);
-          await dbService.saveChatMessage(fromPhone, 'model', photoNamingPrompt);
-          return;
-        }
-
-        // Recognized official document (e.g. BSES bill, LIC policy, etc.)
-        const remainingSlots = currentPlan.maxFiles - (user.file_count + 1);
-        let confirmMsg = personaService.getDocSavedMessage(extracted, userLang, user.plan === 'free' ? remainingSlots : undefined);
-        if (savedDoc.id) {
-          dbService.setPendingDocNaming(fromPhone, savedDoc.id);
-          confirmMsg += `\n\n💡 Tip: Agar aap iska koi aur aasan naam rakhna chahein, toh bas naya naam type karke bhej dijiye.`;
-        }
+        // Send crisp 1-line human receipt
+        const confirmMsg = personaService.getDocSavedMessage(extracted, userLang);
         await whatsappService.sendTextMessage(fromPhone, confirmMsg);
         await dbService.saveChatMessage(fromPhone, 'model', confirmMsg);
-
-        // Habit & Loss-prevention milestone message
-        if (extracted.expiry_date) {
-          const milestoneMsg = personaService.getMilestoneMessage('penalty_saved', extracted.title);
-          await whatsappService.sendTextMessage(fromPhone, milestoneMsg);
-        }
-
-        // Contextual Upsell Check (Anti-Spam rule: max 1 per 7 days)
-        if (extracted.expiry_date && user.plan === 'free' && dbService.canSendUpsell(user)) {
-          const upsell = personaService.getExpiryUpsell(fromPhone, extracted.title, extracted.expiry_date);
-          await whatsappService.sendInteractiveButtons(fromPhone, upsell.text, upsell.buttons);
-          await dbService.markUpsellSent(fromPhone);
-        }
       } catch (err: any) {
         console.error('Failed to process document:', err);
-        await whatsappService.sendTextMessage(fromPhone, `Kshama karein ${resolvedName} ji, kaagaz padhne mein thodi takleef hui. Kripya thoda saaf photo ya PDF dobara bhejiye.`);
+        await whatsappService.sendTextMessage(fromPhone, `Kshama karein ${resolvedName} ji, photo padhne mein thodi takleef hui. Kripya ek aur saaf photo bhej dijiye.`);
       }
       return;
     }
@@ -479,13 +460,113 @@ export const botRouter = {
         return;
       }
 
-      // 4.3 Greeting / Start -> Always ask language first!
+      // 4.3 Zero-Friction Human Greeting (NO IVR, NO brochures)
       if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'dost', 'keepr'].includes(lowerText)) {
-        dbService.setUserPromptState(fromPhone, 'pending_language');
-        const langMsg = personaService.getLanguageSelectionMessage();
-        await whatsappService.sendTextMessage(fromPhone, langMsg);
-        await dbService.saveChatMessage(fromPhone, 'model', langMsg);
+        const greeting = personaService.getHumanGreeting(resolvedName);
+        await whatsappService.sendTextMessage(fromPhone, greeting);
+        await dbService.saveChatMessage(fromPhone, 'model', greeting);
         return;
+      }
+
+      // 4.31 Emergency Fast-Pack: Traffic Police Checking ("police", "car docs", "gaadi ke paper")
+      if (['police', 'car docs', 'car papers', 'gaadi ke kaagaz', 'gaadi ke paper', 'traffic police'].some(k => lowerText === k || lowerText.includes(k))) {
+        const vehicleDocs = await dbService.getEmergencyVehicleDocs(fromPhone);
+        if (vehicleDocs.length === 0) {
+          const noDocMsg = '🚗 Gaadi ke kaagaz abhi vault mein save nahi hain.\n\nCar ya bike ki RC, insurance policy ya PUC ki photo bhej dijiye — aage se "police" likhte hi 2 second mein original files wapas mil jayengi!';
+          await whatsappService.sendTextMessage(fromPhone, noDocMsg);
+          return;
+        }
+
+        await whatsappService.sendTextMessage(fromPhone, `🚨 Emergency Police Pack: Gaadi ke ${vehicleDocs.length} kaagaz (RC + Insurance + PUC) nikal rahe hain...`);
+        for (const vDoc of vehicleDocs.slice(0, 3)) {
+          try {
+            const buffer = await storageService.downloadDocument(vDoc.storage_path);
+            const isPdf = vDoc.file_type?.includes('pdf') || vDoc.file_name?.toLowerCase().endsWith('.pdf');
+            if (isPdf) {
+              const mediaId = await whatsappService.uploadMedia(buffer, 'application/pdf', vDoc.file_name || `${vDoc.title}.pdf`);
+              if (mediaId) await whatsappService.sendDocumentByMediaId(fromPhone, mediaId, vDoc.file_name || `${vDoc.title}.pdf`, `🚗 ${vDoc.title} (${vDoc.expiry_date ? `Expiry: ${vDoc.expiry_date}` : 'Valid'})`);
+            } else {
+              const mediaId = await whatsappService.uploadMedia(buffer, vDoc.file_type || 'image/jpeg', `${vDoc.title}.jpg`);
+              if (mediaId) await whatsappService.sendImageByMediaId(fromPhone, mediaId, `🚗 ${vDoc.title} (${vDoc.expiry_date ? `Expiry: ${vDoc.expiry_date}` : 'Valid'})`);
+            }
+          } catch (e) {
+            console.warn('Error sending emergency vehicle doc:', e);
+          }
+        }
+        return;
+      }
+
+      // 4.32 Emergency Fast-Pack: Medical & Hospital ("medical", "emergency", "hospital")
+      if (['medical', 'emergency', 'hospital', 'doctor emergency'].some(k => lowerText === k || lowerText.includes(k))) {
+        const healthPack = await dbService.getEmergencyHealthDocs(fromPhone);
+        let reply = `🏥 Emergency Medical Pack: 🤖✨\n\n`;
+        if (healthPack.memories.length > 0) {
+          reply += `💊 Active Dawaiyan & Health Notes:\n`;
+          healthPack.memories.forEach((m, idx) => {
+            reply += `${idx + 1}. ${m.key_fact}\n`;
+          });
+          reply += `\n`;
+        }
+        if (healthPack.docs.length > 0) {
+          reply += `📄 Health Policies & Reports in Vault (${healthPack.docs.length}):\n`;
+          healthPack.docs.forEach((d, idx) => {
+            reply += `${idx + 1}. ${d.title} ${d.expiry_date ? `(Valid till ${d.expiry_date})` : ''}\n`;
+          });
+        } else if (healthPack.memories.length === 0) {
+          reply += `Koi health policy ya parcha vault mein nahi hai. Forward karke save kar sakte hain!`;
+        }
+        await whatsappService.sendTextMessage(fromPhone, reply);
+        return;
+      }
+
+      // 4.33 Magic Command: "aaj kya hai" / Unified Daily COO Brief
+      if (['aaj kya hai', 'brief', 'schedule', 'aaj ka schedule', 'today schedule', 'daily brief'].some(k => lowerText === k || lowerText.includes(k))) {
+        const memories = await dbService.getUserMemories(fromPhone);
+        const expiries = await dbService.getUserExpiries(fromPhone);
+        const reminders = await dbService.getUserGeneralReminders(fromPhone);
+        const numerologyData = await dbService.getUserNumerologyData(fromPhone);
+
+        const brief = await geminiService.generateUnifiedDailyBrief(
+          resolvedName,
+          memories,
+          expiries,
+          reminders,
+          numerologyData.profileContext
+        );
+        await whatsappService.sendTextMessage(fromPhone, brief);
+        await dbService.saveChatMessage(fromPhone, 'model', brief);
+        return;
+      }
+
+      // 4.34 Magic Command: "bhool ja" / Delete Memory
+      if (lowerText.startsWith('bhool ja') || lowerText.startsWith('delete') || lowerText.startsWith('remove') || lowerText.startsWith('hata do')) {
+        const queryToDelete = lowerText.replace(/^(bhool ja|delete|remove|hata do)\s*:?/i, '').trim();
+        const deletedCount = await dbService.deleteUserMemories(fromPhone, queryToDelete);
+        const delMsg = deletedCount > 0
+          ? `✅ Maine yaad-daasht se hata diya hai. Ab yeh data mere paas nahi hai.`
+          : `Privacy safe: Aapka data clean hai.`;
+        await whatsappService.sendTextMessage(fromPhone, delMsg);
+        return;
+      }
+
+      // 4.35 Magic Command: "rakh" / "save"
+      if (lowerText.startsWith('rakh') || lowerText.startsWith('save')) {
+        const rawNote = text.replace(/^(rakh|save)\s*:?/i, '').trim();
+        if (rawNote) {
+          const fact = await geminiService.extractFactOrPromise(rawNote);
+          await dbService.saveUserMemory({
+            user_phone: fromPhone,
+            category: fact.isFactOrPromise ? (fact.category || 'note') : 'note',
+            person: fact.person,
+            key_fact: fact.keyFact || rawNote,
+            due_date: fact.dueDate,
+            amount: fact.amount,
+            raw_text: rawNote,
+          });
+          const confirm = fact.replyReceipt || `Save ho gaya ✅\n\n"${rawNote}" — jab bhi poochhoge, turant nikal dunga.`;
+          await whatsappService.sendTextMessage(fromPhone, confirm);
+          return;
+        }
       }
 
       // 4.4 Menu Option 1: Kaagaz Vault
@@ -564,6 +645,46 @@ export const botRouter = {
         await whatsappService.sendTextMessage(fromPhone, reply);
         await dbService.saveChatMessage(fromPhone, 'model', reply);
         return;
+      }
+
+      // 4.101 Search User Memories (Life Graph Recall Loop)
+      const memoryMatches = await dbService.searchUserMemories(fromPhone, text);
+      const isMemoryQuery = /\b(kya tha|kya hai|kaunsi thi|kaunsa hai|password|wifi|dawa|medicine|dawai|promise|sharma|account|ifsc|upi|blood group|kitna|kitne)\b/i.test(text);
+      if (memoryMatches.length > 0 && isMemoryQuery) {
+        const topMem = memoryMatches[0];
+        const memReply = `🔍 ${topMem.key_fact} ✅\n\n(Aapne save karwaya tha: "${topMem.raw_text || topMem.key_fact}")`;
+        await whatsappService.sendTextMessage(fromPhone, memReply);
+        await dbService.saveChatMessage(fromPhone, 'model', memReply);
+        return;
+      }
+
+      // 4.102 Fact or Promise Capture (Forwarded Chat / Casual Life Note Dump Loop)
+      const isLikelyQuestion = /\b(kya|kaun|kahan|kaise|kyun|batao|bataiye|dikhao|bhejo|\?)\b/i.test(text);
+      if (!isLikelyQuestion) {
+        const factCheck = await geminiService.extractFactOrPromise(text);
+        if (factCheck.isFactOrPromise && factCheck.keyFact) {
+          await dbService.saveUserMemory({
+            user_phone: fromPhone,
+            category: factCheck.category || 'note',
+            person: factCheck.person,
+            key_fact: factCheck.keyFact,
+            due_date: factCheck.dueDate,
+            amount: factCheck.amount,
+            raw_text: text,
+          });
+
+          if (factCheck.dueDate) {
+            const targetDate = new Date(factCheck.dueDate);
+            if (!isNaN(targetDate.getTime()) && targetDate.getTime() > Date.now()) {
+              await dbService.addGeneralReminder(fromPhone, factCheck.keyFact, targetDate.toISOString());
+            }
+          }
+
+          const receipt = factCheck.replyReceipt || `Save ho gaya ✅\n• ${factCheck.keyFact}`;
+          await whatsappService.sendTextMessage(fromPhone, receipt);
+          await dbService.saveChatMessage(fromPhone, 'model', receipt);
+          return;
+        }
       }
 
       // 4.11 Document & Photo Search Query (e.g. "RC", "Havells bill", "LIC policy", "PUC", "photo", "pic", "meri pic wapas do")

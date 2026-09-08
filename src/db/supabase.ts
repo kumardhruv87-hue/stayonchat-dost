@@ -81,9 +81,23 @@ export interface DocumentRecord {
   created_at?: string;
 }
 
+export interface UserMemory {
+  id?: string;
+  user_phone: string;
+  category: 'health' | 'family' | 'finance' | 'home' | 'promise' | 'note' | 'general';
+  person?: string;       // e.g. 'Papa', 'Mummy', 'Beti', 'Self', 'Spouse', 'Sharma ji'
+  key_fact: string;      // e.g. 'Papa BP medicine: Telma 40 after dinner'
+  raw_text?: string;
+  due_date?: string;
+  amount?: number;
+  created_at?: string;
+  expires_at?: string;
+}
+
 // In-memory caching & resilient fallback store
 const inMemoryUsers: Map<string, UserRecord> = new Map();
 const inMemoryReminders: GeneralReminder[] = [];
+const inMemoryUserMemories: UserMemory[] = [];
 const inMemoryChatHistory: Map<string, Array<{ role: 'user' | 'model'; text: string; timestamp: string }>> = new Map();
 const inMemoryPendingNaming: Map<string, { docId: string; timestamp: number }> = new Map();
 const inMemoryPromptStates: Map<string, { state: string; timestamp: number }> = new Map();
@@ -546,6 +560,59 @@ export const dbService = {
     return usersWithDob;
   },
 
+  // Get all registered active users for daily brief and system broadcasts
+  async getAllActiveUsers(): Promise<UserRecord[]> {
+    try {
+      const { data } = await supabase.from('users').select('*');
+      if (data && data.length > 0) {
+        return data as UserRecord[];
+      }
+    } catch {
+      // In-memory fallback
+    }
+    return Array.from(inMemoryUsers.values());
+  },
+
+  // Get upcoming documents expiring in next N days for a user
+  async getUserUpcomingDocuments(userPhone: string, daysAhead: number = 30): Promise<DocumentRecord[]> {
+    const today = new Date().toISOString().split('T')[0];
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + daysAhead);
+    const targetStr = targetDate.toISOString().split('T')[0];
+
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_active', true)
+        .gte('expiry_date', today)
+        .lte('expiry_date', targetStr)
+        .order('expiry_date', { ascending: true });
+      if (!error && data) return data as DocumentRecord[];
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  // Get pending tasks/reminders for a user
+  async getUserActiveReminders(userPhone: string): Promise<GeneralReminder[]> {
+    try {
+      const { data, error } = await supabase
+        .from('general_reminders')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_sent', false)
+        .order('remind_at', { ascending: true })
+        .limit(10);
+      if (!error && data) return data as GeneralReminder[];
+    } catch {
+      // Fallback
+    }
+    return inMemoryReminders.filter((r) => r.user_phone === userPhone && !r.is_sent);
+  },
+
   // Effective max files including base plan + referral bonuses
   getUserEffectiveMaxFiles(user: UserRecord): number {
     const base = PLANS[user.plan]?.maxFiles || 10;
@@ -811,5 +878,177 @@ export const dbService = {
     }
 
     return [];
+  },
+
+  // =============================================================
+  // LIFE GRAPH: User Memory & Emergency Retrieval
+  // =============================================================
+
+  // Save a structured life memory (health fact, promise, school note, home fact)
+  async saveUserMemory(memory: UserMemory): Promise<UserMemory> {
+    const memWithMeta: UserMemory = {
+      ...memory,
+      id: memory.id || (await import('crypto')).randomUUID(),
+      created_at: memory.created_at || new Date().toISOString(),
+    };
+
+    inMemoryUserMemories.push(memWithMeta);
+
+    try {
+      // 1. Attempt insert into user_memories table
+      const { data, error } = await supabase.from('user_memories').insert(memWithMeta).select('*').single();
+      if (!error && data) return data as UserMemory;
+    } catch {
+      // Ignore if table not created
+    }
+
+    // 2. Resilient fallback: store in documents table as SYSTEM_USER_MEMORIES
+    try {
+      const userList = inMemoryUserMemories.filter((m) => m.user_phone === memory.user_phone);
+      const { data: existing } = await supabase
+        .from('documents')
+        .select('id')
+        .eq('user_phone', memory.user_phone)
+        .eq('title', 'SYSTEM_USER_MEMORIES')
+        .maybeSingle();
+
+      if (existing?.id) {
+        await supabase
+          .from('documents')
+          .update({
+            raw_extraction: { memories: userList },
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+      } else {
+        await supabase.from('documents').insert({
+          user_phone: memory.user_phone,
+          storage_path: `system/memories_${memory.user_phone}.json`,
+          file_name: 'user_memories.json',
+          file_type: 'application/json',
+          category: 'general',
+          title: 'SYSTEM_USER_MEMORIES',
+          raw_extraction: { memories: userList },
+          is_active: false,
+        });
+      }
+    } catch (err) {
+      console.warn('User memory fallback warning:', err);
+    }
+
+    return memWithMeta;
+  },
+
+  // Get all active memories for a user (optionally filtered by category)
+  async getUserMemories(userPhone: string, category?: string): Promise<UserMemory[]> {
+    let list = inMemoryUserMemories.filter((m) => m.user_phone === userPhone);
+
+    if (list.length === 0) {
+      try {
+        const { data } = await supabase
+          .from('documents')
+          .select('raw_extraction')
+          .eq('user_phone', userPhone)
+          .eq('title', 'SYSTEM_USER_MEMORIES')
+          .maybeSingle();
+
+        if (data?.raw_extraction?.memories && Array.isArray(data.raw_extraction.memories)) {
+          const loaded = data.raw_extraction.memories as UserMemory[];
+          loaded.forEach((m) => inMemoryUserMemories.push(m));
+          list = loaded;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (category) {
+      return list.filter((m) => m.category === category);
+    }
+    return list;
+  },
+
+  // Search memories matching query tokens (e.g. "WiFi password", "Papa BP dawa", "Sharma")
+  async searchUserMemories(userPhone: string, query: string): Promise<UserMemory[]> {
+    const list = await this.getUserMemories(userPhone);
+    if (!query || !query.trim()) return list;
+
+    const cleanTokens = query
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !['mera', 'meri', 'mere', 'kya', 'tha', 'hai', 'kaunsa', 'batana', 'batao'].includes(w));
+
+    if (cleanTokens.length === 0) return list;
+
+    return list.filter((m) => {
+      const searchTarget = `${m.key_fact} ${m.person || ''} ${m.category} ${m.raw_text || ''}`.toLowerCase();
+      return cleanTokens.some((token) => searchTarget.includes(token));
+    });
+  },
+
+  // Delete memories matching query or all if "sab bhool ja"
+  async deleteUserMemories(userPhone: string, query?: string): Promise<number> {
+    const initialCount = inMemoryUserMemories.length;
+    if (!query || query.includes('sab') || query.includes('all')) {
+      for (let i = inMemoryUserMemories.length - 1; i >= 0; i--) {
+        if (inMemoryUserMemories[i].user_phone === userPhone) {
+          inMemoryUserMemories.splice(i, 1);
+        }
+      }
+      try {
+        await supabase.from('documents').delete().eq('user_phone', userPhone).eq('title', 'SYSTEM_USER_MEMORIES');
+      } catch {}
+      return initialCount - inMemoryUserMemories.length;
+    }
+
+    const matches = await this.searchUserMemories(userPhone, query);
+    const matchIds = new Set(matches.map((m) => m.id));
+
+    for (let i = inMemoryUserMemories.length - 1; i >= 0; i--) {
+      if (inMemoryUserMemories[i].id && matchIds.has(inMemoryUserMemories[i].id)) {
+        inMemoryUserMemories.splice(i, 1);
+      }
+    }
+
+    return matches.length;
+  },
+
+  // Fast Emergency Vehicle Documents (Police checking pack: RC, Insurance, PUC)
+  async getEmergencyVehicleDocs(userPhone: string): Promise<DocumentRecord[]> {
+    try {
+      const { data } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_active', true)
+        .or('category.eq.vehicle,title.ilike.%rc%,title.ilike.%insurance%,title.ilike.%puc%,title.ilike.%driving%')
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      return (data as DocumentRecord[]) || [];
+    } catch {
+      return [];
+    }
+  },
+
+  // Fast Emergency Health Documents & Medical Memories (Doctor/Hospital pack)
+  async getEmergencyHealthDocs(userPhone: string): Promise<{ docs: DocumentRecord[]; memories: UserMemory[] }> {
+    let docs: DocumentRecord[] = [];
+    try {
+      const { data } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_phone', userPhone)
+        .eq('is_active', true)
+        .or('category.eq.medical,category.eq.insurance,title.ilike.%health%,title.ilike.%dr%,title.ilike.%parcha%,title.ilike.%hospital%')
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      docs = (data as DocumentRecord[]) || [];
+    } catch {}
+
+    const memories = await this.getUserMemories(userPhone, 'health');
+    return { docs, memories };
   },
 };

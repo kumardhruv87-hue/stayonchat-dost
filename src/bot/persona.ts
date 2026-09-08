@@ -1,6 +1,7 @@
 // =================================================================
-// Keepr (usekeepr.com) - Persona, Voice & Multilingual Response Engine
-// Silicon Valley Standard Warm & Respectful AI Assistant
+// Keepr (usekeepr.com) - Persona, Voice & Human WhatsApp Interface
+// Zero-Friction Human Companion, Life Vault & Personal COO
+// "Dump anything. Ask anything. Miss nothing."
 // =================================================================
 
 import { ExtractedDoc } from '../services/gemini.js';
@@ -8,123 +9,89 @@ import { PLANS, BRAND } from '../config/constants.js';
 
 export const personaService = {
   /**
-   * Primary Language Selector (Sent first on greeting/onboarding)
+   * 4-Line Zero-Friction Human Greeting (NO brochures, NO IVR menus)
+   */
+  getHumanGreeting(userName: string = 'Dhruv'): string {
+    return `Main Keepr hoon. Jo rakhna hai bhej do — photo, PDF, voice note.\nYaad rakhna hai to likh do. Nikalna ho to pooch lo.\n\nJaise: "beti school fee 12 Sept 18400" ya "kal shaam papa ki dawai"`;
+  },
+
+  /**
+   * Backward compatible greeting
    */
   getLanguageSelectionMessage(): string {
-    return `Namaste / Hello! 🙏✨\n\nWelcome to ${BRAND.displayName} — Your Autonomous AI Life Vault & Assistant!\n\nKripya apni pasandeeda bhasha chunein (Please choose your language):\n\n1️⃣ Hinglish (Hindi + English)\n2️⃣ हिंदी (Hindi)\n3️⃣ English\n\n👉 Niche 1, 2 ya 3 likhkar reply karein!`;
+    return this.getHumanGreeting();
   },
 
-  /**
-   * Interactive Language Picker for buttons
-   */
-  getLanguagePicker() {
+  getIntroMessage(userName: string = 'Dhruv', language: string = 'hinglish'): string {
+    return this.getHumanGreeting(userName);
+  },
+
+  getWelcomeMessage(userName: string = 'Dhruv', language: string = 'hinglish'): string {
+    return this.getHumanGreeting(userName);
+  },
+
+  getPhotoNamingPrompt(userName: string = 'Dhruv'): string {
+    return `📸 Photo save ho gayi ✅\n\nIse kis naam se yaad rakhna hai? (Jaise: "Ghar ki Registry" ya "Vacation Photo") taaki maangte hi nikaal doon.`;
+  },
+
+  getMenuMessage(userName: string = 'Dhruv'): { text: string; buttons: { id: string; title: string }[] } {
     return {
-      text: this.getLanguageSelectionMessage(),
-      buttons: [
-        { id: 'lang_hinglish', title: '1️⃣ Hinglish' },
-        { id: 'lang_hi', title: '2️⃣ हिंदी' },
-        { id: 'lang_en', title: '3️⃣ English' },
-      ],
-    };
-  },
-
-  /**
-   * Standard Introduction Message in chosen language
-   */
-  getIntroMessage(userName: string = 'Bhai Sahab', language: string = 'hinglish'): string {
-    const cleanName = userName && userName !== 'Bhai' ? `${userName} ji` : 'Bhai Sahab';
-
-    if (language === 'hi') {
-      return `नमस्ते ${cleanName}! 🙏✨\n\nमैं हूँ आपका ${BRAND.displayName} — आपका सुरक्षित डिजिटल लॉकर और पर्सनल असिस्टेंट!\n\nआप मुझसे बेझिझक बात कर सकते हैं। मेरी मुख्य सेवाएँ:\n\n1️⃣ 📁 मेरे कागज़ (Vault): कोई भी फोटो, बिल, RC, बीमा या पर्चा भेज दीजिए — हमेशा सुरक्षित रखूँगा और मांगते ही ओरिजिनल फ़ाइल वापस भेज दूँगा!\n2️⃣ ⏰ रिमाइंडर्स व चालान सुरक्षा: दवा, EMI या सर्विसिंग याद दिलाने को कहिए। चालान व पेनल्टी से बचाने के लिए समय पर अलर्ट भेजूँगा!\n3️⃣ 🔢 मेरा अंक ज्योतिष: हर सुबह 6:00 AM पर आपका लकी रंग, शुभ मुहूर्त और रोड सेफ्टी गाइड!\n4️⃣ 📋 ${BRAND.name} प्लान्स: सिर्फ ₹20/महीना से शुरू!\n\nशुरुआत के लिए नीचे 1, 2, 3 या 4 लिखें या सीधे कोई भी फोटो, सवाल या काम भेजें! 😊`;
-    }
-
-    if (language === 'en') {
-      return `Hello ${cleanName}! 👋✨\n\nI am ${BRAND.displayName} — your autonomous digital companion and encrypted document vault!\n\nHere is how I can help you:\n\n1️⃣ 📁 My Vault: Send any photo, bill, vehicle RC, insurance, or prescription — I keep them encrypted and return original files instantly!\n2️⃣ ⏰ Smart Reminders: Never miss medicines, bills, or renewals. I save you from penalties and traffic challans with WhatsApp alerts!\n3️⃣ 🔢 Daily Life Guide: Get your lucky colors, daily energy vibration, and travel safety insights every morning at 6:00 AM!\n4️⃣ 📋 ${BRAND.name} Plans: Starting at just ₹20/month!\n\nTo get started, reply with 1, 2, 3, or 4, or simply send any photo, question, or document! 😊`;
-    }
-
-    // Default: Hinglish
-    return `Namaste ${cleanName}! 🙏✨\n\nMain hoon aapka ${BRAND.displayName} — aapka saccha digital dost, personal assistant aur smart kaagaz locker!\n\nAap mujhse ek sacche dost ki tarah baat kar sakte hain. Main aapke liye kya-kya kar sakta hoon:\n\n1️⃣ 📁 Mere Kaagaz (Vault): Koi bhi photo, bill, RC, insurance ya parcha bhej dijiye — surakshit rakhunga aur maangte hi original file wapas bhej dunga!\n2️⃣ ⏰ Reminders & Expiry Alerts: Dawa, EMI ya servicing yaad dilane ko kahiye. Expiry se pehle WhatsApp alert bhejkar challan aur loss bachaunga!\n3️⃣ 🔢 Mera Ank Jyotish: Har subah 6:00 AM par aapka lucky color, shubh din aur road safety guidance!\n4️⃣ 📋 ${BRAND.name} Plans: Sirf ₹20/mahina se shuru!\n\nShuru karne ke liye niche 1, 2, 3 ya 4 likhein ya seedha koi bhi photo, sawal ya task bhejein! 😊`;
-  },
-
-  getWelcomeMessage(userName: string = 'Bhai Sahab', language: string = 'hinglish'): string {
-    return this.getIntroMessage(userName, language);
-  },
-
-  getPhotoNamingPrompt(userName: string = 'Bhai Sahab'): string {
-    return `📸 Aapki photo vault mein bilkul surakshit save ho gayi hai! 🤖✨\n\nKripya batayein ise kis naam se save rakhna hai? (Jaise: "Tarangi Vacation Photo" ya "Ghar ki Registry") taaki aage mangne par main ise turant nikal kar aapko bhej sakoon.`;
-  },
-
-  getMenuMessage(userName: string = 'Bhai Sahab'): { text: string; buttons: { id: string; title: string }[] } {
-    const cleanName = userName && userName !== 'Bhai' ? `${userName} ji` : 'Bhai Sahab';
-    return {
-      text: `Namaste ${cleanName}! 🙏✨\n\nMain hoon aapka ${BRAND.displayName} — aapka autonomous digital saathi!\n\nAap niche diye gaye vikalpon mein se chun sakte hain ya seedhe koi bhi photo, kaagaz ya sawaal bhej sakte hain:`,
+      text: `Main Keepr hoon. Jo rakhna hai bhej do, nikalna ho to pooch lo.\n\nNiche ke options se bhi dekh sakte hain:`,
       buttons: [
         { id: 'btn_my_docs', title: '📁 Mere Kaagaz' },
         { id: 'btn_my_reminders', title: '⏰ Reminders' },
-        { id: 'btn_my_numerology', title: '🔢 Mera Ank Jyotish' },
-        { id: 'btn_plans', title: `📋 ${BRAND.name} Plans` },
-        { id: 'btn_share_invite', title: '🎁 Dosto ko Invite' },
+        { id: 'btn_my_numerology', title: '🌅 Daily Brief' },
+        { id: 'btn_plans', title: `📋 Plans` },
       ],
     };
   },
 
+  /**
+   * Crisp Human Receipts for Saved Documents
+   */
   getDocSavedMessage(
     doc: ExtractedDoc,
     language: string = 'hinglish',
     remainingFreeSlots?: number
   ): string {
-    if (language === 'hi') {
-      let msg = `✅ कागज़ सुरक्षित लॉकर में दर्ज हो गया है! 🤖✨\n\n`;
-      msg += `• शीर्षक: ${doc.title}\n`;
-      if (doc.entity_name) msg += `• दुकान/कंपनी: ${doc.entity_name}\n`;
-      if (doc.policy_or_bill_no) msg += `• नंबर: ${doc.policy_or_bill_no}\n`;
-      if (doc.amount) msg += `• रकम: ₹${doc.amount.toLocaleString('en-IN')}\n`;
-      if (doc.expiry_date) {
-        msg += `• अंतिम तिथि (Expiry): ${doc.expiry_date}\n\n`;
-        msg += `⏰ निश्चिंत रहिए! अंतिम तिथि से 30, 7 और 1 दिन पहले मैं आपको WhatsApp पर याद दिला दूँगा।`;
-      } else {
-        msg += `• श्रेणी: ${doc.category}\n`;
-        msg += `• विवरण: ${doc.summary}`;
+    // 1. Honest Failure & Blur Handling
+    if (doc.is_uncertain) {
+      return doc.clarification_prompt || `Photo thodi blur lag rahi hai. Amount ya date clearly nahi dikh rahi — ek aur saaf photo bhej doge?`;
+    }
+
+    // 2. Vehicle (RC / Insurance / PUC)
+    if (doc.category === 'vehicle' || doc.category === 'money_assets' && doc.vehicle_number) {
+      const reg = doc.vehicle_number ? `• Reg: ${doc.vehicle_number}` : '';
+      const exp = doc.expiry_date ? `• Expiry: ${doc.expiry_date} (Reminder locked)` : '';
+      return `🚗 ${doc.title} save ho gayi ✅\n${reg}\n${exp}\n\nJab bhi zaroorat ho, bas likhna "${doc.vehicle_number || 'car rc'}" — turant original file wapas bhej dunga.`;
+    }
+
+    // 3. School / Kids / Family
+    if (doc.category === 'family_school') {
+      const amt = doc.amount ? `• Rakam: ₹${doc.amount.toLocaleString('en-IN')}` : '';
+      const due = doc.expiry_date ? `• Due Date: ${doc.expiry_date}` : '';
+      return `🏫 ${doc.title} save ho gayi ✅\n${amt}\n${due}\n\n${doc.action_proposed || 'Due date se pehle WhatsApp par reminder bhej dunga!'}`;
+    }
+
+    // 4. Health / Doctor Prescription / Medicine
+    if (doc.category === 'health_medicine' || doc.category === 'medical') {
+      let medsList = '';
+      if (doc.medicines && doc.medicines.length > 0) {
+        medsList = doc.medicines.map(m => `• ${m.name} (${m.dosage || ''} - ${m.timing || ''} ${m.relation_to_food || ''})`).join('\n');
       }
-      return msg;
+      return `💊 ${doc.title} save ho gaya ✅\n${medsList ? `${medsList}\n` : ''}${doc.expiry_date ? `• Next Follow-up: ${doc.expiry_date}\n` : ''}Dawaiyon ki timing yaad rakhunga. Kisi specific waqt par reminder lagana hai?`;
     }
 
-    if (language === 'en') {
-      let msg = `✅ Document safely saved in your vault! 🤖✨\n\n`;
-      msg += `• Title: ${doc.title}\n`;
-      if (doc.entity_name) msg += `• Entity: ${doc.entity_name}\n`;
-      if (doc.policy_or_bill_no) msg += `• Number: ${doc.policy_or_bill_no}\n`;
-      if (doc.amount) msg += `• Amount: ₹${doc.amount.toLocaleString('en-IN')}\n`;
-      if (doc.expiry_date) {
-        msg += `• Expiry / Renewal: ${doc.expiry_date}\n\n`;
-        msg += `⏰ Locked in! I will alert you 30, 7, and 1 day before expiry.`;
-      } else {
-        msg += `• Category: ${doc.category}\n`;
-        msg += `• Summary: ${doc.summary}`;
-      }
-      return msg;
+    // 5. Appliance Bill / Warranty
+    if (doc.category === 'appliance') {
+      const exp = doc.expiry_date ? `• Warranty till: ${doc.expiry_date}` : '';
+      return `🔌 ${doc.title} save ho gaya ✅\n${exp}\nKharab hone par dhoondhna nahi padega — mangte hi original bill wapas mil jayega.`;
     }
 
-    // Hinglish
-    let msg = `✅ Aapka kaagaz vault mein surakshit save ho gaya hai! 🤖✨\n\n`;
-    msg += `• Title: ${doc.title}\n`;
-    if (doc.entity_name) msg += `• Company/Shop: ${doc.entity_name}\n`;
-    if (doc.policy_or_bill_no) msg += `• Number: ${doc.policy_or_bill_no}\n`;
-    if (doc.amount) msg += `• Rakam: ₹${doc.amount.toLocaleString('en-IN')}\n`;
-    if (doc.expiry_date) {
-      msg += `• Expiry / Renewal: ${doc.expiry_date}\n\n`;
-      msg += `⏰ Reminder set! Expiry se 30, 7 aur 1 din pehle main WhatsApp par aapko alert bhejunga.`;
-    } else {
-      msg += `• Category: ${doc.category}\n`;
-      msg += `• Summary: ${doc.summary}`;
-    }
-
-    if (remainingFreeSlots !== undefined) {
-      const usedFiles = Math.max(1, 5 - remainingFreeSlots);
-      msg += `\n\n📦 Safe Vault: ${usedFiles}/5 files used (Free Plan)\n💡 Tip: 50 files aur saal bhar ke challan & penalty alerts ke liye Yaad Plan sirf ₹20/mahina mein activate karein (likhein "yaad").`;
-    }
-
-    return msg;
+    // 6. General / Bills / Notes
+    const amt = doc.amount ? `• Rakam: ₹${doc.amount.toLocaleString('en-IN')}\n` : '';
+    const exp = doc.expiry_date ? `• Expiry/Due: ${doc.expiry_date} (Reminder set)\n` : '';
+    return `📄 ${doc.title} save ho gaya ✅\n${amt}${exp}Vault mein surakshit darj hai.`;
   },
 
   formatSearchResults(

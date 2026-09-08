@@ -15,6 +15,7 @@ export const schedulerService = {
   startScheduler() {
     console.log(`${BRAND.name} Multi-tier Scheduler initialized:`);
     console.log('- 06:00 AM IST: Daily Morning Life & Safety Guidance');
+    console.log('- 08:05 AM IST: Unified Morning COO Brief (Expiries + Dawa + Promises)');
     console.log('- 09:00 AM IST: Document Expiry Alerts (30, 7, 1 day)');
     console.log('- Every 1 Minute: Real-time Task Reminders');
 
@@ -24,13 +25,19 @@ export const schedulerService = {
       await this.processDailyAstroGuidance();
     });
 
-    // 2. Run every day at 09:00 AM IST (03:30 AM UTC): Document Expiries
+    // 2. Run every day at 08:05 AM IST (02:35 AM UTC): Unified Morning COO Brief
+    cron.schedule('35 2 * * *', async () => {
+      console.log('Running daily 08:05 AM IST Unified Morning COO Brief...');
+      await this.processDailyUnifiedBrief();
+    });
+
+    // 3. Run every day at 09:00 AM IST (03:30 AM UTC): Document Expiries
     cron.schedule('30 3 * * *', async () => {
       console.log('Running daily expiry check at 09:00 AM IST...');
       await this.processDailyReminders();
     });
 
-    // 3. Run every 1 minute: Real-time user custom reminders
+    // 4. Run every 1 minute: Real-time user custom reminders
     cron.schedule('* * * * *', async () => {
       await this.processGeneralReminders();
     });
@@ -84,6 +91,47 @@ export const schedulerService = {
   },
 
   /**
+   * Send Unified 8:05 AM Morning COO Brief
+   * Combines upcoming expiries, health medicines, promises, and road safety into 1 crisp card
+   */
+  async processDailyUnifiedBrief() {
+    try {
+      const activeUsers = await dbService.getAllActiveUsers();
+      console.log(`Processing 08:05 AM Morning Brief for ${activeUsers.length} users.`);
+
+      const { geminiService } = await import('./gemini.js');
+
+      for (const user of activeUsers) {
+        try {
+          const memories = await dbService.getUserMemories(user.phone_number);
+          const upcomingDocs = await dbService.getUserUpcomingDocuments(user.phone_number, 30);
+          const activeReminders = await dbService.getUserActiveReminders(user.phone_number);
+
+          // Only send if user has some data or documents to brief on
+          if (memories.length === 0 && upcomingDocs.length === 0 && activeReminders.length === 0) {
+            continue;
+          }
+
+          const brief = await geminiService.generateUnifiedDailyBrief(
+            user.name || 'Bhai Sahab',
+            memories,
+            upcomingDocs,
+            activeReminders
+          );
+
+          if (brief && brief.length > 10) {
+            await whatsappService.sendTextMessage(user.phone_number, brief);
+          }
+        } catch (userErr) {
+          console.error(`Error sending morning brief to ${user.phone_number}:`, userErr);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to process daily morning COO brief:', err);
+    }
+  },
+
+  /**
    * Process all reminders due for today
    */
   async processDailyReminders() {
@@ -131,7 +179,7 @@ export const schedulerService = {
         // Check if user is on free tier and already used their 1 free trial reminder
         if (user.plan === 'free' && user.reminder_count >= 1) {
           // Free tier exhausted reminders - send a respectful upgrade reminder
-          const alertMsg = `⚠️ AI DOST Alert 🤖✨\n\nDhruv ji, aapke ${doc.title} ki expiry ${item.days_before} din mein hai.\n\nFree Pack mein 1 trial alert tha. Saare kaagzat aur gaadiyon ke waqt par WhatsApp alerts ke liye Yaad Plan (₹249/saal — sirf ₹20/mahina) activate karein:\nhttps://rzp.io/rzp/ukMXxGY\n\n(Challan aur penalty se bachane ke liye AI DOST hamesha aapke saath hai! 🙏)`;
+          const alertMsg = `⚠️ ${BRAND.displayName} Alert 🔔\n\n${user.name || 'Ji'}, aapke ${doc.title} ki expiry ${item.days_before} din mein hai.\n\nFree Pack mein 1 trial alert tha. Saare kaagzat aur gaadiyon ke waqt par WhatsApp alerts ke liye Yaad Plan (₹249/saal — sirf ₹20/mahina) activate karein:\nhttps://rzp.io/rzp/ukMXxGY\n\n(Challan aur penalty se bachane ke liye ${BRAND.displayName} hamesha aapke saath hai! 🙏)`;
           await whatsappService.sendTextMessage(userPhone, alertMsg);
         } else {
           // Paid user OR first free trial reminder
