@@ -14,27 +14,81 @@ import { paymentService } from '../services/razorpay.js';
 import { personaService } from './persona.js';
 import { PLANS, BRAND } from '../config/constants.js';
 
+export function detectMessageLanguage(text: string, currentPref: string = 'english'): string {
+  if (!text || text.trim().length === 0) return currentPref;
+  const t = text.trim();
+
+  // 1. Check Devanagari script (Hindi / Marathi)
+  if (/[\u0900-\u097F]/.test(t)) {
+    return 'hi';
+  }
+
+  // 2. Check Hinglish keywords
+  const lower = t.toLowerCase();
+  const hinglishMarkers = [
+    'kya', 'hai', 'hain', 'ho', 'mera', 'meri', 'mere', 'apna', 'apni', 'apne',
+    'bhai', 'dost', 'bhejo', 'bhej', 'karo', 'karein', 'karna', 'yaad', 'rakho',
+    'kal', 'aaj', 'parso', 'subah', 'shaam', 'raat', 'kripya', 'dawa', 'dawai',
+    'kaagaz', 'kagaz', 'gaadi', 'paise', 'batao', 'dekh', 'lena', 'dena',
+    'nahi', 'nahin', 'thoda', 'theek', 'achha', 'acha', 'bhi', 'toh', 'aur',
+    'chahiye', 'kahan', 'dikhao', 'dikhana', 'mil', 'gaya', 'gayi', 'hoga', 'pehle'
+  ];
+  
+  const words = lower.replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 1);
+  const matchCount = words.filter(w => hinglishMarkers.includes(w)).length;
+  
+  if (matchCount >= 2 || (words.length <= 4 && matchCount >= 1)) {
+    return 'hinglish';
+  }
+
+  // 3. English markers or pure English sentences
+  const englishMarkers = [
+    'what', 'where', 'when', 'remind', 'remember', 'save', 'send', 'show',
+    'password', 'car', 'insurance', 'due', 'my', 'the', 'please', 'thanks',
+    'hi', 'hello', 'who', 'how', 'bill', 'receipt', 'note', 'forget', 'police', 'doc', 'docs'
+  ];
+  const enCount = words.filter(w => englishMarkers.includes(w)).length;
+  if (enCount >= 1 && matchCount === 0) {
+    return 'english';
+  }
+
+  return currentPref || 'english';
+}
+
 export const botRouter = {
   /**
    * Helper: Display user's stored documents
    */
-  async showMyDocs(fromPhone: string): Promise<void> {
+  async showMyDocs(fromPhone: string, language: string = 'english'): Promise<void> {
     const docs = await dbService.searchDocuments(fromPhone, '', 10);
     if (!docs || docs.length === 0) {
-      await whatsappService.sendTextMessage(
-        fromPhone,
-        '📂 Aapke vault mein abhi koi kaagaz ya photo save nahi hai.\n\nKoi bhi photo ya PDF bhej kar dekhiye, main turant surakshit save kar lunga!'
-      );
+      const emptyMsg = language === 'hi'
+        ? '📂 आपके वॉल्ट में अभी कोई कागज़ या फ़ोटो सुरक्षित नहीं है।\n\nकोई भी फ़ोटो या PDF भेजकर देखें, मैं तुरंत सुरक्षित सहेज लूँगा!'
+        : language === 'hinglish'
+        ? '📂 Aapke vault mein abhi koi kaagaz ya photo save nahi hai.\n\nKoi bhi photo ya PDF bhej kar dekhiye, main turant surakshit save kar lunga!'
+        : '📂 Your vault is currently empty.\n\nDrop any PDF, photo, or invoice — I will securely encrypt and index it instantly!';
+      await whatsappService.sendTextMessage(fromPhone, emptyMsg);
       return;
     }
 
-    let reply = `📂 Aapke vault ke surakshit kaagaz (${docs.length}): 🤖✨\n\n`;
+    const header = language === 'hi'
+      ? `📂 आपके वॉल्ट के सुरक्षित कागज़ (${docs.length}): 🤖✨\n\n`
+      : language === 'hinglish'
+      ? `📂 Aapke vault ke surakshit kaagaz (${docs.length}): 🤖✨\n\n`
+      : `📂 Your Encrypted Vault Documents (${docs.length}): 🤖✨\n\n`;
+
+    let reply = header;
     docs.forEach((doc: any, index: number) => {
       reply += `${index + 1}. ${doc.title}\n`;
       if (doc.expiry_date) reply += `   • Expiry: ${doc.expiry_date}\n`;
       if (doc.policy_or_bill_no) reply += `   • Number: ${doc.policy_or_bill_no}\n`;
     });
-    reply += `\nKisi bhi file ko dekhne ya mangwane ke liye bas uska naam likhkar bhej dijiye!`;
+    reply += language === 'hi'
+      ? `\nकिसी भी फ़ाइल को मँगवाने के लिए बस उसका नाम लिखकर भेज दीजिए!`
+      : language === 'hinglish'
+      ? `\nKisi bhi file ko dekhne ya mangwane ke liye bas uska naam likhkar bhej dijiye!`
+      : `\nTo retrieve any original file, simply type its name!`;
+
     await whatsappService.sendTextMessage(fromPhone, reply);
     await dbService.saveChatMessage(fromPhone, 'model', reply);
   },
@@ -42,34 +96,41 @@ export const botRouter = {
   /**
    * Helper: Display user's pending reminders & document expiries
    */
-  async showMyReminders(fromPhone: string): Promise<void> {
-    const expiries = await dbService.getUserExpiries(fromPhone);
-    const reminders = await dbService.getUserGeneralReminders(fromPhone);
+  async showMyReminders(fromPhone: string, language: string = 'english'): Promise<void> {
+    const expiries = await dbService.getUserUpcomingDocuments(fromPhone, 365);
+    const reminders = await dbService.getUserActiveReminders(fromPhone);
 
     if ((!expiries || expiries.length === 0) && (!reminders || reminders.length === 0)) {
-      await whatsappService.sendTextMessage(
-        fromPhone,
-        '⏰ Abhi aapka koi pending reminder nahi hai.\n\nKisi bhi kaam ka reminder lagane ke liye bas likhiye (jaise: "Kal subah 10 baje doctor appointment").'
-      );
+      const emptyMsg = language === 'hi'
+        ? '⏰ अभी आपका कोई लंबित (pending) रिमाइंडर नहीं है।\n\nकिसी भी कार्य का रिमाइंडर लगाने के लिए बस संदेश लिखें।'
+        : language === 'hinglish'
+        ? '⏰ Abhi aapka koi pending reminder nahi hai.\n\nKisi bhi kaam ka reminder lagane ke liye bas likhiye (jaise: "Kal subah 10 baje doctor appointment").'
+        : '⏰ You have no pending reminders or upcoming expiries right now.\n\nTo set one, simply type anytime (e.g. "Remind me to pay electricity bill tomorrow 10 AM").';
+      await whatsappService.sendTextMessage(fromPhone, emptyMsg);
       return;
     }
 
-    let reply = `⏰ Aapke active reminders aur tareekhein: 🤖✨\n\n`;
+    let reply = language === 'hi'
+      ? `⏰ आपके सक्रिय रिमाइंडर्स व तिथियाँ: 🤖✨\n\n`
+      : language === 'hinglish'
+      ? `⏰ Aapke active reminders aur tareekhein: 🤖✨\n\n`
+      : `⏰ Your Active Reminders & Expiry Dates: 🤖✨\n\n`;
+
     let count = 1;
     if (reminders && reminders.length > 0) {
-      reply += `📋 Kaam & Reminders:\n`;
+      reply += `📋 Tasks & Reminders:\n`;
       reminders.forEach((r: any) => {
         const timeStr = new Date(r.remind_at).toLocaleString('en-IN', {
           timeZone: 'Asia/Kolkata',
           dateStyle: 'medium',
           timeStyle: 'short',
         });
-        reply += `${count++}. ${r.task} (Waqt: ${timeStr})\n`;
+        reply += `${count++}. ${r.task} (${timeStr})\n`;
       });
       reply += `\n`;
     }
     if (expiries && expiries.length > 0) {
-      reply += `📅 Kaagaz Expiry Alerts:\n`;
+      reply += `📅 Document Expiry Alerts:\n`;
       expiries.forEach((e: any) => {
         reply += `${count++}. ${e.title} (Expiry: ${e.expiry_date})\n`;
       });
@@ -84,7 +145,11 @@ export const botRouter = {
   async showMyNumerology(fromPhone: string, user: any, resolvedName: string, userLang: string): Promise<void> {
     const numerology = await dbService.getUserNumerologyData(fromPhone);
     if (!numerology.profileContext && !user.dob) {
-      const askDob = `🔢 Apna Ank Jyotish janne ke liye kripya apni janmtithi (DOB, jaise: 15-03-1987) bhej dijiye.\n\nMain aapka Mulank (मूलांक), Bhagyank (भाग्यांक), shubh rang aur guidance nikal kar bata dunga! ✨`;
+      const askDob = userLang === 'hi'
+        ? `🔢 अपना अंक ज्योतिष जानने के लिए कृपया अपनी जन्मतिथि (DOB, जैसे: 15-03-1987) भेज दीजिए।\n\nमैं आपका मूलांक, भाग्यांक, लकी रंग और दिन की शुभता निकाल कर बता दूँगा! ✨`
+        : userLang === 'hinglish'
+        ? `🔢 Apna Ank Jyotish janne ke liye kripya apni janmtithi (DOB, jaise: 15-03-1987) bhej dijiye.\n\nMain aapka Mulank (मूलांक), Bhagyank (भाग्यांक), shubh rang aur guidance nikal kar bata dunga! ✨`
+        : `🔢 To activate your daily morning numerology & day guide, please share your date of birth (DOB, e.g. 15-03-1987).\n\nI will calculate your life path numbers, lucky colors, and optimal focus hours! ✨`;
       await whatsappService.sendTextMessage(fromPhone, askDob);
       await dbService.saveChatMessage(fromPhone, 'model', askDob);
       return;
@@ -105,7 +170,7 @@ export const botRouter = {
    * Helper: Display Plans & Live Razorpay Links
    */
   async showPlans(fromPhone: string): Promise<void> {
-    const plansMsg = `📋 ${BRAND.name} Plans 🤖✨\n\n1️⃣ Yaad Plan (₹249/saal — Sirf ₹20/mahina)\n• 50 files vault storage + 25 auto WhatsApp alerts\n• Traffic challan, late fee aur warranty loss se 100% mukti\n👉 Instant UPI / Card: https://rzp.io/rzp/ukMXxGY\n\n2️⃣ Ghar Plan (₹499/saal — Sirf ₹41/mahina)\n• 200 files + 4 Family Members connected\n• Poore parivaar ke liye unlimited reminders & expiries\n👉 Instant UPI / Card: https://rzp.io/rzp/OOIVXyJ\n\n3️⃣ Vault Plan (₹899/saal — ₹75/mahina)\n• 500 files + CA link + Waris kit\n👉 Instant UPI / Card: https://rzp.io/rzp/SjNJKT0\n\n💡 Kisi bhi link par tap karke UPI (GPay/PhonePe/Paytm) se 1 second mein activate karein!`;
+    const plansMsg = `📋 ${BRAND.name} Plans 🤖✨\n\n1️⃣ Yaad Plan (₹249/yr — Just ₹20/month)\n• 50 encrypted files + 25 automated WhatsApp alerts\n• 100% protection against traffic fines, penalties & lapsed warranties\n👉 Instant UPI / Card: https://rzp.io/rzp/ukMXxGY\n\n2️⃣ Ghar Plan (₹499/yr — Just ₹41/month)\n• 200 files + 4 Family Members connected\n• Unlimited reminders & unified family expiry tracking\n👉 Instant UPI / Card: https://rzp.io/rzp/OOIVXyJ\n\n3️⃣ Vault Plan (₹899/yr — ₹75/month)\n• 500 files + CA read-only access + Succession Kit\n👉 Instant UPI / Card: https://rzp.io/rzp/SjNJKT0\n\n💡 Tap any link above to activate in 1 second via UPI (GPay/PhonePe/Paytm/Cards)!`;
     await whatsappService.sendTextMessage(fromPhone, plansMsg);
     await dbService.saveChatMessage(fromPhone, 'model', plansMsg);
   },
@@ -124,8 +189,20 @@ export const botRouter = {
 
     // 1. Get or register user in database
     const user = await dbService.getOrCreateUser(fromPhone, rawContactName);
-    const resolvedName = (user.name && user.name !== 'Bhai') ? user.name : (rawContactName || 'Dhruv');
-    const userLang = user.language || 'hinglish';
+    const resolvedName = (user.name && user.name !== 'Bhai' && user.name !== 'Friend') ? user.name : (rawContactName || 'Friend');
+    const userLang = user.language || 'english';
+
+    // Extract message content for language detection
+    let incomingText = '';
+    if (message.type === 'text') incomingText = message.text?.body || '';
+    else if (message.type === 'image' || message.type === 'document') incomingText = message.image?.caption || message.document?.caption || '';
+
+    // Auto-detect & dynamically mirror language
+    const detectedLanguage = detectMessageLanguage(incomingText, userLang);
+    if (detectedLanguage !== user.language && incomingText.trim().length > 2) {
+      await dbService.setUserLanguage(fromPhone, detectedLanguage);
+    }
+    const activeLang = detectedLanguage || userLang;
 
     // 1.1 Check if new user came with a viral referral code (e.g. "Hi DOST ref_956093")
     const refMatch = (message.text?.body || '').match(/ref_([a-zA-Z0-9]+)/i);
@@ -291,12 +368,17 @@ export const botRouter = {
         }
 
         // Send crisp 1-line human receipt
-        const confirmMsg = personaService.getDocSavedMessage(extracted, userLang);
+        const confirmMsg = personaService.getDocSavedMessage(extracted, activeLang);
         await whatsappService.sendTextMessage(fromPhone, confirmMsg);
         await dbService.saveChatMessage(fromPhone, 'model', confirmMsg);
       } catch (err: any) {
         console.error('Failed to process document:', err);
-        await whatsappService.sendTextMessage(fromPhone, `Kshama karein ${resolvedName} ji, photo padhne mein thodi takleef hui. Kripya ek aur saaf photo bhej dijiye.`);
+        const failMsg = activeLang === 'hi'
+          ? `क्षमा करें ${resolvedName} जी, फ़ोटो पढ़ने में थोड़ी परेशानी हुई। कृपया एक और साफ़ फ़ोटो भेज दीजिए।`
+          : activeLang === 'hinglish'
+          ? `Kshama karein ${resolvedName} ji, photo padhne mein thodi takleef hui. Kripya ek aur saaf photo bhej dijiye.`
+          : `Sorry ${resolvedName}, couldn't read the image clearly. Please send a clearer close-up.`;
+        await whatsappService.sendTextMessage(fromPhone, failMsg);
       }
       return;
     }
@@ -310,26 +392,27 @@ export const botRouter = {
         const voiceResult = await geminiService.processVoiceNote(buffer, mimeType);
 
         console.log(`Voice transcribed: "${voiceResult.transcript}", intent: ${voiceResult.intent}`);
+        const voiceLang = detectMessageLanguage(voiceResult.transcript, activeLang);
 
         // Check if voice note is asking to set a reminder
         const reminderCheck = await geminiService.parseNaturalReminder(voiceResult.transcript);
         if (reminderCheck.isReminder && reminderCheck.task && reminderCheck.remindAtIso) {
           await dbService.addGeneralReminder(fromPhone, reminderCheck.task, reminderCheck.remindAtIso);
-          const reply = personaService.getReminderSavedMessage(reminderCheck.task, reminderCheck.remindAtIso, userLang);
+          const reply = personaService.getReminderSavedMessage(reminderCheck.task, reminderCheck.remindAtIso, voiceLang);
           await whatsappService.sendTextMessage(fromPhone, reply);
           return;
         }
 
         if (voiceResult.intent === 'search' || voiceResult.query) {
           const results = await dbService.searchDocuments(fromPhone, voiceResult.query);
-          const reply = personaService.formatSearchResults(voiceResult.query, results, userLang);
+          const reply = personaService.formatSearchResults(voiceResult.query, results, voiceLang);
           await whatsappService.sendTextMessage(fromPhone, reply);
           return;
         }
 
         if (voiceResult.intent === 'expiry_check') {
-          const expiries = await dbService.getUserExpiries(fromPhone);
-          const reply = personaService.formatExpiriesList(expiries);
+          const expiries = await dbService.getUserUpcomingDocuments(fromPhone, 365);
+          const reply = personaService.formatExpiriesList(expiries, voiceLang);
           await whatsappService.sendTextMessage(fromPhone, reply);
           return;
         }
@@ -339,7 +422,7 @@ export const botRouter = {
         const chatReply = await geminiService.chatAsDost(
           voiceResult.transcript,
           history,
-          userLang,
+          voiceLang,
           resolvedName,
           numerologyData.profileContext
         );
@@ -446,7 +529,7 @@ export const botRouter = {
       // 4.1 Interactive Menu Command
       if (['menu', 'help', 'madad', 'options', 'suvidha', 'features'].includes(lowerText)) {
         dbService.setUserPromptState(fromPhone, 'main_menu');
-        const menu = personaService.getMenuMessage(resolvedName);
+        const menu = personaService.getMenuMessage(resolvedName, activeLang);
         await whatsappService.sendInteractiveButtons(fromPhone, menu.text, menu.buttons);
         return;
       }
@@ -462,7 +545,7 @@ export const botRouter = {
 
       // 4.3 Zero-Friction Human Greeting (NO IVR, NO brochures)
       if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'dost', 'keepr'].includes(lowerText)) {
-        const greeting = personaService.getHumanGreeting(resolvedName);
+        const greeting = personaService.getHumanGreeting(resolvedName, activeLang);
         await whatsappService.sendTextMessage(fromPhone, greeting);
         await dbService.saveChatMessage(fromPhone, 'model', greeting);
         return;
@@ -472,12 +555,22 @@ export const botRouter = {
       if (['police', 'car docs', 'car papers', 'gaadi ke kaagaz', 'gaadi ke paper', 'traffic police'].some(k => lowerText === k || lowerText.includes(k))) {
         const vehicleDocs = await dbService.getEmergencyVehicleDocs(fromPhone);
         if (vehicleDocs.length === 0) {
-          const noDocMsg = '🚗 Gaadi ke kaagaz abhi vault mein save nahi hain.\n\nCar ya bike ki RC, insurance policy ya PUC ki photo bhej dijiye — aage se "police" likhte hi 2 second mein original files wapas mil jayengi!';
+          const noDocMsg = activeLang === 'hi'
+            ? '🚗 गाड़ी के कागज़ अभी वॉल्ट में सुरक्षित नहीं हैं।\n\nकार या बाइक की आरसी (RC), बीमा या PUC की फ़ोटो भेज दीजिए — आगे से "police" लिखते ही 2 सेकंड में ओरिजिनल फ़ाइलें मिल जाएँगी!'
+            : activeLang === 'hinglish'
+            ? '🚗 Gaadi ke kaagaz abhi vault mein save nahi hain.\n\nCar ya bike ki RC, insurance policy ya PUC ki photo bhej dijiye — aage se "police" likhte hi 2 second mein original files wapas mil jayengi!'
+            : '🚗 No vehicle documents found in your vault yet.\n\nDrop a photo of your Car RC, Insurance, or PUC now — whenever police stop you, typing "police" will dispatch all original files in 2 seconds!';
           await whatsappService.sendTextMessage(fromPhone, noDocMsg);
           return;
         }
 
-        await whatsappService.sendTextMessage(fromPhone, `🚨 Emergency Police Pack: Gaadi ke ${vehicleDocs.length} kaagaz (RC + Insurance + PUC) nikal rahe hain...`);
+        const dispatchNotice = activeLang === 'hi'
+          ? `🚨 आपातकालीन पुलिस पैक: गाड़ी के ${vehicleDocs.length} कागज़ात (RC + Insurance + PUC) भेजे जा रहे हैं...`
+          : activeLang === 'hinglish'
+          ? `🚨 Emergency Police Pack: Gaadi ke ${vehicleDocs.length} kaagaz (RC + Insurance + PUC) nikal rahe hain...`
+          : `🚨 Emergency Police Fast-Pack: Dispatching ${vehicleDocs.length} vehicle documents (RC + Insurance + PUC)...`;
+        await whatsappService.sendTextMessage(fromPhone, dispatchNotice);
+
         for (const vDoc of vehicleDocs.slice(0, 3)) {
           try {
             const buffer = await storageService.downloadDocument(vDoc.storage_path);
@@ -513,17 +606,21 @@ export const botRouter = {
             reply += `${idx + 1}. ${d.title} ${d.expiry_date ? `(Valid till ${d.expiry_date})` : ''}\n`;
           });
         } else if (healthPack.memories.length === 0) {
-          reply += `Koi health policy ya parcha vault mein nahi hai. Forward karke save kar sakte hain!`;
+          reply += activeLang === 'hi'
+            ? `कोई स्वास्थ्य पॉलिसी या पर्चा वॉल्ट में नहीं है। फ़ॉरवर्ड करके सुरक्षित कर सकते हैं!`
+            : activeLang === 'hinglish'
+            ? `Koi health policy ya parcha vault mein nahi hai. Forward karke save kar sakte hain!`
+            : `No medical prescriptions or policies in your vault yet. Forward any medical document to lock it safely!`;
         }
         await whatsappService.sendTextMessage(fromPhone, reply);
         return;
       }
 
-      // 4.33 Magic Command: "aaj kya hai" / Unified Daily COO Brief
-      if (['aaj kya hai', 'brief', 'schedule', 'aaj ka schedule', 'today schedule', 'daily brief'].some(k => lowerText === k || lowerText.includes(k))) {
+      // 4.33 Magic Command: "aaj kya hai" / Unified 7:00 AM Daily COO Brief
+      if (['aaj kya hai', 'brief', 'schedule', 'aaj ka schedule', 'today schedule', 'daily brief', 'today', 'morning brief', 'what is today', 'daily update'].some(k => lowerText === k || lowerText.includes(k))) {
         const memories = await dbService.getUserMemories(fromPhone);
-        const expiries = await dbService.getUserExpiries(fromPhone);
-        const reminders = await dbService.getUserGeneralReminders(fromPhone);
+        const expiries = await dbService.getUserUpcomingDocuments(fromPhone, 30);
+        const reminders = await dbService.getUserActiveReminders(fromPhone);
         const numerologyData = await dbService.getUserNumerologyData(fromPhone);
 
         const brief = await geminiService.generateUnifiedDailyBrief(
@@ -531,6 +628,7 @@ export const botRouter = {
           memories,
           expiries,
           reminders,
+          activeLang,
           numerologyData.profileContext
         );
         await whatsappService.sendTextMessage(fromPhone, brief);
@@ -539,12 +637,12 @@ export const botRouter = {
       }
 
       // 4.34 Magic Command: "bhool ja" / Delete Memory
-      if (lowerText.startsWith('bhool ja') || lowerText.startsWith('delete') || lowerText.startsWith('remove') || lowerText.startsWith('hata do')) {
-        const queryToDelete = lowerText.replace(/^(bhool ja|delete|remove|hata do)\s*:?/i, '').trim();
+      if (lowerText.startsWith('bhool ja') || lowerText.startsWith('delete') || lowerText.startsWith('remove') || lowerText.startsWith('hata do') || lowerText.startsWith('forget')) {
+        const queryToDelete = lowerText.replace(/^(bhool ja|delete|remove|hata do|forget)\s*:?/i, '').trim();
         const deletedCount = await dbService.deleteUserMemories(fromPhone, queryToDelete);
         const delMsg = deletedCount > 0
-          ? `✅ Maine yaad-daasht se hata diya hai. Ab yeh data mere paas nahi hai.`
-          : `Privacy safe: Aapka data clean hai.`;
+          ? (activeLang === 'hi' ? `✅ स्मृति से हटा दिया गया है।` : activeLang === 'hinglish' ? `✅ Maine yaad-daasht se hata diya hai. Ab yeh data mere paas nahi hai.` : `✅ Forgotten. Removed from memory.`)
+          : (activeLang === 'hi' ? `गोपनीयता सुरक्षित: आपका डेटा साफ़ है।` : activeLang === 'hinglish' ? `Privacy safe: Aapka data clean hai.` : `Privacy safe: Your data is clean.`);
         await whatsappService.sendTextMessage(fromPhone, delMsg);
         return;
       }
@@ -563,7 +661,11 @@ export const botRouter = {
             amount: fact.amount,
             raw_text: rawNote,
           });
-          const confirm = fact.replyReceipt || `Save ho gaya ✅\n\n"${rawNote}" — jab bhi poochhoge, turant nikal dunga.`;
+          const confirm = fact.replyReceipt || (
+            activeLang === 'hi' ? `सुरक्षित हो गया ✅\n\n"${rawNote}" — माँगते ही तुरंत निकाल दूँगा।` :
+            activeLang === 'hinglish' ? `Save ho gaya ✅\n\n"${rawNote}" — jab bhi poochhoge, turant nikal dunga.` :
+            `Saved ✅\n\n"${rawNote}" — ask anytime and I'll retrieve it instantly.`
+          );
           await whatsappService.sendTextMessage(fromPhone, confirm);
           return;
         }
@@ -572,21 +674,21 @@ export const botRouter = {
       // 4.4 Menu Option 1: Kaagaz Vault
       if (lowerText === '1' || ['kaagaz', 'mere kaagaz', 'dastavez', 'vault', 'files', 'documents', 'docs'].includes(lowerText)) {
         dbService.clearUserPromptState(fromPhone);
-        await this.showMyDocs(fromPhone);
+        await this.showMyDocs(fromPhone, activeLang);
         return;
       }
 
       // 4.5 Menu Option 2: Reminders & Expiries
       if (lowerText === '2' || ['reminders', 'reminder', 'mere reminders', 'active reminders'].includes(lowerText)) {
         dbService.clearUserPromptState(fromPhone);
-        await this.showMyReminders(fromPhone);
+        await this.showMyReminders(fromPhone, activeLang);
         return;
       }
 
       // 4.6 Menu Option 3: Ank Jyotish
       if (lowerText === '3' || ['jyotish', 'ank jyotish', 'mera ank jyotish', 'numerology', 'mulank', 'bhagyank'].includes(lowerText)) {
         dbService.clearUserPromptState(fromPhone);
-        await this.showMyNumerology(fromPhone, user, resolvedName, userLang);
+        await this.showMyNumerology(fromPhone, user, resolvedName, activeLang);
         return;
       }
 
@@ -615,7 +717,7 @@ export const botRouter = {
       const detectedLang = await geminiService.detectCustomLanguage(text);
       if (detectedLang) {
         await dbService.setUserLanguage(fromPhone, detectedLang.toLowerCase());
-        const langAck = `✅ Language set to ${detectedLang}! 🤖✨\n\nAb se main aapse ${detectedLang} mein hi baat karunga aur aapke documents & reminders sambhalunga. Kahiye, aaj kya help karun?`;
+        const langAck = `✅ Language set to ${detectedLang}! 🤖✨\n\nI will now converse with you in ${detectedLang} and protect your documents & reminders. How may I assist you today?`;
         await whatsappService.sendTextMessage(fromPhone, langAck);
         await dbService.saveChatMessage(fromPhone, 'model', langAck);
         return;
@@ -625,7 +727,7 @@ export const botRouter = {
       const reminderCheck = await geminiService.parseNaturalReminder(text);
       if (reminderCheck.isReminder && reminderCheck.task && reminderCheck.remindAtIso) {
         await dbService.addGeneralReminder(fromPhone, reminderCheck.task, reminderCheck.remindAtIso);
-        const reply = personaService.getReminderSavedMessage(reminderCheck.task, reminderCheck.remindAtIso, userLang);
+        const reply = personaService.getReminderSavedMessage(reminderCheck.task, reminderCheck.remindAtIso, activeLang);
         await whatsappService.sendTextMessage(fromPhone, reply);
         await dbService.saveChatMessage(fromPhone, 'model', reply);
         return;
@@ -641,7 +743,7 @@ export const botRouter = {
           pob: astroCheck.pob,
           rashi: astroCheck.rashi,
         });
-        const reply = personaService.getAstroSavedMessage(astroCheck, userLang);
+        const reply = personaService.getAstroSavedMessage(astroCheck, activeLang);
         await whatsappService.sendTextMessage(fromPhone, reply);
         await dbService.saveChatMessage(fromPhone, 'model', reply);
         return;
@@ -649,17 +751,21 @@ export const botRouter = {
 
       // 4.101 Search User Memories (Life Graph Recall Loop)
       const memoryMatches = await dbService.searchUserMemories(fromPhone, text);
-      const isMemoryQuery = /\b(kya tha|kya hai|kaunsi thi|kaunsa hai|password|wifi|dawa|medicine|dawai|promise|sharma|account|ifsc|upi|blood group|kitna|kitne)\b/i.test(text);
+      const isMemoryQuery = /\b(kya tha|kya hai|kaunsi thi|kaunsa hai|password|wifi|dawa|medicine|dawai|promise|sharma|account|ifsc|upi|blood group|kitna|kitne|what was|what is|tell me|where is|when is)\b/i.test(text);
       if (memoryMatches.length > 0 && isMemoryQuery) {
         const topMem = memoryMatches[0];
-        const memReply = `🔍 ${topMem.key_fact} ✅\n\n(Aapne save karwaya tha: "${topMem.raw_text || topMem.key_fact}")`;
+        const memReply = activeLang === 'hi'
+          ? `🔍 ${topMem.key_fact} ✅\n\n(आपने सुरक्षित करवाया था: "${topMem.raw_text || topMem.key_fact}")`
+          : activeLang === 'hinglish'
+          ? `🔍 ${topMem.key_fact} ✅\n\n(Aapne save karwaya tha: "${topMem.raw_text || topMem.key_fact}")`
+          : `🔍 ${topMem.key_fact} ✅\n\n(Saved from: "${topMem.raw_text || topMem.key_fact}")`;
         await whatsappService.sendTextMessage(fromPhone, memReply);
         await dbService.saveChatMessage(fromPhone, 'model', memReply);
         return;
       }
 
       // 4.102 Fact or Promise Capture (Forwarded Chat / Casual Life Note Dump Loop)
-      const isLikelyQuestion = /\b(kya|kaun|kahan|kaise|kyun|batao|bataiye|dikhao|bhejo|\?)\b/i.test(text);
+      const isLikelyQuestion = /\b(kya|kaun|kahan|kaise|kyun|batao|bataiye|dikhao|bhejo|what|where|when|who|how|why|tell|show|send|\?)\b/i.test(text);
       if (!isLikelyQuestion) {
         const factCheck = await geminiService.extractFactOrPromise(text);
         if (factCheck.isFactOrPromise && factCheck.keyFact) {
@@ -680,7 +786,11 @@ export const botRouter = {
             }
           }
 
-          const receipt = factCheck.replyReceipt || `Save ho gaya ✅\n• ${factCheck.keyFact}`;
+          const receipt = factCheck.replyReceipt || (
+            activeLang === 'hi' ? `सुरक्षित हो गया ✅\n• ${factCheck.keyFact}` :
+            activeLang === 'hinglish' ? `Save ho gaya ✅\n• ${factCheck.keyFact}` :
+            `Saved ✅\n• ${factCheck.keyFact}`
+          );
           await whatsappService.sendTextMessage(fromPhone, receipt);
           await dbService.saveChatMessage(fromPhone, 'model', receipt);
           return;
@@ -755,22 +865,24 @@ export const botRouter = {
         }
 
         // Multiple results found: show formatted list
-        const formatted = personaService.formatSearchResults(text, results, userLang);
+        const formatted = personaService.formatSearchResults(text, results, activeLang);
         await whatsappService.sendTextMessage(fromPhone, formatted);
         await dbService.saveChatMessage(fromPhone, 'model', formatted);
         return;
       }
 
       // 4.12 Samajhdaar Dost Conversational AI + Ank Jyotish Visheshagya
-      // Empathetic, polite "Aap/Aapka" conversation with continuous chat memory and universal numerology wisdom:
-      const respectfulName = resolvedName && resolvedName !== 'Bhai' ? `${resolvedName} ji` : 'Bhai Sahab';
+      // Empathetic, polite conversation with continuous chat memory:
+      const respectfulName = (activeLang === 'hi' || activeLang === 'hinglish')
+        ? (resolvedName && resolvedName !== 'Friend' && resolvedName !== 'Bhai' ? `${resolvedName} ji` : 'Bhai Sahab')
+        : (resolvedName && resolvedName !== 'Bhai' ? resolvedName : 'Friend');
       const history = await dbService.getRecentChatHistory(fromPhone, 10);
       const numerologyData = await dbService.getUserNumerologyData(fromPhone);
 
       const dostReply = await geminiService.chatAsDost(
         text,
         history,
-        userLang,
+        activeLang,
         respectfulName,
         numerologyData.profileContext
       );

@@ -14,20 +14,13 @@ export const schedulerService = {
    */
   startScheduler() {
     console.log(`${BRAND.name} Multi-tier Scheduler initialized:`);
-    console.log('- 06:00 AM IST: Daily Morning Life & Safety Guidance');
-    console.log('- 08:05 AM IST: Unified Morning COO Brief (Expiries + Dawa + Promises)');
+    console.log('- 07:00 AM IST: Unified Morning COO Brief (Expiries + Dawa + Promises)');
     console.log('- 09:00 AM IST: Document Expiry Alerts (30, 7, 1 day)');
     console.log('- Every 1 Minute: Real-time Task Reminders');
 
-    // 1. Run every day at 06:00 AM IST (00:30 AM UTC): Daily Astro & Morning Guidance
-    cron.schedule('30 0 * * *', async () => {
-      console.log('Running daily 06:00 AM IST Astro & Morning Guidance...');
-      await this.processDailyAstroGuidance();
-    });
-
-    // 2. Run every day at 08:05 AM IST (02:35 AM UTC): Unified Morning COO Brief
-    cron.schedule('35 2 * * *', async () => {
-      console.log('Running daily 08:05 AM IST Unified Morning COO Brief...');
+    // 1. Run every day at 07:00 AM IST (01:30 AM UTC): Unified Morning COO Brief
+    cron.schedule('30 1 * * *', async () => {
+      console.log('Running daily 07:00 AM IST Unified Morning COO Brief...');
       await this.processDailyUnifiedBrief();
     });
 
@@ -91,13 +84,13 @@ export const schedulerService = {
   },
 
   /**
-   * Send Unified 8:05 AM Morning COO Brief
+   * Send Unified 7:00 AM Morning COO Brief
    * Combines upcoming expiries, health medicines, promises, and road safety into 1 crisp card
    */
   async processDailyUnifiedBrief() {
     try {
       const activeUsers = await dbService.getAllActiveUsers();
-      console.log(`Processing 08:05 AM Morning Brief for ${activeUsers.length} users.`);
+      console.log(`Processing 07:00 AM Morning Brief for ${activeUsers.length} users.`);
 
       const { geminiService } = await import('./gemini.js');
 
@@ -113,10 +106,11 @@ export const schedulerService = {
           }
 
           const brief = await geminiService.generateUnifiedDailyBrief(
-            user.name || 'Bhai Sahab',
+            user.name || 'Friend',
             memories,
             upcomingDocs,
-            activeReminders
+            activeReminders,
+            user.language || 'english'
           );
 
           if (brief && brief.length > 10) {

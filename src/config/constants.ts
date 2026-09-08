@@ -55,7 +55,7 @@ export const PLANS: Record<string, PlanDetails> = {
       "50 files storage (RC, Bill, Insurance, Parcha)",
       "25 automated reminders / saal",
       "30, 7, aur 1 din pehle WhatsApp alert",
-      "Subah 6 baje daily life & safety guide",
+      "Daily 7:00 AM Morning Brief & Expiry alerts",
       "Saves ₹2,000+ in traffic challans and late fees"
     ]
   },

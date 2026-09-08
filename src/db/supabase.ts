@@ -195,8 +195,8 @@ export const dbService = {
 
     const defaultUser: UserRecord = {
       phone_number: phoneNumber,
-      name: name || 'Bhai',
-      language: 'hinglish',
+      name: name || 'Friend',
+      language: 'english',
       plan: 'free',
       file_count: 0,
       reminder_count: 0,

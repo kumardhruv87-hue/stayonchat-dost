@@ -225,8 +225,8 @@ Return JSON:
   async chatAsDost(
     userMessage: string,
     history: Array<{ role: string; text: string }> = [],
-    language: string = 'hinglish',
-    userName: string = 'Bhai',
+    language: string = 'english',
+    userName: string = 'Friend',
     numerologyContext?: string
   ): Promise<string> {
     try {
@@ -238,11 +238,11 @@ Return JSON:
       });
 
       const langInstruction =
-        language === 'hi'
+        language === 'hi' || language === 'hindi'
           ? 'शुद्ध, शिष्ट, आदरणीय और सरल हिंदी में बात करें। हमेशा "आप", "आपका", "आपको" का प्रयोग करें।'
-          : language === 'en'
-          ? 'Speak in polite, cultured, dignified, and warm Indian English.'
-          : 'Hinglish mein baat karein, lekin hamesha purna aadar aur samman ke saath ("Aap", "Aapka", "Aapke").';
+          : language === 'hinglish'
+          ? 'Hinglish mein baat karein, lekin hamesha purna aadar aur samman ke saath ("Aap", "Aapka", "Aapke").'
+          : 'Speak in polite, cultured, dignified, and warm English. DYNAMIC MIRRORING: If the user wrote to you in Hindi, Hinglish, Marathi, or another language, seamlessly adapt and mirror their language while maintaining utmost respect and warmth.';
 
       // Build conversation history context
       let historySection = '';
@@ -255,6 +255,11 @@ Return JSON:
       const prompt = `
 You are "${BRAND.displayName}" — a deeply caring, genuine lifelong friend (सच्चा दोस्त), trusted confidant, and certified Ank Jyotish Visheshagya (अंक ज्योतिष विशेषज्ञ).
 You are conversing with ${userName}.
+
+LANGUAGE POLICY:
+- Default language is English.
+- DYNAMIC LANGUAGE MIRRORING: Always mirror the user's chat language. If the user talks in Hindi, reply in Hindi. If in Hinglish, reply in Hinglish. If in English, reply in English. If in any regional language (Marathi, Tamil, etc.), reply in that language.
+- Directive for this turn: ${langInstruction}
 
 MANDATORY RULES OF A TRUE FRIEND & ASSISTANT (STRICT COMPLIANCE):
 1. RESPECT & COURTESY FIRST (सदा "आप" का प्रयोग):
@@ -566,7 +571,7 @@ Return JSON:
   "keyFact": "Concise clean summary of the fact/promise in 1 line",
   "dueDate": "YYYY-MM-DD or null if a deadline exists",
   "amount": number or null,
-  "replyReceipt": "Crisp 1-line human receipt in Hinglish confirming what was saved (e.g. 'Save ho gaya ✅ Sharma ji ko 15 Sept tak ₹10,000. 14 Sept ko yaad dilau?')"
+  "replyReceipt": "Crisp 1-line human receipt confirming what was saved. MATCH THE LANGUAGE OF USER'S TEXT: If user text is in English, reply in English (e.g. 'Saved ✅ WiFi password noted.' or 'Saved ✅ ₹10,000 to Sharma by 15 Sept. Remind you on 14 Sept?'). If Hinglish, reply in Hinglish. If Hindi, reply in Hindi."
 }
 
 If it is just casual greeting, general chat, or inquiry:
@@ -585,14 +590,15 @@ Return JSON:
   },
 
   /**
-   * Unified 8:05 AM Morning COO Briefing Engine
+   * Unified 7:00 AM Morning COO Briefing Engine
    * Combines Today's Expiries + Medicine Timings + Promises + Road Safety Alert into 1 clean card
    */
   async generateUnifiedDailyBrief(
-    userName: string = 'Bhai Sahab',
+    userName: string = 'Friend',
     memories: any[] = [],
     upcomingDocs: any[] = [],
     reminders: any[] = [],
+    language: string = 'english',
     numerologyContext?: string
   ): Promise<string> {
     try {
@@ -611,33 +617,43 @@ Return JSON:
 
       const prompt = `
 You are "${BRAND.displayName}" — the personal life COO on WhatsApp.
-Create the single unified 8:05 AM morning brief for ${userName}.
+Create the single unified 7:00 AM morning brief for ${userName}.
 Today is ${todayStr}.
+Language preference: ${language} (If "english", write in clean English; if "hinglish", write in natural Hinglish; if "hi", write in Hindi).
 
 Active Data:
 - Upcoming/Due Document Expiries & Bills: ${JSON.stringify(upcomingDocs.map(d => ({ title: d.title, date: d.expiry_date, amount: d.amount })))}
 - Active Reminders/Tasks for today: ${JSON.stringify(reminders.map(r => ({ task: r.task, time: r.remind_at })))}
 - Stored Family & Health Memories (e.g. medicines, promises): ${JSON.stringify(memories.map(m => m.key_fact))}
-- Numerology / Road Safety Context: ${numerologyContext || 'Drive carefully during evening rush hour.'}
+- Road Safety Context: ${numerologyContext || 'Drive carefully and stay alert during rush hour.'}
 
 MANDATORY RULES:
 1. Short & crisp (NO long essays, max 4-6 bullet points).
 2. Format:
-   Suprabhat ${userName}! ☀️ Aaj ka schedule:
-   1. [Task/Bill due today or soon]
-   2. [Family medicine or promise]
-   3. [Travel / Road safety warning]
-   4. [Lucky color / Focus window if applicable]
+   ☀️ Keepr Morning Brief (7:00 AM) — ${todayStr}
+
+   1. 🚗 Vehicle/Bills: [Car/Insurance/PUC or bill due soon]
+   2. 💊 Health/Family: [Medicine schedule or family task]
+   3. 📌 Note: [Committed promise or owed money]
+   4. 🛡️ Safety: [Road safety tip or focus hours]
    
-   Kisi cheez par reminder lagana hai?
-3. Natural, respectful Hinglish. NEVER spam asterisks.
+   Would you like me to set a reminder for anything?
+
+   (Adapt language cleanly according to the requested language preference: English, Hinglish, or Hindi).
+3. Professional, warm, respectful. NEVER spam asterisks.
 `;
 
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
     } catch (err) {
       console.error('Error in generateUnifiedDailyBrief:', err);
-      return `Suprabhat ${userName}! ☀️\n\nAaj ka din shubh rahe. Sadak par driving sambhal kar kijiye aur apne zaroori kaamo par dhyan dein. Kisi bhi kaagaz ya reminder ke liye main yahin hoon! 🙏`;
+      if (language === 'hi' || language === 'hindi') {
+        return `सुप्रभात ${userName}! ☀️\n\nआज का दिन शुभ रहे। सड़क पर सावधानी से वाहन चलाएँ और अपने ज़रूरी कार्यों पर ध्यान दें। किसी भी कागज़ या रिमाइंडर के लिए मैं यहीं हूँ! 🙏`;
+      }
+      if (language === 'hinglish') {
+        return `Suprabhat ${userName}! ☀️\n\nAaj ka din shubh rahe. Sadak par driving sambhal kar kijiye aur apne zaroori kaamo par dhyan dein. Kisi bhi kaagaz ya reminder ke liye main yahin hoon! 🙏`;
+      }
+      return `Good morning ${userName}! ☀️\n\nWishing you a productive and safe day ahead. Drive carefully and stay on top of your key tasks. Whenever you need to store or pull a document, I'm right here! 🙏`;
     }
   },
 };
