@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RoasSiren™ 🚨 — Agency Radar Dashboard</title>
+  <title>RoasSiren™ 🚨 — Autonomous Ad Waste & Quick Commerce Radar</title>
   
-  <meta name="description" content="Live 24/7 Meta Ad Spend Protection & Out-of-Stock Radar Dashboard for Performance Marketers." />
+  <meta name="description" content="Live 24/7 Meta Ad Spend Protection & Out-of-Stock Radar Dashboard for Performance Marketers & Quick Commerce Brands." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -52,27 +52,43 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .glass-card {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.78);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-glow {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.12);
     }
     .bg-grid {
       background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
       background-size: 28px 28px;
     }
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.01); }
+    }
+    .threat-banner-pulse {
+      animation: pulse-soft 3s infinite ease-in-out;
+    }
   </style>
 </head>
 
-<body class="bg-obsidian-950 text-slate-100 min-h-screen flex flex-col bg-grid">
+<body class="bg-obsidian-950 text-slate-100 min-h-screen flex flex-col bg-grid selection:bg-siren-500 selection:text-white">
 
-  <!-- Top Navigation -->
-  <header class="sticky top-0 z-40 glass-card border-b border-white/10 px-4 lg:px-8 py-3.5">
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 glass-card border-b border-white/10 px-4 lg:px-8 py-3.5 transition-all">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       
       <!-- Brand & Status -->
       <div class="flex items-center gap-4">
         <a href="/" class="flex items-center gap-2.5 group">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-siren-500 to-rose-700 flex items-center justify-center p-1.5 shadow-md shadow-siren-500/25">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-siren-500 to-rose-700 flex items-center justify-center p-1.5 shadow-md shadow-siren-500/25 group-hover:scale-105 transition-transform">
             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
@@ -80,61 +96,71 @@
           <div>
             <div class="flex items-center gap-1.5">
               <span class="text-lg font-black text-white">Roas<span class="text-siren-500">Siren</span></span>
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/10 text-slate-300 font-mono">DASHBOARD</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/10 text-slate-300 font-mono">RADAR</span>
             </div>
           </div>
         </a>
 
         <div class="hidden sm:flex items-center gap-2 pl-4 border-l border-white/10 text-xs font-mono text-radar-400">
           <span class="h-2 w-2 rounded-full bg-radar-500 animate-ping"></span>
-          <span>RADAR LIVE • 15-MIN SWEEP</span>
+          <span>AUTONOMOUS RADAR • 15-MIN SWEEP</span>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2.5">
+        <button onclick="triggerSimulatedSiren()" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-siren-500/10 hover:bg-siren-500/20 border border-siren-500/30 text-siren-400 text-xs font-bold transition-all">
+          <span>⚡ Test WhatsApp Siren</span>
+        </button>
+
+        <a href="/audit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-semibold text-slate-300 transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <span>Catalog Audit</span>
+        </a>
+
         <button onclick="openModal('modalBulkAdd')" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-semibold text-slate-300 transition-all">
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-          Bulk Import
+          <span>Bulk Ingest</span>
         </button>
 
-        <button onclick="openModal('modalStoreScan')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-semibold text-slate-300 transition-all">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          Store Audit
-        </button>
-
-        <button onclick="openModal('modalAddUrl')" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-siren-500 hover:bg-siren-600 text-white text-xs font-bold shadow-md shadow-siren-500/25 transition-all">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-          Add Monitored URL
-        </button>
+        <a href="https://wa.me/919870530066" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-siren-500 hover:bg-siren-600 text-white text-xs font-bold shadow-md shadow-siren-500/25 transition-all">
+          <span>🚨 Open WhatsApp</span>
+        </a>
       </div>
 
     </div>
   </header>
 
   <!-- Main Dashboard Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8 space-y-8">
-    
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8 space-y-7">
+
     <!-- ============================================================= -->
-    <!-- Top Metric Ribbon -->
+    <!-- 1. Smart Threat / Health Flash Banner (Dynamic) -->
+    <!-- ============================================================= -->
+    <div id="smartThreatBanner" class="hidden rounded-2xl p-5 border transition-all">
+      <!-- Populated dynamically by JS -->
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- 2. Top Metric Ribbon -->
     <!-- ============================================================= -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       
       <!-- Card 1: Active URLs -->
       <div class="glass-card rounded-xl p-5 border border-white/10">
         <div class="flex items-center justify-between">
-          <span class="text-xs text-slate-400 font-medium">Monitored Ad Destinations</span>
-          <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-slate-300">📡</div>
+          <span class="text-xs text-slate-400 font-medium">Monitored Destinations</span>
+          <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-slate-300 text-xs">📡</div>
         </div>
         <div id="statTotalMonitored" class="text-2xl sm:text-3xl font-black text-white mt-2 font-mono">0</div>
-        <div class="text-[11px] text-slate-500 mt-1">Autonomous 24/7 Radar</div>
+        <div class="text-[11px] text-slate-500 mt-1">Shopify D2C & Blinkit Dark Stores</div>
       </div>
 
       <!-- Card 2: Healthy vs Alerts -->
       <div class="glass-card rounded-xl p-5 border border-white/10">
         <div class="flex items-center justify-between">
-          <span class="text-xs text-slate-400 font-medium">Radar Health</span>
-          <div class="w-7 h-7 rounded-lg bg-radar-500/10 flex items-center justify-center text-radar-400">🛡️</div>
+          <span class="text-xs text-slate-400 font-medium">Inventory Integrity</span>
+          <div class="w-7 h-7 rounded-lg bg-radar-500/10 flex items-center justify-center text-radar-400 text-xs">🛡️</div>
         </div>
         <div class="flex items-baseline gap-2 mt-2">
           <span id="statHealthy" class="text-2xl sm:text-3xl font-black text-radar-400 font-mono">0</span>
@@ -143,46 +169,119 @@
           <span id="statCritical" class="text-2xl sm:text-3xl font-black text-siren-400 font-mono">0</span>
           <span class="text-xs text-slate-400">Alerts</span>
         </div>
-        <div class="text-[11px] text-slate-500 mt-1">Instant stockout & link check</div>
+        <div class="text-[11px] text-slate-500 mt-1">Instant 60-second stockout check</div>
       </div>
 
       <!-- Card 3: Protected Monthly Ad Budget -->
       <div class="glass-card rounded-xl p-5 border border-white/10">
         <div class="flex items-center justify-between">
-          <span class="text-xs text-slate-400 font-medium">Monthly Ad Spend Under Radar</span>
-          <div class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400">💰</div>
+          <span class="text-xs text-slate-400 font-medium">Monthly Spend Protected</span>
+          <div class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 text-xs">💰</div>
         </div>
         <div id="statMonthlyProtected" class="text-2xl sm:text-3xl font-black text-white mt-2 font-mono">₹0</div>
-        <div class="text-[11px] text-slate-500 mt-1">Allocated Meta & Google budget</div>
+        <div class="text-[11px] text-slate-500 mt-1">Allocated Meta & Google ad budget</div>
       </div>
 
       <!-- Card 4: Active Hourly Burn -->
       <div class="glass-card rounded-xl p-5 border border-white/10">
         <div class="flex items-center justify-between">
           <span class="text-xs text-slate-400 font-medium">Active Ad Bleed Rate</span>
-          <div class="w-7 h-7 rounded-lg bg-siren-500/10 flex items-center justify-center text-siren-400">🚨</div>
+          <div class="w-7 h-7 rounded-lg bg-siren-500/10 flex items-center justify-center text-siren-400 text-xs">🚨</div>
         </div>
         <div id="statHourlyBleed" class="text-2xl sm:text-3xl font-black text-siren-400 mt-2 font-mono">₹0 / hr</div>
-        <div class="text-[11px] text-slate-500 mt-1">Zero-inventory traffic loss</div>
+        <div class="text-[11px] text-slate-500 mt-1">Zero-inventory click loss</div>
       </div>
 
     </div>
 
     <!-- ============================================================= -->
-    <!-- Filters & Search Toolbar -->
+    <!-- 3. Smart Quick-Add Bar (Zero Modal Friction) -->
+    <!-- ============================================================= -->
+    <div class="glass-card-glow rounded-2xl p-5 sm:p-6 border border-white/15 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="flex h-2.5 w-2.5 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-siren-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-siren-500"></span>
+          </span>
+          <h2 class="text-sm font-bold text-white tracking-wide uppercase">Smart Quick-Add to 24/7 Radar</h2>
+        </div>
+        <span class="text-xs text-slate-400 font-mono hidden sm:block">⚡ Native Shopify API • Cloudflare WAF Bypass Active</span>
+      </div>
+
+      <form onsubmit="handleQuickAddSubmit(event)" class="grid grid-cols-1 md:grid-cols-12 gap-3">
+        <div class="md:col-span-6 relative">
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Product or Ad Destination URL</label>
+          <input 
+            type="url" 
+            id="quickUrlInput" 
+            required 
+            placeholder="https://shop.boat-lifestyle.com/products/... or https://blinkit.com/prn/..." 
+            class="w-full bg-obsidian-950 border border-white/15 focus:border-siren-500 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none font-mono transition-all"
+          />
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Daily Ad Budget on SKU</label>
+          <select id="quickSpendInput" class="w-full bg-obsidian-950 border border-white/15 focus:border-siren-500 text-xs rounded-xl px-3 py-2.5 text-white outline-none font-mono">
+            <option value="1500">₹1,500 / day</option>
+            <option value="3000" selected>₹3,000 / day (Average)</option>
+            <option value="7500">₹7,500 / day</option>
+            <option value="15000">₹15,000 / day (Scale)</option>
+            <option value="30000">₹30,000 / day</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-3 flex items-end">
+          <button 
+            type="submit" 
+            id="quickAddBtn"
+            class="w-full px-5 py-2.5 rounded-xl bg-gradient-to-r from-siren-500 to-rose-600 hover:from-siren-600 hover:to-rose-700 text-white text-xs font-bold shadow-lg shadow-siren-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-95 whitespace-nowrap"
+          >
+            <span>+ Lock into Radar 🚨</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- 1-Click Fast Test Chips -->
+      <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-white/5 text-xs text-slate-400">
+        <span class="text-[11px] font-semibold text-slate-400">1-Click Test Chips:</span>
+        <button type="button" onclick="quickFillAndAdd('https://blinkit.com/prn/aashirvaad-shudh-chakki-atta-100-atta-0-maida/prid/333324')" class="text-xs bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5 font-medium">
+          <span>⚡</span> Blinkit Atta (Quick Commerce)
+        </button>
+        <button type="button" onclick="quickFillAndAdd('https://snitch.co.in/products/air-mesh-oversized-tee')" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5">
+          <span>🛍️</span> Snitch Apparel
+        </button>
+        <button type="button" onclick="quickFillAndAdd('https://shop.boat-lifestyle.com/products/rockerz-450')" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5">
+          <span>🎧</span> boAt Rockerz
+        </button>
+        <button type="button" onclick="quickFillAndAdd('https://snitch.co.in/products/oversized-dead-link-sample-404')" class="text-xs bg-siren-500/10 hover:bg-siren-500/20 border border-siren-500/30 text-siren-400 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5">
+          <span>❌</span> Test Broken 404
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- 4. Filters & Search Toolbar -->
     <!-- ============================================================= -->
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 glass-card rounded-xl p-4 border border-white/10">
       
       <!-- Filter Chips -->
-      <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-        <button onclick="filterRadar('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 text-white transition-all">
+      <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <button onclick="filterRadar('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 text-white transition-all whitespace-nowrap">
           All (<span id="countAll">0</span>)
         </button>
-        <button onclick="filterRadar('critical')" id="filterCritical" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+        <button onclick="filterRadar('critical')" id="filterCritical" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all whitespace-nowrap">
           🔴 Critical (<span id="countCritical">0</span>)
         </button>
-        <button onclick="filterRadar('safe')" id="filterSafe" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">
+        <button onclick="filterRadar('safe')" id="filterSafe" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all whitespace-nowrap">
           🟢 In Stock (<span id="countSafe">0</span>)
+        </button>
+        <button onclick="filterRadar('blinkit')" id="filterBlinkit" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all whitespace-nowrap">
+          ⚡ Blinkit (<span id="countBlinkit">0</span>)
+        </button>
+        <button onclick="filterRadar('shopify')" id="filterShopify" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all whitespace-nowrap">
+          🛍️ Shopify (<span id="countShopify">0</span>)
         </button>
       </div>
 
@@ -193,7 +292,7 @@
             type="text" 
             id="searchRadar" 
             oninput="renderRadarGrid()"
-            placeholder="Search brand or SKU..." 
+            placeholder="Search brand, SKU, or platform..." 
             class="w-full bg-obsidian-950 border border-white/10 text-xs text-white rounded-lg px-3 py-2 pl-8 outline-none focus:border-siren-500"
           />
           <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,7 +300,7 @@
           </svg>
         </div>
 
-        <button onclick="loadDashboardData()" title="Refresh Status" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all">
+        <button onclick="loadDashboardData(true)" title="Refresh Radar" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shrink-0">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
         </button>
       </div>
@@ -209,7 +308,7 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- Live Watchdog Radar Grid -->
+    <!-- 5. Live Watchdog Radar Grid -->
     <!-- ============================================================= -->
     <div id="radarGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       <!-- Populated dynamically by JS -->
@@ -218,68 +317,25 @@
     <!-- Empty State -->
     <div id="emptyState" class="hidden glass-card rounded-2xl p-12 text-center border border-white/10 max-w-md mx-auto">
       <div class="w-12 h-12 mx-auto rounded-xl bg-white/5 flex items-center justify-center text-xl mb-4">📡</div>
-      <h3 class="text-base font-bold text-white">No Monitored Ad URLs Found</h3>
-      <p class="text-xs text-slate-400 mt-2">Start protecting your Meta ad budget by adding your first Shopify landing page URL.</p>
-      <button onclick="openModal('modalAddUrl')" class="mt-5 px-5 py-2.5 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs shadow-md shadow-siren-500/30 transition-all">
-        + Add My First Ad URL
+      <h3 class="text-base font-bold text-white">No Monitored Destinations Found</h3>
+      <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+        Start protecting your Meta ad budget or Quick Commerce dark store. Paste any product URL in the quick-add bar above.
+      </p>
+      <button onclick="document.getElementById('quickUrlInput').focus()" class="mt-5 px-5 py-2.5 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs shadow-md shadow-siren-500/30 transition-all">
+        + Add My First SKU
       </button>
     </div>
 
   </main>
 
   <!-- ============================================================= -->
-  <!-- MODAL 1: Add Single URL -->
-  <!-- ============================================================= -->
-  <div id="modalAddUrl" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-2xl p-6 max-w-lg w-full border border-white/15 space-y-4">
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <h3 class="text-sm font-bold text-white">Add URL to 24/7 Watchdog Radar</h3>
-        <button onclick="closeModal('modalAddUrl')" class="text-slate-400 hover:text-white text-sm">&times;</button>
-      </div>
-
-      <form onsubmit="handleAddUrlSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Product / Ad Destination URL (Shopify, Blinkit Quick Commerce, WooCommerce)</label>
-          <input type="url" id="addUrlTarget" required placeholder="https://snitch.co.in/products/... or https://blinkit.com/prn/..." class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-siren-500 font-mono" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Brand / Store Name</label>
-            <input type="text" id="addUrlBrand" placeholder="e.g. Snitch" class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-siren-500" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Daily Ad Budget (₹)</label>
-            <input type="number" id="addUrlSpend" value="3000" class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-siren-500 font-mono" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">WhatsApp Phone for Sirens</label>
-          <input type="tel" id="addUrlPhone" required placeholder="e.g. 919560931596" class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-siren-500 font-mono" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Slack / Discord Webhook URL (Optional)</label>
-          <input type="url" id="addUrlWebhook" placeholder="https://hooks.slack.com/services/..." class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-siren-500 font-mono text-[11px]" />
-        </div>
-
-        <div class="pt-2 flex justify-end gap-3">
-          <button type="button" onclick="closeModal('modalAddUrl')" class="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-400">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-lg bg-siren-500 hover:bg-siren-600 text-xs font-bold text-white shadow-md shadow-siren-500/25">Lock into Radar 🚨</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ============================================================= -->
-  <!-- MODAL 2: Bulk Import URLs -->
+  <!-- MODAL: Bulk Import URLs -->
   <!-- ============================================================= -->
   <div id="modalBulkAdd" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="glass-card rounded-2xl p-6 max-w-xl w-full border border-white/15 space-y-4">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
         <div>
-          <h3 class="text-sm font-bold text-white">Bulk Ingest Ad URLs (Up to 20)</h3>
+          <h3 class="text-sm font-bold text-white">Bulk Ingest Ad URLs (Up to 25)</h3>
           <p class="text-[11px] text-slate-400">Paste your Meta Ads active landing page URLs, one per line.</p>
         </div>
         <button onclick="closeModal('modalBulkAdd')" class="text-slate-400 hover:text-white text-sm">&times;</button>
@@ -292,14 +348,14 @@
             id="bulkUrlsInput" 
             rows="6" 
             required 
-            placeholder="https://brand.com/products/tee-black&#10;https://brand.com/products/hoodie-grey&#10;https://brand.com/products/sneaker-white"
+            placeholder="https://snitch.co.in/products/air-mesh-oversized-tee&#10;https://shop.boat-lifestyle.com/products/rockerz-450&#10;https://blinkit.com/prn/.../prid/333324"
             class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl p-3 text-white outline-none focus:border-siren-500 font-mono"
           ></textarea>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">WhatsApp Recipient Phone</label>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">WhatsApp Phone for Sirens</label>
             <input type="tel" id="bulkPhoneInput" required placeholder="919560931596" class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3 py-2 text-white outline-none font-mono" />
           </div>
           <div>
@@ -316,39 +372,65 @@
     </div>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- MODAL 3: Store-Wide Catalog Audit -->
-  <!-- ============================================================= -->
-  <div id="modalStoreScan" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-2xl p-6 max-w-2xl w-full border border-white/15 space-y-4 max-h-[90vh] flex flex-col">
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <div>
-          <h3 class="text-sm font-bold text-white">Store-Wide Out-of-Stock Audit</h3>
-          <p class="text-[11px] text-slate-400">Crawl entire public catalog to detect zero-inventory ad risks.</p>
-        </div>
-        <button onclick="closeModal('modalStoreScan')" class="text-slate-400 hover:text-white text-sm">&times;</button>
-      </div>
-
-      <form onsubmit="handleStoreScanSubmit(event)" class="flex gap-2">
-        <input type="text" id="storeDomainInput" required placeholder="e.g. snitch.co.in or shop.boat-lifestyle.com" class="flex-1 bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2 text-white outline-none focus:border-siren-500 font-mono" />
-        <button type="submit" id="storeScanBtn" class="px-4 py-2 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs whitespace-nowrap shadow-md shadow-siren-500/25">Crawl Catalog</button>
-      </form>
-
-      <!-- Store Audit Results -->
-      <div id="storeAuditResults" class="hidden overflow-y-auto flex-1 space-y-4 pt-2">
-        <!-- Injected by JS -->
+  <!-- Footer -->
+  <footer class="border-t border-white/10 bg-obsidian-950 py-8 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>RoasSiren™ Autonomous Watchdog • 24/7 Meta Ad Spend & Quick Commerce Protection</div>
+      <div class="flex items-center gap-4">
+        <a href="/audit" class="hover:text-slate-300">Catalog Auditor</a>
+        <a href="/privacy" class="hover:text-slate-300">Privacy</a>
+        <a href="/terms" class="hover:text-slate-300">Terms</a>
+        <a href="https://wa.me/919870530066" target="_blank" class="text-siren-400 hover:underline">WhatsApp Support</a>
       </div>
     </div>
-  </div>
+  </footer>
 
   <!-- ============================================================= -->
-  <!-- Front-end Dashboard Controller -->
+  <!-- Client-Side Smart Radar Logic -->
   <!-- ============================================================= -->
   <script>
     let radarData = [];
     let currentFilter = 'all';
 
-    async function loadDashboardData() {
+    // Get remembered phone or default
+    function getStoredPhone() {
+      return localStorage.getItem('roas_phone') || '919560931596';
+    }
+
+    function setStoredPhone(phone) {
+      if (phone) localStorage.setItem('roas_phone', phone.replace(/\D/g, ''));
+    }
+
+    // Interactive Toast Notification
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const isError = type === 'error';
+      const isWarn = type === 'warn';
+      const borderClass = isError ? 'border-siren-500 bg-obsidian-900 text-siren-300' : isWarn ? 'border-amber-500 bg-obsidian-900 text-amber-300' : 'border-radar-500 bg-obsidian-900 text-radar-300';
+      
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border ${borderClass} shadow-xl text-xs font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-[-10px] opacity-0`;
+      toast.innerHTML = `<span>${isError ? '🚨' : isWarn ? '⚠️' : '✅'}</span><span>${message}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Load initial data on mount
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('bulkPhoneInput').value = getStoredPhone();
+      loadDashboardData();
+      setInterval(() => loadDashboardData(false), 30000); // 30-sec background sync
+    });
+
+    async function loadDashboardData(showNotification = false) {
       try {
         const resp = await fetch('/api/dashboard/stats');
         const data = await resp.json();
@@ -356,7 +438,12 @@
 
         radarData = data.items || [];
         updateMetricsRibbon(data);
+        updateSmartThreatBanner(data);
         renderRadarGrid();
+
+        if (showNotification) {
+          showToast('Radar synced with live platform endpoints');
+        }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       }
@@ -372,17 +459,75 @@
       document.getElementById('countAll').textContent = stats.totalMonitored || 0;
       document.getElementById('countCritical').textContent = stats.criticalCount || 0;
       document.getElementById('countSafe').textContent = stats.healthyCount || 0;
+
+      const blinkitCount = radarData.filter(i => i.platform === 'BLINKIT' || (i.url && i.url.includes('blinkit.com'))).length;
+      const shopifyCount = radarData.filter(i => i.platform === 'SHOPIFY' || (i.url && !i.url.includes('blinkit.com'))).length;
+
+      document.getElementById('countBlinkit').textContent = blinkitCount;
+      document.getElementById('countShopify').textContent = shopifyCount;
+    }
+
+    // Smart Threat Banner
+    function updateSmartThreatBanner(stats) {
+      const banner = document.getElementById('smartThreatBanner');
+      if (stats.criticalCount > 0) {
+        banner.className = 'glass-card-glow rounded-2xl p-5 border border-siren-500/40 bg-siren-500/10 threat-banner-pulse flex flex-col sm:flex-row items-center justify-between gap-4';
+        banner.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🚨</span>
+            <div>
+              <div class="text-sm font-extrabold text-white">IMMEDIATE AD BLEED WARNING: ${stats.criticalCount} DESTINATION(S) SOLD OUT!</div>
+              <div class="text-xs text-siren-300 mt-0.5">
+                Active ad spend is landing on dead stock. You are bleeding <strong class="text-white font-mono">~₹${(stats.activeHourlyBurn || 0).toLocaleString('en-IN')}/hour</strong> right now!
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="filterRadar('critical')" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs shadow-md shadow-siren-500/30 whitespace-nowrap">
+              View Critical SKUs (${stats.criticalCount})
+            </button>
+          </div>
+        `;
+        banner.classList.remove('hidden');
+      } else if (stats.totalMonitored > 0) {
+        banner.className = 'glass-card rounded-2xl p-4 border border-radar-500/30 bg-radar-500/5 flex items-center justify-between gap-4';
+        banner.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-xl text-radar-400">🛡️</span>
+            <div>
+              <div class="text-xs font-bold text-white">100% INVENTORY INTEGRITY VERIFIED</div>
+              <div class="text-[11px] text-slate-400">All ${stats.totalMonitored} monitored ad destinations are in stock and ready for conversion. 24/7 siren radar active.</div>
+            </div>
+          </div>
+          <span class="text-[11px] font-mono text-radar-400 font-bold bg-radar-500/10 px-2.5 py-1 rounded-md border border-radar-500/20">RADAR OPTIMAL</span>
+        `;
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
     }
 
     function filterRadar(type) {
       currentFilter = type;
-      const btnAll = document.getElementById('filterAll');
-      const btnCrit = document.getElementById('filterCritical');
-      const btnSafe = document.getElementById('filterSafe');
+      const tabs = ['filterAll', 'filterCritical', 'filterSafe', 'filterBlinkit', 'filterShopify'];
+      tabs.forEach(tabId => {
+        const el = document.getElementById(tabId);
+        if (!el) return;
+        el.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all whitespace-nowrap';
+      });
 
-      btnAll.className = type === 'all' ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 text-white' : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white';
-      btnCrit.className = type === 'critical' ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-siren-500/20 text-siren-400 border border-siren-500/30' : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white';
-      btnSafe.className = type === 'safe' ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-radar-500/20 text-radar-400 border border-radar-500/30' : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white';
+      const activeMap = {
+        all: 'filterAll',
+        critical: 'filterCritical',
+        safe: 'filterSafe',
+        blinkit: 'filterBlinkit',
+        shopify: 'filterShopify'
+      };
+
+      const activeEl = document.getElementById(activeMap[type]);
+      if (activeEl) {
+        activeEl.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white/15 text-white transition-all whitespace-nowrap border border-white/20';
+      }
 
       renderRadarGrid();
     }
@@ -393,16 +538,24 @@
       const search = (document.getElementById('searchRadar').value || '').toLowerCase().trim();
 
       let filtered = radarData.filter((item) => {
+        const isBlinkit = item.platform === 'BLINKIT' || (item.url && item.url.includes('blinkit.com'));
+        const isShopify = item.platform === 'SHOPIFY' || (!isBlinkit && item.url && !item.url.includes('woocommerce'));
+
         if (currentFilter === 'critical') {
           if (item.lastStatus !== 'CRITICAL_OUT_OF_STOCK' && item.lastStatus !== 'DEAD_LINK_404') return false;
         } else if (currentFilter === 'safe') {
           if (item.lastStatus !== 'SAFE_IN_STOCK') return false;
+        } else if (currentFilter === 'blinkit') {
+          if (!isBlinkit) return false;
+        } else if (currentFilter === 'shopify') {
+          if (!isShopify) return false;
         }
 
         if (search) {
           const matchBrand = (item.brandName || '').toLowerCase().includes(search);
           const matchUrl = (item.url || '').toLowerCase().includes(search);
-          if (!matchBrand && !matchUrl) return false;
+          const matchPlatform = (item.platform || '').toLowerCase().includes(search);
+          if (!matchBrand && !matchUrl && !matchPlatform) return false;
         }
         return true;
       });
@@ -423,13 +576,15 @@
         const isBlinkit = item.platform === 'BLINKIT' || (item.url && item.url.includes('blinkit.com'));
         const isWoo = item.platform === 'WOOCOMMERCE' || (item.url && item.url.includes('woocommerce'));
         const platformBadge = isBlinkit 
-          ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚡ Blinkit</span>'
+          ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚡ Blinkit Hub</span>'
           : (isWoo 
-              ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">📦 Woo</span>' 
-              : '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🛍️ Shopify</span>');
+              ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">📦 WooCommerce</span>' 
+              : '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🛍️ Shopify D2C</span>');
+
+        const cardBorder = isCritical ? 'border-siren-500/40 bg-obsidian-900/90 shadow-lg shadow-siren-500/10' : 'border-white/10 glass-card hover:border-white/20';
 
         return `
-          <div class="glass-card rounded-2xl p-5 border border-white/10 space-y-4 hover:border-white/20 transition-all">
+          <div id="card_${item.id}" class="rounded-2xl p-5 border ${cardBorder} space-y-4 transition-all relative">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="relative flex h-2.5 w-2.5">
@@ -451,29 +606,35 @@
               </a>
             </div>
 
-            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+            <!-- Smart Financial Impact Box -->
+            <div class="p-3 rounded-xl ${isCritical ? 'bg-siren-500/10 border border-siren-500/20' : 'bg-obsidian-950/80 border border-white/5'} flex items-center justify-between text-xs font-mono">
               <div>
-                <div class="text-[10px] text-slate-500">Daily Spend</div>
-                <div class="text-slate-200 font-bold">₹${(item.dailyAdSpend || 3000).toLocaleString('en-IN')} / d</div>
+                <div class="text-[10px] text-slate-400">Daily Ad Budget</div>
+                <div class="text-slate-200 font-bold">₹${(item.dailyAdSpend || 3000).toLocaleString('en-IN')}/d</div>
               </div>
               <div>
-                <div class="text-[10px] text-slate-500">Hourly Bleed</div>
+                <div class="text-[10px] text-slate-400">Bleed Rate</div>
                 <div class="${isCritical ? 'text-siren-400 font-bold' : 'text-slate-400'}">₹${hourlyBurn}/hr</div>
               </div>
-              <div>
-                <div class="text-[10px] text-slate-500">Last Sweep</div>
-                <div class="text-slate-400">${new Date(item.lastCheckedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+              <div class="text-right">
+                <div class="text-[10px] text-slate-400">Last Sweep</div>
+                <div class="text-slate-300">${new Date(item.lastCheckedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
               </div>
             </div>
 
-            <div class="pt-2 border-t border-white/10 flex items-center justify-between">
-              <button onclick="rescanUrl('${item.url}')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                Re-Scan
+            <!-- Smart Action Tray -->
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+              <button onclick="rescanSingleItem('${item.id}', this)" class="text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors font-medium">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                <span>Re-Scan</span>
               </button>
 
-              <button onclick="removeMonitoredUrl('${item.id}')" class="text-xs text-siren-400 hover:text-siren-500 transition-colors">
-                Remove
+              <button onclick="dispatchDirectSiren('${item.id}', this)" class="text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-medium">
+                <span>📲 Send Siren</span>
+              </button>
+
+              <button onclick="removeMonitoredUrl('${item.id}')" class="text-slate-500 hover:text-siren-400 transition-colors">
+                Delete
               </button>
             </div>
           </div>
@@ -481,32 +642,156 @@
       }).join('');
     }
 
-    async function handleAddUrlSubmit(e) {
+    // Instant Quick Add Handler (Zero modal)
+    async function handleQuickAddSubmit(e) {
       e.preventDefault();
-      const url = document.getElementById('addUrlTarget').value.trim();
-      const brandName = document.getElementById('addUrlBrand').value.trim();
-      const dailyAdSpend = document.getElementById('addUrlSpend').value;
-      const phone = document.getElementById('addUrlPhone').value.trim();
-      const webhookUrl = document.getElementById('addUrlWebhook').value.trim();
+      const urlInput = document.getElementById('quickUrlInput');
+      const spendInput = document.getElementById('quickSpendInput');
+      const btn = document.getElementById('quickAddBtn');
+
+      const url = urlInput.value.trim();
+      const dailyAdSpend = Number(spendInput.value);
+      const phone = getStoredPhone();
+
+      if (!url) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="animate-spin">🌀</span><span>Scanning...</span>';
 
       try {
         const resp = await fetch('/api/monitor', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, brandName, dailyAdSpend: Number(dailyAdSpend), phone, webhookUrl })
+          body: JSON.stringify({ url, dailyAdSpend, phone })
         });
         const data = await resp.json();
+
+        btn.disabled = false;
+        btn.innerHTML = '<span>+ Lock into Radar 🚨</span>';
+
         if (data.success) {
-          closeModal('modalAddUrl');
+          urlInput.value = '';
+          showToast(`Locked into 24/7 radar: ${data.monitored.brandName}`);
           loadDashboardData();
         } else {
-          alert(data.error || 'Failed to add URL');
+          showToast(data.error || 'Failed to add URL', 'error');
         }
       } catch (err) {
-        alert('Error adding URL: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<span>+ Lock into Radar 🚨</span>';
+        showToast('Error: ' + err.message, 'error');
       }
     }
 
+    // 1-Click Fast Test Chip Helper
+    function quickFillAndAdd(url) {
+      document.getElementById('quickUrlInput').value = url;
+      handleQuickAddSubmit(new Event('submit'));
+    }
+
+    // Instant Re-Scan Single Item
+    async function rescanSingleItem(id, btnEl) {
+      const origText = btnEl.innerHTML;
+      btnEl.disabled = true;
+      btnEl.innerHTML = '<span class="animate-spin text-xs">🌀</span><span>Checking...</span>';
+
+      try {
+        const resp = await fetch(`/api/monitor/rescan/${id}`, { method: 'POST' });
+        const data = await resp.json();
+
+        btnEl.disabled = false;
+        btnEl.innerHTML = origText;
+
+        if (data.success) {
+          showToast(`Re-scanned: ${data.diag.productTitle} is ${data.diag.status}`);
+          loadDashboardData();
+        } else {
+          showToast(data.error || 'Re-scan failed', 'error');
+        }
+      } catch (err) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = origText;
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    // Direct Siren Dispatch Trigger
+    async function dispatchDirectSiren(id, btnEl) {
+      const orig = btnEl.innerHTML;
+      btnEl.disabled = true;
+      btnEl.innerHTML = '<span>Dispatching...</span>';
+
+      try {
+        const resp = await fetch(`/api/monitor/siren/${id}`, { method: 'POST' });
+        const data = await resp.json();
+
+        btnEl.disabled = false;
+        btnEl.innerHTML = orig;
+
+        if (data.success) {
+          showToast(`Emergency WhatsApp Siren sent to ${getStoredPhone()}!`);
+        } else {
+          showToast(data.error || 'Failed to dispatch siren', 'error');
+        }
+      } catch (err) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = orig;
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    // Simulate 3 AM Stockout Demo
+    async function triggerSimulatedSiren() {
+      const phone = prompt('Enter your WhatsApp phone number to receive a live demo siren:', getStoredPhone());
+      if (!phone) return;
+
+      setStoredPhone(phone);
+      showToast(`Dispatching demo siren to ${phone}...`, 'warn');
+
+      try {
+        const resp = await fetch('/api/simulate-siren', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+          showToast(`Siren delivered to ${phone}! Check WhatsApp.`);
+        } else {
+          showToast(data.message || 'Simulation failed', 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    // Remove Monitored URL
+    async function removeMonitoredUrl(id) {
+      if (!confirm('Remove this product destination from 24/7 siren radar?')) return;
+      try {
+        const resp = await fetch(`/api/monitor/${id}`, { method: 'DELETE' });
+        const data = await resp.json();
+        if (data.success) {
+          showToast('Product destination removed from radar');
+          loadDashboardData();
+        } else {
+          showToast('Failed to remove item', 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
+    // Modal Helpers
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Bulk Ingestion Handler
     async function handleBulkAddSubmit(e) {
       e.preventDefault();
       const rawUrls = document.getElementById('bulkUrlsInput').value.split('\n');
@@ -517,8 +802,9 @@
       const urls = rawUrls.map(u => u.trim()).filter(u => u.startsWith('http'));
       if (urls.length === 0) return alert('No valid URLs found.');
 
+      setStoredPhone(phone);
       btn.disabled = true;
-      btn.textContent = 'Importing ' + urls.length + ' URLs...';
+      btn.textContent = `Importing ${urls.length} URLs...`;
 
       for (const url of urls) {
         await fetch('/api/monitor', {
@@ -531,107 +817,10 @@
       btn.disabled = false;
       btn.textContent = 'Import & Scan All';
       closeModal('modalBulkAdd');
+      document.getElementById('bulkUrlsInput').value = '';
+      showToast(`Successfully imported ${urls.length} ad destinations!`);
       loadDashboardData();
     }
-
-    async function handleStoreScanSubmit(e) {
-      e.preventDefault();
-      const domain = document.getElementById('storeDomainInput').value.trim();
-      const btn = document.getElementById('storeScanBtn');
-      const resultsContainer = document.getElementById('storeAuditResults');
-
-      btn.disabled = true;
-      btn.textContent = 'Crawling Catalog...';
-      resultsContainer.classList.remove('hidden');
-      resultsContainer.innerHTML = '<div class="text-xs font-mono text-slate-400 p-4">Reading /products.json from ' + domain + '...</div>';
-
-      try {
-        const resp = await fetch('/api/scan-store', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ domain })
-        });
-        const data = await resp.json();
-
-        btn.disabled = false;
-        btn.textContent = 'Crawl Catalog';
-
-        if (data.success && data.report) {
-          const r = data.report;
-          resultsContainer.innerHTML = `
-            <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h4 class="text-sm font-bold text-white">${r.brandName} (${r.domain})</h4>
-                  <p class="text-xs text-slate-400">${r.totalProducts} Total Products In Catalog</p>
-                </div>
-                <div class="text-right">
-                  <div class="text-xs text-siren-400 font-bold">${r.vulnerabilityScorePct}% Vulnerability Score</div>
-                  <div class="text-[11px] text-slate-400">${r.outOfStockCount} SKUs 100% Sold Out</div>
-                </div>
-              </div>
-
-              <div class="text-xs font-bold text-slate-300 pt-2 border-t border-white/10">
-                Top Out-of-Stock SKUs Detected:
-              </div>
-
-              <div class="space-y-2 max-h-60 overflow-y-auto">
-                ${r.outOfStockProducts.slice(0, 10).map(p => `
-                  <div class="flex items-center justify-between p-2 rounded-lg bg-obsidian-950 border border-white/5 text-xs">
-                    <span class="truncate max-w-xs text-slate-300">${p.title}</span>
-                    <button onclick="addUrlDirectly('${p.url}', '${r.brandName}')" class="text-[10px] bg-siren-500/20 text-siren-400 border border-siren-500/30 px-2 py-0.5 rounded">
-                      + Monitor
-                    </button>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `;
-        }
-      } catch (err) {
-        btn.disabled = false;
-        btn.textContent = 'Crawl Catalog';
-        resultsContainer.innerHTML = '<div class="text-xs text-siren-400 p-4">Error: ' + err.message + '</div>';
-      }
-    }
-
-    async function addUrlDirectly(url, brandName) {
-      await fetch('/api/monitor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, brandName, phone: '919560931596', dailyAdSpend: 3000 })
-      });
-      alert('Locked into 24/7 Watchdog Radar!');
-      loadDashboardData();
-    }
-
-    async function rescanUrl(url) {
-      await fetch('/api/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-      });
-      loadDashboardData();
-    }
-
-    async function removeMonitoredUrl(id) {
-      if (!confirm('Remove this URL from 24/7 watchdog radar?')) return;
-      await fetch('/api/monitor/' + id, { method: 'DELETE' });
-      loadDashboardData();
-    }
-
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    // Initialize on page load
-    loadDashboardData();
-
-    // Auto-refresh every 30 seconds
-    setInterval(loadDashboardData, 30000);
   </script>
 </body>
 </html>

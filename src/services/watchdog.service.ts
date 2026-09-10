@@ -888,6 +888,13 @@ export class WatchdogService {
   }
 
   /**
+   * Get a single monitored URL by ID
+   */
+  public getMonitoredUrl(id: string): MonitoredUrl | undefined {
+    return this.monitoredUrls.get(id);
+  }
+
+  /**
    * Get monitored URLs for a specific phone number
    */
   public getMonitoredUrlsByPhone(phone: string): MonitoredUrl[] {

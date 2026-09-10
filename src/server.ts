@@ -222,6 +222,46 @@ app.delete('/api/monitor/:id', (req: Request, res: Response) => {
   }
 });
 
+// Instant Re-Scan a Monitored URL
+app.post('/api/monitor/rescan/:id', async (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const item = watchdogService.getMonitoredUrl(id);
+    if (!item) {
+      return res.status(404).json({ error: 'Monitored URL not found' });
+    }
+
+    const diag = await watchdogService.scanUrl(item.url, item.dailyAdSpend);
+    watchdogService.updateMonitoredStatus(id, diag.status);
+
+    // If critical failure, dispatch siren alert
+    if (diag.status === 'CRITICAL_OUT_OF_STOCK' || diag.status === 'DEAD_LINK_404') {
+      sirenService.dispatchAdWasteSiren(item.userPhone, item, diag).catch(console.error);
+    }
+
+    return res.json({ success: true, item, diag });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Rescan failed' });
+  }
+});
+
+// Force Dispatch WhatsApp Siren for a Monitored Item
+app.post('/api/monitor/siren/:id', async (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const item = watchdogService.getMonitoredUrl(id);
+    if (!item) {
+      return res.status(404).json({ error: 'Monitored URL not found' });
+    }
+
+    const diag = await watchdogService.scanUrl(item.url, item.dailyAdSpend);
+    const sent = await sirenService.dispatchAdWasteSiren(item.userPhone, item, diag);
+    return res.json({ success: true, sent, diag });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Siren dispatch failed' });
+  }
+});
+
 // Send Demo Siren Alert (Used by landing page interactive simulation)
 app.post('/api/simulate-siren', async (req: Request, res: Response) => {
   try {
