@@ -94,7 +94,7 @@ export class MetaCloudAdapter implements ChannelAdapter {
     bodyText: string,
     buttons: WhatsAppButton[],
     headerText?: string,
-    footerText: string = 'Keepr 🤖 • Autonomous Life Vault'
+    footerText: string = 'RoasSiren™ 🚨 • 24/7 Ad Waste Watchdog'
   ): Promise<boolean> {
     const toClean = this.cleanPhone(to);
     const cleanBody = bodyText.replace(/\*/g, '');

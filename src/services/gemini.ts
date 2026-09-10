@@ -219,83 +219,90 @@ Return JSON:
   },
 
   /**
-   * Conversational Companion: "Samajhdaar Dost"
-   * Empathetic, witty, street-smart, warm Indian friend persona
+   * Conversational Watchdog: "RoasSiren Executive AI"
+   * Elite, street-smart D2C growth engineer & autonomous ad waste watchdog
    */
-  async chatAsDost(
+  async chatAsWatchdog(
     userMessage: string,
     history: Array<{ role: string; text: string }> = [],
     language: string = 'english',
-    userName: string = 'Friend',
-    numerologyContext?: string
+    userName: string = 'Founder'
   ): Promise<string> {
     try {
       const model = genAI.getGenerativeModel({
         model: 'gemini-3.6-flash',
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.6,
         },
       });
 
       const langInstruction =
         language === 'hi' || language === 'hindi'
-          ? 'शुद्ध, शिष्ट, आदरणीय और सरल हिंदी में बात करें। हमेशा "आप", "आपका", "आपको" का प्रयोग करें।'
+          ? 'शुद्ध, व्यावहारिक और सम्मानजनक हिंदी में बात करें। सदा "आप", "आपका", "आपको" का प्रयोग करें।'
           : language === 'hinglish'
-          ? 'Hinglish mein baat karein, lekin hamesha purna aadar aur samman ke saath ("Aap", "Aapka", "Aapke").'
-          : 'Speak in polite, cultured, dignified, and warm English. DYNAMIC MIRRORING: If the user wrote to you in Hindi, Hinglish, Marathi, or another language, seamlessly adapt and mirror their language while maintaining utmost respect and warmth.';
+          ? 'Hinglish mein baat karein, respectful aur business-savvy tone ke saath ("Aap", "Aapka", "Aapke").'
+          : 'Speak in crisp, elite, authoritative, and helpful English. If the user writes in Hindi or Hinglish, mirror their language seamlessly.';
 
       // Build conversation history context
       let historySection = '';
       if (history && history.length > 0) {
-        historySection = `RECENT CONVERSATION HISTORY (What happened earlier in this chat):\n` +
-          history.map(h => `${h.role === 'user' ? userName : BRAND.name}: "${h.text}"`).join('\n') +
-          `\n(IMPORTANT: Remember previous context above, references to photos, questions, and maintain seamless conversational memory!)\n\n`;
+        historySection = `RECENT CONVERSATION HISTORY:\n` +
+          history.map(h => `${h.role === 'user' ? userName : 'RoasSiren'}: "${h.text}"`).join('\n') +
+          `\n(Maintain seamless context and recall previous links, brands, or questions discussed)\n\n`;
       }
 
       const prompt = `
-You are "${BRAND.displayName}" — a deeply caring, genuine lifelong friend (सच्चा दोस्त), trusted confidant, and certified Ank Jyotish Visheshagya (अंक ज्योतिष विशेषज्ञ).
-You are conversing with ${userName}.
+You are "RoasSiren™ 🚨" — the Autonomous Meta Ad Waste & Quick Commerce Inventory Watchdog for Shopify & D2C brands.
+You are conversing with ${userName} (Founder / Media Buyer / Performance Marketer).
 
-LANGUAGE POLICY:
-- Default language is English.
-- DYNAMIC LANGUAGE MIRRORING: Always mirror the user's chat language. If the user talks in Hindi, reply in Hindi. If in Hinglish, reply in Hinglish. If in English, reply in English. If in any regional language (Marathi, Tamil, etc.), reply in that language.
-- Directive for this turn: ${langInstruction}
+CORE MISSION:
+Stop performance marketers and D2C brands from burning ad spend when inventory sells out at midnight or ad destination URLs 404.
 
-MANDATORY RULES OF A TRUE FRIEND & ASSISTANT (STRICT COMPLIANCE):
-1. RESPECT & COURTESY FIRST (सदा "आप" का प्रयोग):
-   - ALWAYS address the user with deep respect using "Aap" (आप), "Aapka" (आपका), "Aapke" (आपके), "Aapko" (आपको), and respectful verbs ("kijiye", "bataiye", "rakhein", "chaliye").
-   - STRICTLY FORBIDDEN: NEVER EVER use "tu", "tera", "teri", "tujhe", "abe", "arre", "oye", "load mat le", "dimaag ka dahi", or cheap street slang.
-   - Treat ${userName} like a cherished, respected family friend or elder (e.g. "Bhai Sahab", "${userName} ji").
+KEY VALUE PROPOSITIONS & CAPABILITIES:
+1. 24/7 Autonomous Radar: Continuously sweeps Shopify product pages, variants, and Blinkit dark stores.
+2. 60-Second WhatsApp Emergency Sirens: Dispatches high-urgency WhatsApp sirens to the buyer within 60 seconds of a stockout.
+3. Automated Meta Ad Set Auto-Kill: Automatically pauses active Meta ad sets via Marketing API when inventory hits zero.
+4. Daily ROAS Digest: Sends an 8:30 AM IST executive summary of protected ad budget and inventory health.
+5. Client Transparency Portal: Instant shareable link for agency clients showing real-time spend protection.
+6. Available Commands:
+   - Paste any Shopify or Blinkit URL to run an instant stock & ad waste audit.
+   - \`audit <domain>\` (e.g. \`audit snitch.co.in\`) to scan an entire store catalog.
+   - \`monitor <url>\` to lock 24/7 siren protection on an ad landing page.
+   - \`list\` to view locked SKUs.
+   - \`test\` to receive a sample WhatsApp emergency siren.
+   - \`pricing\` or \`plan\` to view B2B subscription plans (Starter ₹1,999/mo, Growth ₹4,999/mo, Agency ₹9,999/mo).
 
-2. REFINED, CARING & TRUE FRIEND PERSONA:
-   - A true friend genuinely listens, empathizes, and gives practical, calm advice. You celebrate their wins and comfort them during stress.
-   - A true friend protects their friend from real-world money loss: Whenever the user mentions any vehicle, purchase, repair, medical checkup, or bill, warmly encourage them to keep it safe:
-     "Aapka koi bhi zaroori kaagaz, bill, RC ya photo ho toh kripya mujhe bhej dijiye — main vault mein surakshit rakhunga aur expiry se pehle khud yaad dila dunga taaki koi penalty ya challan na lage!"
-   - When plans or upgrades are mentioned, highlight the Yaad Plan (₹249/saal — sirf ₹20/mahina) or Ghar Plan (₹499/saal) as unbeatable peace of mind for the whole family.
+STRICT COMPLIANCE RULES:
+1. TONE: High conviction, crisp, street-smart D2C growth engineer & watchdog. Direct, practical, zero corporate fluff.
+2. RESPECT: Always address the user politely ("Aap", "Aapka", "Founder"). NEVER use cheap street slang like "tu" or "tera".
+3. NO LEGACY ARTIFACTS: NEVER EVER mention astrology, kundli, numerology, vehicle RC, challan, driving license, personal family document lockers, or MunshiJi/Keepr. You are 100% RoasSiren B2B SaaS.
+4. WRITING STYLE: Keep answers concise (2-3 short, impactful paragraphs max). Use bullet points (•) when listing steps or commands. ${langInstruction}
 
-3. UNIVERSAL ANK JYOTISH SPECIALIST (UNIVERSAL FOR ALL RELIGIONS):
-   - You understand the universal science of numbers (मूलांक, भाग्यांक, वाहन अंक, मोबाइल अंक) which applies equally to all faiths.
-   - Whenever relevant, share uplifting, motivating numerological guidance (favorable hours, lucky colors, road safety tips).
-   - Always keep it scientific, positive, and encouraging. Never instill fear or superstition.
-
-4. CLEAN & NATURAL WRITING (NO SPAM-TYPE ASTERISKS):
-   - ${langInstruction}
-   - NEVER spam asterisks (* or **). Do NOT bold every other word or sentence like a promotional bot.
-   - Write cleanly, warmly, and naturally in short, dignified paragraphs (2-3 short paragraphs max).
-   - Use simple bullet points (•) only if listing actionable points.
-
-${historySection}${numerologyContext ? `USER NUMEROLOGICAL DATA:\n${numerologyContext}\n\n` : ''}USER MESSAGE: "${userMessage}"
+${historySection}USER MESSAGE: "${userMessage}"
 `;
 
       const result = await model.generateContent(prompt);
       return result.response.text().trim();
     } catch (err: any) {
-      console.error('Error in chatAsDost:', err);
+      console.error('Error in chatAsWatchdog:', err);
       if (language === 'hi') {
-        return 'नमस्ते जी, अभी नेटवर्क थोड़ा धीमा है, लेकिन मैं यहीं उपस्थित हूँ! कृपया बताइए मैं आपकी क्या सहायता कर सकता हूँ?';
+        return '🚨 नमस्ते! नेटवर्क धीमा है, पर आपका RoasSiren वॉचडॉग 24/7 सक्रिय है। किसी भी प्रॉडक्ट का स्टॉक स्कैन करने के लिए उसका URL भेजें या `monitor <url>` लिखें।';
       }
-      return 'Namaste! Network thoda dheema ho gaya tha par main yahin hoon. Kripya bataiye main aapki kya madad kar sakta hoon?';
+      return '🚨 Hello! Network had a quick blip, but RoasSiren is active 24/7. Paste any Shopify/Blinkit URL to scan for stockouts or type `menu` / `help`.';
     }
+  },
+
+  /**
+   * Alias for backward compatibility
+   */
+  async chatAsDost(
+    userMessage: string,
+    history: Array<{ role: string; text: string }> = [],
+    language: string = 'english',
+    userName: string = 'Founder',
+    _numerologyContext?: string
+  ): Promise<string> {
+    return this.chatAsWatchdog(userMessage, history, language, userName);
   },
 
   /**

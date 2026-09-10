@@ -83,7 +83,7 @@ export const whatsappService = {
     bodyText: string,
     buttons: WhatsAppButton[],
     headerText?: string,
-    footerText: string = `${BRAND.name} 🤖 • Autonomous Life Vault`
+    footerText: string = `${BRAND.name} 🚨 • 24/7 Ad Waste Watchdog`
   ): Promise<boolean> {
     const primary = this.getPrimaryAdapter();
     const sent = await primary.sendInteractiveButtons(to, bodyText, buttons, headerText, footerText);

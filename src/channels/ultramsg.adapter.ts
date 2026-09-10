@@ -46,7 +46,7 @@ export class UltraMsgAdapter implements ChannelAdapter {
     bodyText: string,
     buttons: WhatsAppButton[],
     headerText?: string,
-    footerText: string = 'Keepr 🤖 • Autonomous Life Vault'
+    footerText: string = 'RoasSiren™ 🚨 • 24/7 Ad Waste Watchdog'
   ): Promise<boolean> {
     const numberEmojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣'];
     let formatted = '';

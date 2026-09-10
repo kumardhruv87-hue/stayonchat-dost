@@ -16,6 +16,7 @@ import { watchdogService } from './services/watchdog.service.js';
 import { sirenService } from './services/siren.service.js';
 import { webhookService } from './services/webhook.service.js';
 import { metaAdsService } from './services/meta-ads.service.js';
+import { whatsappProfileService } from './services/whatsapp-profile.service.js';
 import { BRAND, PLANS } from './config/constants.js';
 
 dotenv.config();
@@ -473,6 +474,45 @@ app.post('/api/meta/link/:id', (req: Request, res: Response) => {
 
     const updated = watchdogService.updateMetaAdSet(id, metaAdSetId, autoKillEnabled);
     return res.json({ success: updated });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Update WhatsApp Business Profile on Meta (About, Description, Websites, Email, Logo)
+app.post('/api/admin/update-wa-profile', async (req: Request, res: Response) => {
+  try {
+    const { about, description, email, websites, vertical, updateLogo } = req.body;
+    const textRes = await whatsappProfileService.updateProfile({
+      about,
+      description,
+      email,
+      websites,
+      vertical,
+    });
+
+    let logoRes = { success: true };
+    if (updateLogo !== false) {
+      logoRes = await whatsappProfileService.updateProfilePicture();
+    }
+
+    const verified = await whatsappProfileService.getProfile();
+    return res.json({
+      success: textRes.success && (logoRes as any).success,
+      textUpdate: textRes,
+      logoUpdate: logoRes,
+      profile: verified,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Get Live WhatsApp Business Profile from Meta
+app.get('/api/admin/wa-profile', async (_req: Request, res: Response) => {
+  try {
+    const profile = await whatsappProfileService.getProfile();
+    return res.json({ success: true, profile });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }

@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test:watchdog": "tsx src/tests/test-watchdog.ts",
-    "test:extraction": "tsx src/tests/test-extraction.ts"
+    "test:extraction": "tsx src/tests/test-extraction.ts",
+    "update:wa-profile": "tsx src/scripts/update-wa-profile.ts"
   },
   "engines": {
     "node": ">=22.0.0"
