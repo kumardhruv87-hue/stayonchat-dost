@@ -17,7 +17,7 @@ export const schedulerService = {
   startScheduler() {
     console.log(`🚨 ${BRAND.name} Autonomous Watchdog Engine running:`);
     console.log('- Every 15 Minutes: Autonomous Shopify Stock & Broken Ad URL Sweep');
-    console.log('- 07:00 AM IST: Daily ROAS Protection Briefing');
+    console.log('- 08:30 AM IST: Daily ROAS Protection Intelligence Briefing');
     console.log('- Every 1 Minute: Real-time Task Reminders');
 
     // 1. Run every 15 minutes: Autonomous Shopify Stock & Ad Link Check
@@ -26,10 +26,10 @@ export const schedulerService = {
       await this.processWatchdogSweep();
     });
 
-    // 2. Run every day at 07:00 AM IST (01:30 AM UTC): Daily Brief
-    cron.schedule('30 1 * * *', async () => {
-      console.log('Running daily 07:00 AM IST ROAS Protection Brief...');
-      await this.processDailyUnifiedBrief();
+    // 2. Run every day at 08:30 AM IST (03:00 AM UTC): Daily ROAS Brief
+    cron.schedule('0 3 * * *', async () => {
+      console.log('📊 [Watchdog Cron] Running daily 08:30 AM IST ROAS Protection Brief...');
+      await this.processDailyRoasDigest();
     });
 
     // 3. Run every 1 minute: Real-time user custom reminders
@@ -109,75 +109,76 @@ export const schedulerService = {
   },
 
   /**
-   * Send personalized 6:00 AM daily morning Astro & Safety guidance
+   * Process and dispatch 08:30 AM Daily ROAS & Ad Spend Protection Intelligence Briefing
    */
-  async processDailyAstroGuidance() {
+  async processDailyRoasDigest() {
     try {
-      const astroUsers = await dbService.getAllAstroUsers();
-      console.log(`Sending 6:00 AM Astro guidance to ${astroUsers.length} users.`);
+      const allUrls = watchdogService.getAllMonitoredUrls();
+      if (allUrls.length === 0) return;
 
-      const { geminiService } = await import('./gemini.js');
+      // Group URLs by subscriber phone
+      const phoneMap = new Map<string, any[]>();
+      for (const item of allUrls) {
+        if (!item.isActive) continue;
+        const cleanPhone = item.userPhone.replace(/\D/g, '');
+        if (!cleanPhone) continue;
+        const list = phoneMap.get(cleanPhone) || [];
+        list.push(item);
+        phoneMap.set(cleanPhone, list);
+      }
 
-      for (const user of astroUsers) {
-        if (!user.dob) continue;
-        const guidance = await geminiService.generateDailyAstroGuide(
-          {
-            name: user.name,
-            dob: user.dob,
-            tob: user.tob,
-            pob: user.pob,
-            rashi: user.rashi,
-          },
-          user.language || 'hinglish'
-        );
+      console.log(`📊 [Daily Digest] Dispatching 08:30 AM intelligence briefings to ${phoneMap.size} subscribers...`);
 
-        await whatsappService.sendTextMessage(user.phone_number, guidance);
+      for (const [phone, urls] of phoneMap.entries()) {
+        try {
+          const brief = this.generateUserDigestText(phone, urls);
+          await whatsappService.sendTextMessage(phone, brief);
+        } catch (phoneErr) {
+          console.error(`Error sending digest to ${phone}:`, phoneErr);
+        }
       }
     } catch (err) {
-      console.error('Failed to send daily astro guidance:', err);
+      console.error('Failed to dispatch daily ROAS digest:', err);
     }
   },
 
   /**
-   * Send Unified 7:00 AM Morning COO Brief
-   * Combines upcoming expiries, health medicines, promises, and road safety into 1 crisp card
+   * Helper to format executive digest text for a user
    */
-  async processDailyUnifiedBrief() {
-    try {
-      const activeUsers = await dbService.getAllActiveUsers();
-      console.log(`Processing 07:00 AM Morning Brief for ${activeUsers.length} users.`);
+  generateUserDigestText(phone: string, urls: any[]): string {
+    const totalCount = urls.length;
+    const critical = urls.filter(u => u.lastStatus === 'CRITICAL_OUT_OF_STOCK' || u.lastStatus === 'DEAD_LINK_404');
+    const safe = urls.filter(u => u.lastStatus === 'SAFE_IN_STOCK');
+    const partial = urls.filter(u => u.lastStatus === 'PARTIAL_OUT_OF_STOCK');
 
-      const { geminiService } = await import('./gemini.js');
+    const totalDailySpend = urls.reduce((acc, u) => acc + (u.dailyAdSpend || 3000), 0);
+    const totalMonthlyProtected = totalDailySpend * 30;
+    const activeHourlyBurn = critical.reduce((acc, u) => acc + Math.round((u.dailyAdSpend || 3000) / 24), 0);
 
-      for (const user of activeUsers) {
-        try {
-          const memories = await dbService.getUserMemories(user.phone_number);
-          const upcomingDocs = await dbService.getUserUpcomingDocuments(user.phone_number, 30);
-          const activeReminders = await dbService.getUserActiveReminders(user.phone_number);
+    const integrityScore = totalCount > 0 ? Math.round((safe.length / totalCount) * 100) : 100;
 
-          // Only send if user has some data or documents to brief on
-          if (memories.length === 0 && upcomingDocs.length === 0 && activeReminders.length === 0) {
-            continue;
-          }
+    let text = `📊 *[ROASSIREN DAILY EXECUTIVE INTELLIGENCE]* 🛡️\n━━━━━━━━━━━━━━━━━━━━\nGood morning! Here is your 24-hour ad protection status:\n\n`;
+    text += `🛡️ *Monitored SKUs:* ${totalCount} Destinations Active\n`;
+    text += `💰 *Daily Ad Budget on Radar:* ₹${totalDailySpend.toLocaleString('en-IN')}/day (₹${totalMonthlyProtected.toLocaleString('en-IN')}/mo)\n`;
+    text += `📈 *Inventory Integrity Score:* ${integrityScore}%\n`;
+    text += `• 🟢 Safe & Converting: ${safe.length} SKUs\n`;
+    text += `• 🟡 Partial Variant Stockouts: ${partial.length} SKUs\n`;
+    text += `• 🔴 Sold Out / 404 Alerts: ${critical.length} SKUs\n`;
 
-          const brief = await geminiService.generateUnifiedDailyBrief(
-            user.name || 'Friend',
-            memories,
-            upcomingDocs,
-            activeReminders,
-            user.language || 'english'
-          );
-
-          if (brief && brief.length > 10) {
-            await whatsappService.sendTextMessage(user.phone_number, brief);
-          }
-        } catch (userErr) {
-          console.error(`Error sending morning brief to ${user.phone_number}:`, userErr);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to process daily morning COO brief:', err);
+    if (critical.length > 0) {
+      text += `\n🚨 *ATTENTION: ${critical.length} ACTIVE AD(S) LANDING ON ZERO STOCK!*\n`;
+      text += `💸 You are currently burning ~₹${activeHourlyBurn.toLocaleString('en-IN')}/hour on dead clicks:\n`;
+      critical.forEach((item, idx) => {
+        text += `${idx + 1}. *${item.brandName}* — ${item.lastStatus.replace(/_/g, ' ')}\n   🔗 ${item.url}\n`;
+      });
+      text += `\n⚡ *Immediate Action:* Pause the corresponding Meta ad sets now to save your ROAS.\n`;
+    } else {
+      text += `\n🛡️ *100% HEALTHY:* Zero active ad spend is being wasted on sold-out products. Safe to scale campaigns.\n`;
     }
+
+    text += `\n━━━━━━━━━━━━━━━━━━━━\n⚡ *Quick Actions:*\n• Add new SKU: \`monitor <url>\`\n• View live dashboard: https://keepr-bot.onrender.com/dashboard\n• Check quota: \`plan\``;
+
+    return text;
   },
 
   /**

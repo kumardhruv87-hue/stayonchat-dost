@@ -13,6 +13,8 @@ import { whatsappService } from '../services/whatsapp.js';
 import { paymentService } from '../services/razorpay.js';
 import { watchdogService } from '../services/watchdog.service.js';
 import { sirenService } from '../services/siren.service.js';
+import { schedulerService } from '../services/scheduler.js';
+import { metaAdsService } from '../services/meta-ads.service.js';
 import { personaService } from './persona.js';
 import { PLANS, BRAND } from '../config/constants.js';
 
@@ -598,12 +600,18 @@ export const botRouter = {
           return;
         }
 
+        // Check for optional Meta Ad Set ID: adset:123456789 or meta:123456789
+        const metaMatch = text.match(/(?:adset|meta)[:=\s]+([0-9]{8,25})/i);
+        const metaAdSetId = metaMatch ? metaMatch[1] : undefined;
+
         // Run instant initial check
         const initialDiag = await watchdogService.scanUrl(targetUrl);
         const monitored = watchdogService.registerMonitoredUrl({
           url: targetUrl,
           userPhone: fromPhone,
           brandName: initialDiag.brandName,
+          metaAdSetId,
+          autoKillEnabled: !!metaAdSetId,
         });
 
         const isQuickCommerce = initialDiag.platform === 'BLINKIT';
@@ -611,8 +619,49 @@ export const botRouter = {
         const platformLabel = isQuickCommerce ? '⚡ Blinkit Quick Commerce' : '🛍️ Shopify D2C';
         const usedCount = userUrls.length + 1;
 
-        const msg = `🛡️ *[ROASSIREN RADAR LOCKED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Platform:* ${platformLabel}\n🏷️ *Store / Brand:* ${monitored.brandName}\n📦 *Product:* ${initialDiag.productTitle}\n${statusEmoji} *Initial Status:* ${initialDiag.status}\n🔗 *Target:* ${monitored.url}\n\n📊 *Radar Quota:* ${usedCount}/${maxQuota} Used (${maxQuota - usedCount} available)\n🕒 *Sweep Frequency:* 24/7 Autonomous Radar (Every ${planDetail.scanFrequencyMinutes} mins)\n⚡ *Siren Protocol:* If stock drops to zero or URL hits 404, an emergency WhatsApp siren will alert your phone within 60 seconds!\n━━━━━━━━━━━━━━━━━━━━\n_Type \`plan\` to see subscription details or \`list\` for all locked SKUs._`;
+        let msg = `🛡️ *[ROASSIREN RADAR LOCKED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Platform:* ${platformLabel}\n🏷️ *Store / Brand:* ${monitored.brandName}\n📦 *Product:* ${initialDiag.productTitle}\n${statusEmoji} *Initial Status:* ${initialDiag.status}\n🔗 *Target:* ${monitored.url}\n`;
+        if (metaAdSetId) {
+          msg += `🛑 *Autonomous Meta Auto-Kill:* ACTIVE (Ad Set #${metaAdSetId})\n`;
+        }
+        msg += `\n📊 *Radar Quota:* ${usedCount}/${maxQuota} Used (${maxQuota - usedCount} available)\n🕒 *Sweep Frequency:* 24/7 Autonomous Radar (Every ${planDetail.scanFrequencyMinutes} mins)\n⚡ *Siren Protocol:* If stock drops to zero or URL hits 404, an emergency WhatsApp siren will alert your phone within 60 seconds!\n━━━━━━━━━━━━━━━━━━━━\n_Type \`plan\` to see subscription details or \`list\` for all locked SKUs._`;
         await whatsappService.sendTextMessage(fromPhone, msg);
+        return;
+      }
+
+      // C1.2. Daily Executive ROAS Digest On-Demand: "digest", "report", "brief", "summary"
+      if (['digest', 'report', 'brief', 'summary', 'morning report', 'daily report', 'roas report'].includes(lowerText)) {
+        const userUrls = watchdogService.getMonitoredUrlsByPhone(fromPhone);
+        if (userUrls.length === 0) {
+          await whatsappService.sendTextMessage(fromPhone, `📡 *No SKUs on radar yet.* Reply \`monitor <product-url>\` to protect your first active ad destination and unlock daily ROAS briefings.`);
+          return;
+        }
+
+        const digestText = schedulerService.generateUserDigestText(fromPhone, userUrls);
+        await whatsappService.sendTextMessage(fromPhone, digestText);
+        return;
+      }
+
+      // C1.3. Shareable Client Transparency Portal: "portal", "share", "client link"
+      if (['portal', 'share', 'client link', 'client portal', 'share link'].includes(lowerText)) {
+        const cleanPhone = fromPhone.replace(/\D/g, '');
+        const portalMsg = `🌐 *[ROASSIREN CLIENT TRANSPARENCY PORTAL]* 🛡️\n━━━━━━━━━━━━━━━━━━━━\nShare this live, read-only ad spend protection report with your brand clients or executive team:\n\n👉 *Direct Client Link:*\nhttps://keepr-bot.onrender.com/client?phone=${cleanPhone}\n\n✨ *Features:*\n• Live 24/7 inventory integrity score\n• Zero login required for the client\n• Monthly ad spend protected proof\n• Real-time stock status beacons\n━━━━━━━━━━━━━━━━━━━━\n_Show your clients you are actively preventing ad waste!_`;
+        await whatsappService.sendTextMessage(fromPhone, portalMsg);
+        return;
+      }
+
+      // C1.4. Manual Meta Killswitch Command: "killswitch <adSetId>" or "pause <adSetId>"
+      if (lowerText.startsWith('killswitch ') || lowerText.startsWith('pause ') || lowerText.startsWith('pausead ')) {
+        const rawId = text.replace(/^(killswitch|pause|pausead)\s+/i, '').trim();
+        const cleanId = rawId.replace(/\D/g, '');
+
+        if (!cleanId || cleanId.length < 8) {
+          await whatsappService.sendTextMessage(fromPhone, '⚠️ Please provide a valid Meta Ad Set ID, e.g.:\n`killswitch 120204894389204`');
+          return;
+        }
+
+        const killRes = await metaAdsService.pauseAdSet(cleanId);
+        const killMsg = `🛑 *[META KILLSWITCH EXECUTED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\nAd Set *#${cleanId}* has been marked PAUSED!\n💸 Zero further ad spend will be wasted.\n\n👉 *Open in Ads Manager:*\n${killRes.adsManagerUrl}\n\n_To reactivate later, reply: \`resume ${cleanId}\`_`;
+        await whatsappService.sendTextMessage(fromPhone, killMsg);
         return;
       }
 

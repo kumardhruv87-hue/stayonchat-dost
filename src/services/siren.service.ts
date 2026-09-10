@@ -6,6 +6,7 @@
 import { whatsappService } from './whatsapp.js';
 import { webhookService } from './webhook.service.js';
 import { DiagnosticResult, MonitoredUrl } from './watchdog.service.js';
+import { metaAdsService } from './meta-ads.service.js';
 import { BRAND } from '../config/brand.js';
 import { WATCHDOG_RULES } from '../config/constants.js';
 
@@ -122,6 +123,17 @@ _We will notify you immediately once this SKU is restocked._`;
 ━━━━━━━━━━━━━━━━━━━━
 _${BRAND.name} Autonomous Watchdog_`;
     }
+ 
+    // Autonomous Meta Ad Set Killswitch Notice
+    if (sirenBody && monitored.metaAdSetId) {
+      if (monitored.autoKillEnabled) {
+        const killRes = await metaAdsService.pauseAdSet(monitored.metaAdSetId);
+        sirenBody += `\n\n🛑 *[AUTONOMOUS META KILLSWITCH]*\n⚡ Meta Ad Set #${monitored.metaAdSetId} automatically PAUSED!\n💸 Ad bleed halted immediately.\n👉 Ads Manager: ${killRes.adsManagerUrl}`;
+      } else {
+        const adUrl = metaAdsService.generateAdsManagerUrl(monitored.metaAdSetId);
+        sirenBody += `\n\n👉 *1-Click Pause Meta Ad Set (#${monitored.metaAdSetId}):*\n${adUrl}`;
+      }
+    }
 
     if (!sirenBody) return false;
 
@@ -168,7 +180,7 @@ _${BRAND.name} Autonomous Watchdog_`;
 
     const isQuickCommerce = diag.platform === 'BLINKIT' || monitored.platform === 'BLINKIT';
 
-    const msg = isQuickCommerce
+    let msg = isQuickCommerce
       ? `🟢 *[ROASSIREN] QUICK COMMERCE RESTOCKED!* 🟢
 ━━━━━━━━━━━━━━━━━━━━
 🎉 *Good news! Your product is back in stock on Blinkit.*
@@ -196,6 +208,11 @@ _${BRAND.name} Quick Commerce Radar (roassiren.com)_`
 💡 *Action:* You can now safely reactivate or scale your Meta AdSet!
 ━━━━━━━━━━━━━━━━━━━━
 _${BRAND.name} 24/7 Watchdog Radar_`;
+
+    if (monitored.metaAdSetId) {
+      const adUrl = metaAdsService.generateAdsManagerUrl(monitored.metaAdSetId);
+      msg += `\n\n👉 *Reactivate Meta Ad Set (#${monitored.metaAdSetId}):*\n${adUrl}`;
+    }
 
     console.log(`🟢 [Restock Siren] Sending recovery WhatsApp alert to ${cleanPhone} for ${monitored.url}`);
     const success = await whatsappService.sendTextMessage(cleanPhone, msg);

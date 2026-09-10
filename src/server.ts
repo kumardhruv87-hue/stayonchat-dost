@@ -15,6 +15,7 @@ import { schedulerService } from './services/scheduler.js';
 import { watchdogService } from './services/watchdog.service.js';
 import { sirenService } from './services/siren.service.js';
 import { webhookService } from './services/webhook.service.js';
+import { metaAdsService } from './services/meta-ads.service.js';
 import { BRAND, PLANS } from './config/constants.js';
 
 dotenv.config();
@@ -49,6 +50,10 @@ app.get('/dashboard', (req: Request, res: Response) => {
 
 app.get('/audit', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'public', 'audit.html'));
+});
+
+app.get('/client', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'client.html'));
 });
 
 // =================================================================
@@ -118,7 +123,7 @@ app.post('/api/scan', async (req: Request, res: Response) => {
 // Register an Ad URL for 24/7 Autonomous Watchdog Monitoring
 app.post('/api/monitor', async (req: Request, res: Response) => {
   try {
-    const { url, phone, brandName, dailyAdSpend, webhookUrl, alertRecipients } = req.body;
+    const { url, phone, brandName, dailyAdSpend, webhookUrl, alertRecipients, metaAdSetId, metaCampaignName, autoKillEnabled } = req.body;
     if (!url || !phone) {
       return res.status(400).json({ error: 'Both URL and WhatsApp phone number are required.' });
     }
@@ -150,6 +155,9 @@ app.post('/api/monitor', async (req: Request, res: Response) => {
       dailyAdSpend: dailyAdSpend ? Number(dailyAdSpend) : undefined,
       webhookUrl: webhookUrl || undefined,
       alertRecipients: Array.isArray(alertRecipients) ? alertRecipients : undefined,
+      metaAdSetId: metaAdSetId ? String(metaAdSetId).trim() : undefined,
+      metaCampaignName: metaCampaignName ? String(metaCampaignName).trim() : undefined,
+      autoKillEnabled: autoKillEnabled !== undefined ? Boolean(autoKillEnabled) : !!metaAdSetId,
     });
 
     return res.json({ success: true, monitored: item });
@@ -384,6 +392,89 @@ app.post('/api/simulate-siren', async (req: Request, res: Response) => {
     return res.json(result);
   } catch (err: any) {
     return res.status(500).json({ error: err.message || 'Simulation failed' });
+  }
+});
+
+// Client Transparency Portal Data Endpoint
+app.get('/api/client/report', (req: Request, res: Response) => {
+  try {
+    const phone = (req.query.phone as string) || '919560931596';
+    const brand = (req.query.brand as string) || '';
+    const cleanPhone = phone.replace(/\D/g, '');
+
+    let items = watchdogService.getMonitoredUrlsByPhone(cleanPhone);
+    if (brand) {
+      items = items.filter(i => (i.brandName || '').toLowerCase().includes(brand.toLowerCase()));
+    }
+
+    const totalMonitored = items.length;
+    const criticalCount = items.filter(i => i.lastStatus === 'CRITICAL_OUT_OF_STOCK' || i.lastStatus === 'DEAD_LINK_404').length;
+    const healthyCount = items.filter(i => i.lastStatus === 'SAFE_IN_STOCK').length;
+    const totalDailySpend = items.reduce((acc, i) => acc + (i.dailyAdSpend || 3000), 0);
+    const totalMonthlyProtected = totalDailySpend * 30;
+    const integrityScorePct = totalMonitored > 0 ? Math.round((healthyCount / totalMonitored) * 100) : 100;
+
+    return res.json({
+      success: true,
+      phone: cleanPhone,
+      brandFilter: brand,
+      stats: {
+        totalMonitored,
+        criticalCount,
+        healthyCount,
+        totalDailySpend,
+        totalMonthlyProtected,
+        integrityScorePct,
+      },
+      items,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Meta Marketing API - Pause Ad Set for Monitored Item
+app.post('/api/meta/pause/:id', async (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const item = watchdogService.getMonitoredUrl(id);
+    if (!item) return res.status(404).json({ error: 'Monitored item not found' });
+    if (!item.metaAdSetId) return res.status(400).json({ error: 'No Meta Ad Set ID linked to this SKU' });
+
+    const result = await metaAdsService.pauseAdSet(item.metaAdSetId);
+    watchdogService.updateAutoPausedAt(item.id);
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Meta Marketing API - Resume Ad Set for Monitored Item
+app.post('/api/meta/resume/:id', async (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const item = watchdogService.getMonitoredUrl(id);
+    if (!item) return res.status(404).json({ error: 'Monitored item not found' });
+    if (!item.metaAdSetId) return res.status(400).json({ error: 'No Meta Ad Set ID linked to this SKU' });
+
+    const result = await metaAdsService.resumeAdSet(item.metaAdSetId);
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Link Meta Ad Set ID to Monitored Item
+app.post('/api/meta/link/:id', (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const { metaAdSetId, autoKillEnabled } = req.body;
+    if (!metaAdSetId) return res.status(400).json({ error: 'Meta Ad Set ID is required' });
+
+    const updated = watchdogService.updateMetaAdSet(id, metaAdSetId, autoKillEnabled);
+    return res.json({ success: updated });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
   }
 });
 

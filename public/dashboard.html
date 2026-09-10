@@ -117,6 +117,10 @@
           <span id="navPlanQuota" class="font-mono text-[11px] text-slate-300">0/15 Slots</span>
         </button>
 
+        <a id="navClientPortalLink" href="/client" target="_blank" class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-radar-500/10 hover:bg-radar-500/20 border border-radar-500/30 text-radar-300 text-xs font-bold transition-all">
+          <span>🌐 Client Portal</span>
+        </a>
+
         <button onclick="triggerSimulatedSiren()" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-siren-500/10 hover:bg-siren-500/20 border border-siren-500/30 text-siren-400 text-xs font-bold transition-all">
           <span>⚡ Test WhatsApp Siren</span>
         </button>
@@ -218,7 +222,7 @@
       </div>
 
       <form onsubmit="handleQuickAddSubmit(event)" class="grid grid-cols-1 md:grid-cols-12 gap-3">
-        <div class="md:col-span-6 relative">
+        <div class="md:col-span-5 relative">
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Product or Ad Destination URL</label>
           <input 
             type="url" 
@@ -229,24 +233,34 @@
           />
         </div>
 
-        <div class="md:col-span-3">
-          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Daily Ad Budget on SKU</label>
+        <div class="md:col-span-2">
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Daily Spend</label>
           <select id="quickSpendInput" class="w-full bg-obsidian-950 border border-white/15 focus:border-siren-500 text-xs rounded-xl px-3 py-2.5 text-white outline-none font-mono">
-            <option value="1500">₹1,500 / day</option>
-            <option value="3000" selected>₹3,000 / day (Average)</option>
-            <option value="7500">₹7,500 / day</option>
-            <option value="15000">₹15,000 / day (Scale)</option>
-            <option value="30000">₹30,000 / day</option>
+            <option value="1500">₹1,500/d</option>
+            <option value="3000" selected>₹3,000/d</option>
+            <option value="7500">₹7,500/d</option>
+            <option value="15000">₹15,000/d</option>
+            <option value="30000">₹30,000/d</option>
           </select>
         </div>
 
-        <div class="md:col-span-3 flex items-end">
+        <div class="md:col-span-3">
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Meta Ad Set ID (Auto-Kill)</label>
+          <input 
+            type="text" 
+            id="quickMetaAdSetInput" 
+            placeholder="e.g. 120204894389204" 
+            class="w-full bg-obsidian-950 border border-white/15 focus:border-siren-500 text-xs rounded-xl px-3 py-2.5 text-white outline-none font-mono transition-all text-blue-300"
+          />
+        </div>
+
+        <div class="md:col-span-2 flex items-end">
           <button 
             type="submit" 
             id="quickAddBtn"
-            class="w-full px-5 py-2.5 rounded-xl bg-gradient-to-r from-siren-500 to-rose-600 hover:from-siren-600 hover:to-rose-700 text-white text-xs font-bold shadow-lg shadow-siren-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-95 whitespace-nowrap"
+            class="w-full px-3 py-2.5 rounded-xl bg-gradient-to-r from-siren-500 to-rose-600 hover:from-siren-600 hover:to-rose-700 text-white text-xs font-bold shadow-lg shadow-siren-500/25 flex items-center justify-center gap-1.5 transition-all transform active:scale-95 whitespace-nowrap"
           >
-            <span>+ Lock into Radar 🚨</span>
+            <span>+ Lock SKU 🚨</span>
           </button>
         </div>
       </form>
@@ -274,7 +288,7 @@
     <!-- ============================================================= -->
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 glass-card rounded-xl p-4 border border-white/10">
       
-      <!-- Filter Chips -->
+      <!-- Filter Chips & Brand Selector -->
       <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
         <button onclick="filterRadar('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white/10 text-white transition-all whitespace-nowrap">
           All (<span id="countAll">0</span>)
@@ -291,16 +305,20 @@
         <button onclick="filterRadar('shopify')" id="filterShopify" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all whitespace-nowrap">
           🛍️ Shopify (<span id="countShopify">0</span>)
         </button>
+
+        <select id="filterBrandSelect" onchange="filterByBrand(this.value)" class="bg-obsidian-950 border border-white/10 text-xs text-slate-300 rounded-lg px-2.5 py-1.5 outline-none focus:border-radar-500 font-medium shrink-0">
+          <option value="">All Brands / Clients</option>
+        </select>
       </div>
 
       <!-- Search & Refresh -->
-      <div class="flex items-center gap-3 w-full sm:w-auto">
-        <div class="relative w-full sm:w-64">
+      <div class="flex items-center gap-2.5 w-full sm:w-auto">
+        <div class="relative w-full sm:w-56">
           <input 
             type="text" 
             id="searchRadar" 
             oninput="renderRadarGrid()"
-            placeholder="Search brand, SKU, or platform..." 
+            placeholder="Search SKU or URL..." 
             class="w-full bg-obsidian-950 border border-white/10 text-xs text-white rounded-lg px-3 py-2 pl-8 outline-none focus:border-siren-500"
           />
           <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -308,7 +326,14 @@
           </svg>
         </div>
 
+        <button onclick="copyClientPortalLink()" title="Copy Shareable Client Portal Link" class="px-2.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-radar-400 hover:text-radar-300 border border-radar-500/20 transition-all shrink-0 flex items-center gap-1 text-xs font-bold">
+          <span>🔗</span><span class="hidden md:inline">Client Link</span>
+        </button>
+
         <button onclick="loadDashboardData(true)" title="Refresh Radar" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all shrink-0">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        </button>
+      </div>
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
         </button>
       </div>
@@ -679,7 +704,11 @@
         radarData = data.items || [];
         updateMetricsRibbon(data);
         updateSmartThreatBanner(data);
+        updateBrandDropdown();
         renderRadarGrid();
+
+        const clientLink = document.getElementById('navClientPortalLink');
+        if (clientLink) clientLink.href = `/client?phone=${encodeURIComponent(getStoredPhone())}`;
 
         if (showNotification) {
           showToast('Radar synced with live platform endpoints');
@@ -772,6 +801,61 @@
       renderRadarGrid();
     }
 
+    let currentBrandFilter = '';
+
+    function filterByBrand(brand) {
+      currentBrandFilter = brand;
+      renderRadarGrid();
+    }
+
+    function updateBrandDropdown() {
+      const select = document.getElementById('filterBrandSelect');
+      if (!select) return;
+      const brands = Array.from(new Set(radarData.map(i => i.brandName).filter(Boolean))).sort();
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">All Brands / Clients</option>' + brands.map(b => `<option value="${b}" ${b === currentVal ? 'selected' : ''}>${b}</option>`).join('');
+    }
+
+    function copyClientPortalLink() {
+      const phone = getStoredPhone();
+      const brand = currentBrandFilter;
+      let url = `${window.location.origin}/client?phone=${encodeURIComponent(phone)}`;
+      if (brand) url += `&brand=${encodeURIComponent(brand)}`;
+      
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('Copied Client Portal link! Ready to share with your brand partner.');
+        }).catch(() => {
+          prompt('Share this link with your client:', url);
+        });
+      } else {
+        prompt('Share this link with your client:', url);
+      }
+    }
+
+    async function pauseMetaAdSet(id, btnEl) {
+      const orig = btnEl.innerHTML;
+      btnEl.disabled = true;
+      btnEl.innerHTML = '<span class="animate-spin text-xs">🌀</span><span>Killing...</span>';
+
+      try {
+        const resp = await fetch(`/api/meta/pause/${id}`, { method: 'POST' });
+        const data = await resp.json();
+        btnEl.disabled = false;
+        btnEl.innerHTML = orig;
+
+        if (data.success) {
+          showToast(`🛑 Meta Ad Set #${data.adSetId} successfully PAUSED! Zero ad bleed.`);
+        } else {
+          showToast(data.error || 'Failed to pause Meta Ad Set', 'error');
+        }
+      } catch (err) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = orig;
+        showToast('Error: ' + err.message, 'error');
+      }
+    }
+
     function renderRadarGrid() {
       const grid = document.getElementById('radarGrid');
       const empty = document.getElementById('emptyState');
@@ -780,6 +864,10 @@
       let filtered = radarData.filter((item) => {
         const isBlinkit = item.platform === 'BLINKIT' || (item.url && item.url.includes('blinkit.com'));
         const isShopify = item.platform === 'SHOPIFY' || (!isBlinkit && item.url && !item.url.includes('woocommerce'));
+
+        if (currentBrandFilter && (item.brandName || '').toLowerCase() !== currentBrandFilter.toLowerCase()) {
+          return false;
+        }
 
         if (currentFilter === 'critical') {
           if (item.lastStatus !== 'CRITICAL_OUT_OF_STOCK' && item.lastStatus !== 'DEAD_LINK_404') return false;
@@ -795,7 +883,8 @@
           const matchBrand = (item.brandName || '').toLowerCase().includes(search);
           const matchUrl = (item.url || '').toLowerCase().includes(search);
           const matchPlatform = (item.platform || '').toLowerCase().includes(search);
-          if (!matchBrand && !matchUrl && !matchPlatform) return false;
+          const matchAdSet = (item.metaAdSetId || '').includes(search);
+          if (!matchBrand && !matchUrl && !matchPlatform && !matchAdSet) return false;
         }
         return true;
       });
@@ -821,6 +910,10 @@
               ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">📦 WooCommerce</span>' 
               : '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🛍️ Shopify D2C</span>');
 
+        const metaBadge = item.metaAdSetId 
+          ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30" title="Meta Ad Set Linked">🛑 AdSet #${item.metaAdSetId}</span>`
+          : '';
+
         const cardBorder = isCritical ? 'border-siren-500/40 bg-obsidian-900/90 shadow-lg shadow-siren-500/10' : 'border-white/10 glass-card hover:border-white/20';
 
         return `
@@ -833,6 +926,7 @@
                 </span>
                 <span class="text-xs font-bold text-white">${item.brandName || 'Brand'}</span>
                 ${platformBadge}
+                ${metaBadge}
               </div>
               <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${badgeBorder}">
                 ${item.lastStatus.replace(/_/g, ' ')}
@@ -863,15 +957,23 @@
             </div>
 
             <!-- Smart Action Tray -->
-            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-              <button onclick="rescanSingleItem('${item.id}', this)" class="text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors font-medium">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                <span>Re-Scan</span>
-              </button>
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs flex-wrap gap-2">
+              <div class="flex items-center gap-3">
+                <button onclick="rescanSingleItem('${item.id}', this)" class="text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors font-medium">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  <span>Re-Scan</span>
+                </button>
 
-              <button onclick="dispatchDirectSiren('${item.id}', this)" class="text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-medium">
-                <span>📲 Send Siren</span>
-              </button>
+                <button onclick="dispatchDirectSiren('${item.id}', this)" class="text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors font-medium">
+                  <span>📲 Send Siren</span>
+                </button>
+
+                ${item.metaAdSetId ? `
+                  <button onclick="pauseMetaAdSet('${item.id}', this)" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors font-medium">
+                    <span>🛑 Kill Ad</span>
+                  </button>
+                ` : ''}
+              </div>
 
               <button onclick="removeMonitoredUrl('${item.id}')" class="text-slate-500 hover:text-siren-400 transition-colors">
                 Delete
@@ -887,10 +989,12 @@
       e.preventDefault();
       const urlInput = document.getElementById('quickUrlInput');
       const spendInput = document.getElementById('quickSpendInput');
+      const metaInput = document.getElementById('quickMetaAdSetInput');
       const btn = document.getElementById('quickAddBtn');
 
       const url = urlInput.value.trim();
       const dailyAdSpend = Number(spendInput.value);
+      const metaAdSetId = metaInput ? metaInput.value.trim() : '';
       const phone = getStoredPhone();
 
       if (!url) return;
@@ -902,12 +1006,12 @@
         const resp = await fetch('/api/monitor', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, dailyAdSpend, phone })
+          body: JSON.stringify({ url, dailyAdSpend, phone, metaAdSetId })
         });
         const data = await resp.json();
 
         btn.disabled = false;
-        btn.innerHTML = '<span>+ Lock into Radar 🚨</span>';
+        btn.innerHTML = '<span>+ Lock SKU 🚨</span>';
 
         if (resp.status === 403 || data.quotaExceeded) {
           showToast(data.error || 'Radar quota reached! Please upgrade your plan.', 'warn');
@@ -917,7 +1021,9 @@
 
         if (data.success) {
           urlInput.value = '';
-          showToast(`Locked into 24/7 radar: ${data.monitored.brandName}`);
+          if (metaInput) metaInput.value = '';
+          const metaNotice = metaAdSetId ? ' (Meta Auto-Kill Linked)' : '';
+          showToast(`Locked into 24/7 radar: ${data.monitored.brandName}${metaNotice}`);
           loadDashboardData();
           loadPlanData();
         } else {
@@ -925,7 +1031,7 @@
         }
       } catch (err) {
         btn.disabled = false;
-        btn.innerHTML = '<span>+ Lock into Radar 🚨</span>';
+        btn.innerHTML = '<span>+ Lock SKU 🚨</span>';
         showToast('Error: ' + err.message, 'error');
       }
     }

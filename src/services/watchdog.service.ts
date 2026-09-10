@@ -72,6 +72,10 @@ export interface MonitoredUrl {
   createdAt: string;
   webhookUrl?: string;
   alertRecipients?: string[];
+  metaAdSetId?: string;
+  metaCampaignName?: string;
+  autoKillEnabled?: boolean;
+  lastAutoPausedAt?: string;
 }
 
 export class WatchdogService {
@@ -851,6 +855,9 @@ export class WatchdogService {
     dailyAdSpend?: number;
     webhookUrl?: string;
     alertRecipients?: string[];
+    metaAdSetId?: string;
+    metaCampaignName?: string;
+    autoKillEnabled?: boolean;
   }): MonitoredUrl {
     const { domain, cleanUrl } = this.parseShopifyUrl(item.url);
     const brandName = item.brandName || this.extractBrandFromDomain(domain);
@@ -872,6 +879,9 @@ export class WatchdogService {
       createdAt: new Date().toISOString(),
       webhookUrl: item.webhookUrl,
       alertRecipients: item.alertRecipients,
+      metaAdSetId: item.metaAdSetId ? item.metaAdSetId.trim() : undefined,
+      metaCampaignName: item.metaCampaignName ? item.metaCampaignName.trim() : undefined,
+      autoKillEnabled: item.autoKillEnabled !== undefined ? item.autoKillEnabled : !!item.metaAdSetId,
     };
 
     this.monitoredUrls.set(id, monitored);
@@ -914,6 +924,34 @@ export class WatchdogService {
     if (sirenSent) {
       item.lastSirenSentAt = new Date().toISOString();
     }
+    this.monitoredUrls.set(id, item);
+    this.savePersistedUrls();
+  }
+
+  /**
+   * Update Meta Ad Set association & Auto-Kill switch
+   */
+  public updateMetaAdSet(id: string, metaAdSetId: string, autoKillEnabled?: boolean): boolean {
+    const item = this.monitoredUrls.get(id);
+    if (!item) return false;
+
+    item.metaAdSetId = metaAdSetId.trim() || undefined;
+    if (autoKillEnabled !== undefined) {
+      item.autoKillEnabled = autoKillEnabled;
+    }
+    this.monitoredUrls.set(id, item);
+    this.savePersistedUrls();
+    return true;
+  }
+
+  /**
+   * Record when an Ad Set was auto-paused
+   */
+  public updateAutoPausedAt(id: string, timestamp?: string): void {
+    const item = this.monitoredUrls.get(id);
+    if (!item) return;
+
+    item.lastAutoPausedAt = timestamp || new Date().toISOString();
     this.monitoredUrls.set(id, item);
     this.savePersistedUrls();
   }
