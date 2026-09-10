@@ -1,28 +1,29 @@
 {
-  "name": "keepr",
-  "version": "2.0.0",
-  "description": "Keepr — Autonomous AI Life Vault & Smart Assistant on WhatsApp (usekeepr.com)",
+  "name": "roassiren",
+  "version": "3.0.0",
+  "description": "RoasSiren — Autonomous Meta Ad Waste & Shopify Out-of-Stock Watchdog (roassiren.com)",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "test:watchdog": "tsx src/tests/test-watchdog.ts",
     "test:extraction": "tsx src/tests/test-extraction.ts"
   },
   "engines": {
     "node": ">=22.0.0"
   },
   "keywords": [
+    "shopify",
+    "meta-ads",
+    "roas",
+    "out-of-stock",
+    "watchdog",
     "whatsapp",
-    "ai",
-    "gemini",
-    "locker",
-    "keepr",
-    "ocr",
-    "reminders",
-    "saas"
+    "d2c",
+    "performance-marketing"
   ],
-  "author": "Keepr AI Technologies Inc.",
+  "author": "RoasSiren Technologies Inc.",
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.24.0",

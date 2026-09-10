@@ -1,40 +1,95 @@
 // =================================================================
-// Keepr (usekeepr.com) - Daily Expiry & Reminder Scheduler
-// Runs automated cron jobs for alerts and morning guidance
+// RoasSiren (roassiren.com) - Autonomous Watchdog & Scheduler
+// 24/7 Ad Link Rot, Out-of-Stock Inspector & Notification Engine
 // =================================================================
 
 import cron from 'node-cron';
 import { supabase, dbService } from '../db/supabase.js';
 import { whatsappService } from './whatsapp.js';
-import { BRAND } from '../config/constants.js';
+import { watchdogService } from './watchdog.service.js';
+import { sirenService } from './siren.service.js';
+import { BRAND } from '../config/brand.js';
 
 export const schedulerService = {
   /**
    * Initialize cron jobs
    */
   startScheduler() {
-    console.log(`${BRAND.name} Multi-tier Scheduler initialized:`);
-    console.log('- 07:00 AM IST: Unified Morning COO Brief (Expiries + Dawa + Promises)');
-    console.log('- 09:00 AM IST: Document Expiry Alerts (30, 7, 1 day)');
+    console.log(`🚨 ${BRAND.name} Autonomous Watchdog Engine running:`);
+    console.log('- Every 15 Minutes: Autonomous Shopify Stock & Broken Ad URL Sweep');
+    console.log('- 07:00 AM IST: Daily ROAS Protection Briefing');
     console.log('- Every 1 Minute: Real-time Task Reminders');
 
-    // 1. Run every day at 07:00 AM IST (01:30 AM UTC): Unified Morning COO Brief
+    // 1. Run every 15 minutes: Autonomous Shopify Stock & Ad Link Check
+    cron.schedule('*/15 * * * *', async () => {
+      console.log('🛡️ [Watchdog Cron] Running 15-minute Shopify stock & ad link sweep...');
+      await this.processWatchdogSweep();
+    });
+
+    // 2. Run every day at 07:00 AM IST (01:30 AM UTC): Daily Brief
     cron.schedule('30 1 * * *', async () => {
-      console.log('Running daily 07:00 AM IST Unified Morning COO Brief...');
+      console.log('Running daily 07:00 AM IST ROAS Protection Brief...');
       await this.processDailyUnifiedBrief();
     });
 
-    // 3. Run every day at 09:00 AM IST (03:30 AM UTC): Document Expiries
-    cron.schedule('30 3 * * *', async () => {
-      console.log('Running daily expiry check at 09:00 AM IST...');
-      await this.processDailyReminders();
-    });
-
-    // 4. Run every 1 minute: Real-time user custom reminders
+    // 3. Run every 1 minute: Real-time user custom reminders
     cron.schedule('* * * * *', async () => {
       await this.processGeneralReminders();
     });
   },
+
+  /**
+   * Continuous Watchdog Sweep: Checks all registered ad URLs for out-of-stock or 404 links
+   */
+  async processWatchdogSweep() {
+    try {
+      const monitoredItems = watchdogService.getAllMonitoredUrls();
+      if (monitoredItems.length === 0) {
+        return;
+      }
+
+      console.log(`🛡️ [Watchdog Sweep] Checking ${monitoredItems.length} active ad destinations...`);
+
+      for (const item of monitoredItems) {
+        if (!item.isActive) continue;
+
+        try {
+          const diag = await watchdogService.scanUrl(item.url, item.dailyAdSpend);
+          const previousStatus = item.lastStatus;
+
+          console.log(`[Watchdog] Scanned ${item.url} -> ${diag.status} (Previous: ${previousStatus})`);
+
+          // 1. Transition into Critical Out-of-Stock or 404 Broken Link -> DISPATCH EMERGENCY SIREN
+          if (
+            (diag.status === 'CRITICAL_OUT_OF_STOCK' || diag.status === 'DEAD_LINK_404') &&
+            previousStatus !== diag.status
+          ) {
+            console.log(`🚨 [WATCHDOG TRIGGER] Ad destination failure detected for ${item.url}! Dispatching siren...`);
+            const sent = await sirenService.dispatchAdWasteSiren(item.userPhone, item, diag);
+            watchdogService.updateMonitoredStatus(item.id, diag.status, sent);
+          }
+          // 2. Transition back to Safe In Stock -> DISPATCH RESTOCK RECOVERY
+          else if (
+            diag.status === 'SAFE_IN_STOCK' &&
+            (previousStatus === 'CRITICAL_OUT_OF_STOCK' || previousStatus === 'DEAD_LINK_404')
+          ) {
+            console.log(`🟢 [WATCHDOG TRIGGER] Product restocked for ${item.url}! Dispatching recovery...`);
+            await sirenService.dispatchRestockRecovery(item.userPhone, item, diag);
+            watchdogService.updateMonitoredStatus(item.id, diag.status, false);
+          }
+          // 3. Status unchanged or normal
+          else {
+            watchdogService.updateMonitoredStatus(item.id, diag.status, false);
+          }
+        } catch (scanErr) {
+          console.error(`Error scanning monitored URL ${item.url}:`, scanErr);
+        }
+      }
+    } catch (err) {
+      console.error('Error during autonomous watchdog sweep:', err);
+    }
+  },
+
 
   /**
    * Check and deliver real-time user-defined general reminders

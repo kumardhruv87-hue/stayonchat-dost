@@ -1,140 +1,169 @@
 // =================================================================
-// Keepr (usekeepr.com) - Core Constants & Business Rules
-// Silicon Valley Grade SaaS Configuration Layer
+// RoasSiren (roassiren.com) - Core Constants & Business Rules
+// Silicon Valley Grade B2B Watchdog Configuration Layer
 // =================================================================
 
 export { BRAND, type BrandConfig } from './brand.js';
 
-export const REFERRAL_RULES = {
-  bonusFilesPerFriend: 5,
-  bonusRemindersPerFriend: 3,
-  maxReferralsAllowed: 6, // Up to 30 bonus files free
-};
-
-export type PlanId = "free" | "yaad_249" | "ghar_499" | "vault_899" | "yaad_149" | "ghar_399" | "vault_799";
+export type PlanId = 
+  | "starter_1999" 
+  | "growth_4999" 
+  | "agency_9999"
+  | "free_scan"
+  // Legacy aliases
+  | "free" | "yaad_249" | "ghar_499" | "vault_899" | "yaad_149" | "ghar_399" | "vault_799";
 
 export interface PlanDetails {
   id: PlanId;
   name: string;
   priceInr: number;
   period: string;
-  maxFiles: number;
-  maxReminders: number;
-  familySeats: number;
+  maxMonitoredUrls: number;
+  scanFrequencyMinutes: number;
+  maxAlertRecipients: number;
   description: string;
   features: string[];
+  // Backwards compatibility for existing user db records & tests
+  maxFiles?: number;
+  maxReminders?: number;
+  familySeats?: number;
 }
 
 export const PLANS: Record<string, PlanDetails> = {
-  free: {
-    id: "free",
-    name: "Free Pack",
+  free_scan: {
+    id: "free_scan",
+    name: "Free Diagnostic",
     priceInr: 0,
     period: "Lifetime",
-    maxFiles: 5,
+    maxMonitoredUrls: 1,
+    scanFrequencyMinutes: 60,
+    maxAlertRecipients: 1,
+    maxFiles: 15,
     maxReminders: 1,
     familySeats: 1,
-    description: "Shuruat ke liye 5 files aur instant search",
+    description: "Instant one-off Shopify & ad destination health check",
     features: [
-      "5 files encrypted storage (refer karke 15 tak badhayein)",
-      "Instant WhatsApp search (0 ms)",
-      "1 free reminder trial",
-      "Lifetime free access"
+      "Instant real-time stock & HTTP status scan",
+      "Full variant availability breakdown",
+      "ROAS burn calculation",
+      "1 ad URL WhatsApp alert test"
     ]
+  },
+  starter_1999: {
+    id: "starter_1999",
+    name: "Starter D2C",
+    priceInr: 1999,
+    period: "1 Month",
+    maxMonitoredUrls: 15,
+    scanFrequencyMinutes: 15,
+    maxAlertRecipients: 1,
+    maxFiles: 50,
+    maxReminders: 25,
+    familySeats: 1,
+    description: "For emerging D2C brands spending ₹50k–₹3L / mo on Meta ads",
+    features: [
+      "Up to 15 active ad landing page URLs monitored 24/7",
+      "15-minute background automated scan frequency",
+      "Instant 60-second WhatsApp Siren to Founder / Media Buyer",
+      "Broken link (404/redirect) & Out-of-Stock detection",
+      "Zero Shopify app install required (100% native)",
+      "Saves ~₹25,000+ in monthly wasted ad spend"
+    ]
+  },
+  growth_4999: {
+    id: "growth_4999",
+    name: "Growth Brand",
+    priceInr: 4999,
+    period: "1 Month",
+    maxMonitoredUrls: 50,
+    scanFrequencyMinutes: 5,
+    maxAlertRecipients: 3,
+    maxFiles: 200,
+    maxReminders: 999999,
+    familySeats: 4,
+    description: "For scaling D2C brands spending ₹3L–₹25L / mo on Meta & Google ads",
+    features: [
+      "Up to 50 active ad landing page URLs monitored",
+      "Ultra-fast 5-minute autonomous scan frequency",
+      "Multi-buyer sirens: WhatsApp alerts to up to 3 team members",
+      "Variant-level inventory exhaustion alerts (e.g. Size M Sold Out)",
+      "Automatic Restock Recovery notifications",
+      "Estimated monthly ad spend savings: ₹75,000+"
+    ]
+  },
+  agency_9999: {
+    id: "agency_9999",
+    name: "Agency Fleet",
+    priceInr: 9999,
+    period: "1 Month",
+    maxMonitoredUrls: 200,
+    scanFrequencyMinutes: 5,
+    maxAlertRecipients: 10,
+    maxFiles: 500,
+    maxReminders: 999999,
+    familySeats: 10,
+    description: "For Performance Marketing Agencies managing multiple Shopify clients",
+    features: [
+      "Monitor up to 200 active ad URLs across 10 client stores",
+      "5-minute continuous watchdog radar",
+      "Client-tagged WhatsApp siren routing",
+      "Weekly Ad Waste Audit PDF reports to show agency ROI",
+      "Dedicated agency Slack/WhatsApp webhook bridge",
+      "Stops client churn due to burnt ad budgets"
+    ]
+  },
+
+  // Legacy mappings for backwards compatibility
+  free: {
+    id: "free_scan",
+    name: "Free Diagnostic",
+    priceInr: 0,
+    period: "Lifetime",
+    maxMonitoredUrls: 1,
+    scanFrequencyMinutes: 60,
+    maxAlertRecipients: 1,
+    description: "Free instant diagnostic scan",
+    features: ["Instant stock & HTTP scan"]
   },
   yaad_249: {
-    id: "yaad_249",
-    name: "Yaad Plan",
-    priceInr: 249,
-    period: "1 Saal",
-    maxFiles: 50,
-    maxReminders: 25,
-    familySeats: 1,
-    description: "Challan, penalty aur warranty lapse se mukti (Sirf ₹20/mahina)",
-    features: [
-      "50 files storage (RC, Bill, Insurance, Parcha)",
-      "25 automated reminders / saal",
-      "30, 7, aur 1 din pehle WhatsApp alert",
-      "Daily 7:00 AM Morning Brief & Expiry alerts",
-      "Saves ₹2,000+ in traffic challans and late fees"
-    ]
+    id: "starter_1999",
+    name: "Starter D2C",
+    priceInr: 1999,
+    period: "1 Month",
+    maxMonitoredUrls: 15,
+    scanFrequencyMinutes: 15,
+    maxAlertRecipients: 1,
+    description: "Starter D2C",
+    features: []
   },
   ghar_499: {
-    id: "ghar_499",
-    name: "Ghar Plan (Family Pack)",
-    priceInr: 499,
-    period: "1 Saal",
-    maxFiles: 200,
-    maxReminders: 999999, // Unlimited
-    familySeats: 4,
-    description: "Poore parivaar ke kaagaz ek surakshit jagah (Sirf ₹41/mahina)",
-    features: [
-      "200 files storage",
-      "4 Family Seats (Maa, Papa, Spouse, Aap)",
-      "Unlimited WhatsApp expiry reminders",
-      "All family expiries ek hi list mein"
-    ]
+    id: "growth_4999",
+    name: "Growth Brand",
+    priceInr: 4999,
+    period: "1 Month",
+    maxMonitoredUrls: 50,
+    scanFrequencyMinutes: 5,
+    maxAlertRecipients: 3,
+    description: "Growth Brand",
+    features: []
   },
   vault_899: {
-    id: "vault_899",
-    name: "Vault Plan",
-    priceInr: 899,
-    period: "1 Saal",
-    maxFiles: 500,
-    maxReminders: 999999,
-    familySeats: 6,
-    description: "Property, investments aur CA read-only access (Sirf ₹75/mahina)",
-    features: [
-      "500 files storage",
-      "Family + CA/Advisor read-only access link",
-      "Unlimited automated reminders",
-      "WarisPath Succession Kit Add-on"
-    ]
-  },
-  // Backward compatibility aliases
-  yaad_149: {
-    id: "yaad_249",
-    name: "Yaad Plan",
-    priceInr: 249,
-    period: "1 Saal",
-    maxFiles: 50,
-    maxReminders: 25,
-    familySeats: 1,
-    description: "Yaad Plan",
-    features: []
-  },
-  ghar_399: {
-    id: "ghar_499",
-    name: "Ghar Plan",
-    priceInr: 499,
-    period: "1 Saal",
-    maxFiles: 200,
-    maxReminders: 999999,
-    familySeats: 4,
-    description: "Ghar Plan",
-    features: []
-  },
-  vault_799: {
-    id: "vault_899",
-    name: "Vault Plan",
-    priceInr: 899,
-    period: "1 Saal",
-    maxFiles: 500,
-    maxReminders: 999999,
-    familySeats: 6,
-    description: "Vault Plan",
+    id: "agency_9999",
+    name: "Agency Fleet",
+    priceInr: 9999,
+    period: "1 Month",
+    maxMonitoredUrls: 200,
+    scanFrequencyMinutes: 5,
+    maxAlertRecipients: 10,
+    description: "Agency Fleet",
     features: []
   }
 };
 
-export const BUSINESS_RULES = {
-  // Anti-spam rule: Max 1 upsell / offer message per 7 days per user
-  UPSELL_COOLDOWN_DAYS: 7,
-  
-  // Expiry notification intervals (days before expiry date)
-  REMINDER_DAYS_BEFORE: [30, 7, 1, 0],
-
-  // Free trial limits
-  FREE_TIER_MAX_FILES: 15,
-  FREE_TRIAL_REMINDERS: 1
+export const WATCHDOG_RULES = {
+  DEFAULT_CHECK_INTERVAL_MINS: 15,
+  MIN_CHECK_INTERVAL_MINS: 5,
+  ALERT_COOLDOWN_HOURS: 4, // Don't spam repeated siren for the same URL within 4h unless state changes
+  DEFAULT_ESTIMATED_DAILY_BUDGET: 3000, // ₹3,000 / adset
 };
+

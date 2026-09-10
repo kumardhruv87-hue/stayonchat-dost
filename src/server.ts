@@ -1,16 +1,19 @@
 // =================================================================
-// Keepr (usekeepr.com) - Main Express Application Server
-// Silicon Valley Grade API Server & Webhook Gateway
+// RoasSiren (roassiren.com) - Main Express Application Server
+// Autonomous Meta Ad Waste & Shopify Stock Watchdog API Gateway
 // =================================================================
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import { botRouter } from './bot/router.js';
 import { dbService } from './db/supabase.js';
 import { whatsappService, getWhatsAppToken, getWhatsAppPhoneId } from './services/whatsapp.js';
 import { paymentService } from './services/razorpay.js';
 import { schedulerService } from './services/scheduler.js';
+import { watchdogService } from './services/watchdog.service.js';
+import { sirenService } from './services/siren.service.js';
 import { BRAND } from './config/constants.js';
 
 dotenv.config();
@@ -19,7 +22,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'keepr_secure_verify_token_2026';
 
-import path from 'path';
 
 // Capture raw body for Razorpay webhook signature verification
 app.use(express.json({
@@ -82,6 +84,94 @@ app.get('/api/test-reply', async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// =================================================================
+// 1b. RoasSiren Core REST APIs (Public Scanner & Watchdog Radar)
+// =================================================================
+
+// Public Instant Scan Endpoint (Used by Landing Page widget)
+app.post('/api/scan', async (req: Request, res: Response) => {
+  try {
+    const { url, dailyAdSpend } = req.body;
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'Valid URL is required.' });
+    }
+
+    const spendNum = dailyAdSpend ? Math.max(100, Number(dailyAdSpend)) : undefined;
+    const result = await watchdogService.scanUrl(url, spendNum);
+    return res.json({ success: true, result });
+  } catch (err: any) {
+    console.error('Error in /api/scan:', err);
+    return res.status(500).json({ error: err.message || 'Scan failed' });
+  }
+});
+
+// Register an Ad URL for 24/7 Autonomous Watchdog Monitoring
+app.post('/api/monitor', (req: Request, res: Response) => {
+  try {
+    const { url, phone, brandName, dailyAdSpend } = req.body;
+    if (!url || !phone) {
+      return res.status(400).json({ error: 'Both URL and WhatsApp phone number are required.' });
+    }
+
+    const item = watchdogService.registerMonitoredUrl({
+      url,
+      userPhone: String(phone),
+      brandName,
+      dailyAdSpend: dailyAdSpend ? Number(dailyAdSpend) : undefined,
+    });
+
+    return res.json({ success: true, monitored: item });
+  } catch (err: any) {
+    console.error('Error in /api/monitor:', err);
+    return res.status(500).json({ error: err.message || 'Registration failed' });
+  }
+});
+
+// Retrieve Active Monitored URLs (optionally filtered by subscriber phone)
+app.get('/api/monitor', (req: Request, res: Response) => {
+  try {
+    const phone = req.query.phone as string | undefined;
+    const items = phone 
+      ? watchdogService.getMonitoredUrlsByPhone(phone) 
+      : watchdogService.getAllMonitoredUrls();
+
+    return res.json({
+      success: true,
+      count: items.length,
+      items,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Remove a Monitored URL
+app.delete('/api/monitor/:id', (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const removed = watchdogService.removeMonitoredUrl(id);
+    return res.json({ success: removed });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Send Demo Siren Alert (Used by landing page interactive simulation)
+app.post('/api/simulate-siren', async (req: Request, res: Response) => {
+  try {
+    const { phone, storeUrl } = req.body;
+    if (!phone) {
+      return res.status(400).json({ error: 'WhatsApp phone number is required.' });
+    }
+
+    const result = await sirenService.sendTestSiren(phone, storeUrl);
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Simulation failed' });
+  }
+});
+
 
 // =================================================================
 // 2. WhatsApp Cloud API Webhook Verification (GET /webhook)

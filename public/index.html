@@ -3,40 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Keepr 🤖 — Autonomous AI Life Vault & Smart Assistant on WhatsApp</title>
+  <title>RoasSiren™ 🚨 — Autonomous Meta Ad Waste & Shopify Stock Watchdog</title>
   
-  <!-- SEO & Generative Engine Optimization (GEO) Meta Tags -->
-  <meta name="description" content="Meet Keepr: Your autonomous personal AI companion and encrypted life vault on WhatsApp. Fluent English default with instant Hindi & Hinglish mirroring, instant original file retrieval, expiry reminders, and a unified 7:00 AM daily morning brief." />
-  <meta name="keywords" content="WhatsApp AI Assistant, Autonomous AI Life Vault WhatsApp, Encrypted Document Locker, WhatsApp Bill Reminder, 7 AM Morning Brief WhatsApp, Keepr AI, WhatsApp Gemini Assistant" />
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="author" content="Keepr AI Technologies Inc." />
+  <!-- SEO & Performance Marketing Meta Tags -->
+  <meta name="description" content="Stop burning ad spend on out-of-stock products & broken links. RoasSiren monitors your Shopify ad landing pages 24/7 and dispatches 60-second emergency WhatsApp sirens the moment products sell out." />
+  <meta name="keywords" content="Meta Ad Waste, Shopify Out of Stock Alert, Facebook Ad Stock Watchdog, ROAS Protection, D2C WhatsApp Alerts, Performance Marketing Software, Shopify Broken Link Monitor" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="RoasSiren Technologies Inc." />
   <link rel="canonical" href="https://keepr-bot.onrender.com/" />
 
   <!-- OpenGraph Social Metadata -->
-  <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Keepr 🤖 — Autonomous AI Companion & Life Vault on WhatsApp" />
-  <meta property="og:description" content="Bank-grade encrypted vault meets conversational AI inside WhatsApp. Zero app downloads. 5 files free forever. Stop missed deadlines & traffic challans." />
+  <meta property="og:title" content="RoasSiren™ 🚨 — Stop Burning Meta Ad Spend on Sold Out Products" />
+  <meta property="og:description" content="Autonomous 24/7 Shopify stock & broken link watchdog. 60-second WhatsApp sirens before your ROAS bleeds." />
   <meta property="og:url" content="https://keepr-bot.onrender.com/" />
-  <meta property="og:site_name" content="Keepr" />
-  <meta property="og:image" content="https://keepr-bot.onrender.com/logo.jpg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name" content="RoasSiren" />
 
-  <!-- Twitter Card Metadata -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Keepr 🤖 — Autonomous AI Life Vault on WhatsApp" />
-  <meta name="twitter:description" content="Talk freely, store vital papers safely, and never miss an insurance or bill expiry. Zero app downloads." />
-  <meta name="twitter:image" content="https://keepr-bot.onrender.com/logo.jpg" />
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="/logo.jpg" />
-  <link rel="apple-touch-icon" href="/logo.jpg" />
-
-  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -45,26 +31,34 @@
       darkMode: 'class',
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
           colors: {
             obsidian: {
               950: '#030712',
-              900: '#0b0f19',
-              850: '#111827',
-              800: '#1f2937',
+              900: '#090d16',
+              850: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
             },
-            emerald: {
+            siren: {
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              glow: 'rgba(244, 63, 94, 0.4)',
+            },
+            radar: {
               400: '#34d399',
               500: '#10b981',
               600: '#059669',
-              700: '#047857',
-              900: '#064e3b',
-              950: '#022c22',
             }
           },
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-            display: ['Outfit', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'ping-siren': 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
           }
         }
       }
@@ -72,1020 +66,888 @@
   </script>
 
   <style>
-    /* Silicon Valley Luxury Obsidian Glows & Effects */
     body {
       background-color: #030712;
-      color: #f3f4f6;
-      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
     }
-
-    .glass-panel {
-      background: rgba(17, 24, 39, 0.65);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
     .glass-card {
-      background: linear-gradient(135deg, rgba(31, 41, 55, 0.5) 0%, rgba(17, 24, 39, 0.6) 100%);
+      background: rgba(15, 23, 42, 0.7);
       backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    .glass-card:hover {
-      border-color: rgba(16, 185, 129, 0.35);
-      box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15);
-      transform: translateY(-2px);
+    .glass-card-glow {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      box-shadow: 0 0 35px -5px rgba(244, 63, 94, 0.2);
     }
-
-    .glass-card-featured {
-      background: linear-gradient(135deg, rgba(6, 78, 59, 0.25) 0%, rgba(17, 24, 39, 0.8) 100%);
-      backdrop-filter: blur(16px);
-      border: 1.5px solid rgba(16, 185, 129, 0.5);
-      box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25);
+    .glass-card-green {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.2);
     }
-
-    .hero-glow-bg {
-      background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.08) 35%, rgba(3, 7, 18, 0) 70%);
-    }
-
-    .radial-green-blur {
+    .hero-glow {
       position: absolute;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(3, 7, 18, 0) 70%);
+      border-radius: 50%;
+      filter: blur(140px);
       pointer-events: none;
+      z-index: 0;
     }
-
-    .shimmer-emerald {
-      background: linear-gradient(90deg, #ffffff 0%, #34d399 50%, #ffffff 100%);
-      background-size: 200% auto;
-      color: transparent;
-      -webkit-background-clip: text;
-      animation: shine 4s linear infinite;
-    }
-
-    @keyframes shine {
-      to { background-position: 200% center; }
-    }
-
-    .dot-grid {
+    .bg-grid {
       background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-      background-size: 24px 24px;
+      background-size: 32px 32px;
     }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #030712;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1f2937;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #374151;
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #f43f5e;
+      cursor: pointer;
+      box-shadow: 0 0 15px #f43f5e;
+      border: 2px solid #ffffff;
     }
   </style>
-
-  <!-- Schema.org Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "SoftwareApplication",
-        "name": "Keepr",
-        "operatingSystem": "WhatsApp (iOS, Android, Web, Desktop)",
-        "applicationCategory": "ProductivityApplication",
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.95",
-          "reviewCount": "18400",
-          "bestRating": "5",
-          "worstRating": "1"
-        },
-        "offers": [
-          {
-            "@type": "Offer",
-            "name": "Free Pack",
-            "price": "0",
-            "priceCurrency": "INR"
-          },
-          {
-            "@type": "Offer",
-            "name": "Yaad Plan",
-            "price": "249",
-            "priceCurrency": "INR"
-          },
-          {
-            "@type": "Offer",
-            "name": "Ghar Plan",
-            "price": "499",
-            "priceCurrency": "INR"
-          },
-          {
-            "@type": "Offer",
-            "name": "Vault Plan",
-            "price": "899",
-            "priceCurrency": "INR"
-          }
-        ],
-        "description": "Keepr is an autonomous AI Life Vault and cultured personal smart assistant operating 100% natively on WhatsApp."
-      },
-      {
-        "@type": "Organization",
-        "name": "Keepr",
-        "url": "https://keepr-bot.onrender.com",
-        "logo": "https://keepr-bot.onrender.com/logo.jpg",
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": "+91 98705 30066",
-          "contactType": "Customer Support",
-          "email": "care@keepr-bot.onrender.com",
-          "availableLanguage": ["Hindi", "English", "Hinglish"]
-        }
-      }
-    ]
-  }
-  </script>
 </head>
-<body class="bg-obsidian-950 text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black">
 
-  <!-- ================= TOP STATUS BAR ================= -->
-  <aside aria-label="Status Banner" class="bg-obsidian-900/90 border-b border-emerald-500/20 text-emerald-300 text-xs py-2 px-4 text-center font-medium backdrop-blur-md">
-    <div class="max-w-7xl mx-auto flex items-center justify-center gap-2 flex-wrap">
-      <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        Official Meta Cloud API Live
-      </span>
-      <span>Keepr is active 24/7 on our verified Indian line:</span>
-      <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="font-bold text-white underline hover:text-emerald-300 transition-colors flex items-center gap-1">
-        +91 98705 30066 &rarr;
-      </a>
-    </div>
-  </aside>
+<body class="bg-obsidian-950 text-slate-100 antialiased selection:bg-siren-500 selection:text-white">
 
-  <!-- ================= NAVBAR ================= -->
-  <nav class="sticky top-0 z-50 glass-panel">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+  <!-- Background Gradients -->
+  <div class="hero-glow bg-siren-600/15 top-[-100px] left-1/2 transform -translate-x-1/2"></div>
+  <div class="hero-glow bg-radar-500/10 top-[600px] right-[-100px]"></div>
+
+  <!-- ============================================================= -->
+  <!-- Top Navigation Header -->
+  <!-- ============================================================= -->
+  <header class="sticky top-0 z-50 glass-card border-b border-white/10 px-4 lg:px-8 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
       
       <!-- Brand Logo -->
-      <a href="#" class="flex items-center gap-3.5 group">
-        <div class="relative w-11 h-11 rounded-xl overflow-hidden ring-1 ring-emerald-500/40 shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
-          <img src="/logo.jpg" alt="Keepr Vault Official Logo" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-emerald-500/10 mix-blend-overlay"></div>
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-siren-500 to-rose-700 flex items-center justify-center p-2 shadow-lg shadow-siren-500/30 group-hover:scale-105 transition-transform">
+          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span class="absolute -top-1 -right-1 flex h-3 w-3">
+            <span class="animate-ping-siren absolute inline-flex h-full w-full rounded-full bg-siren-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-siren-500"></span>
+          </span>
         </div>
         <div>
-          <span class="text-2xl font-black tracking-tight font-display text-white flex items-center gap-1.5">
-            Keepr <span class="text-emerald-400 text-xl font-normal">🤖</span>
-          </span>
-          <span class="text-[10px] block text-emerald-400/90 font-mono font-medium tracking-wider uppercase">Autonomous Life Vault</span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xl font-extrabold tracking-tight text-white">Roas<span class="text-siren-500">Siren</span></span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-siren-500/20 text-siren-400 border border-siren-500/30 uppercase tracking-wider">Radar</span>
+          </div>
+          <p class="text-[11px] text-slate-400 -mt-0.5 hidden sm:block">Meta Ad Waste & OOS Watchdog</p>
         </div>
       </a>
 
-      <!-- Desktop Nav Links -->
-      <div class="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-300">
-        <a href="#superpowers" class="hover:text-emerald-400 transition-colors">Superpowers</a>
-        <a href="#simulator" class="hover:text-emerald-400 transition-colors">Live Demo</a>
-        <a href="#how-it-works" class="hover:text-emerald-400 transition-colors">How It Works</a>
-        <a href="#pricing" class="hover:text-emerald-400 transition-colors">Plans &amp; Pricing</a>
-        <a href="#security" class="hover:text-emerald-400 transition-colors">Security &amp; DPDP</a>
-        <a href="#faq" class="hover:text-emerald-400 transition-colors">FAQ</a>
-      </div>
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+        <a href="#scanner" class="hover:text-white transition-colors">Instant Scanner</a>
+        <a href="#nightmare" class="hover:text-white transition-colors">The 3 AM Disaster</a>
+        <a href="#calculator" class="hover:text-white transition-colors">Waste Calculator</a>
+        <a href="#how-it-works" class="hover:text-white transition-colors">Architecture</a>
+        <a href="#pricing" class="hover:text-white transition-colors">Pricing</a>
+      </nav>
 
-      <!-- Header WhatsApp Action Button -->
+      <!-- CTA Buttons -->
       <div class="flex items-center gap-3">
-        <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-obsidian-950 font-extrabold text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 transition-all">
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-          <span>Chat on WhatsApp</span>
+        <a href="#scanner" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs font-semibold border border-white/15 transition-all">
+          <span class="h-2 w-2 rounded-full bg-radar-500 animate-pulse"></span>
+          Scan Ad URL Free
+        </a>
+        <a href="https://wa.me/919870530066?text=Hi%20RoasSiren,%20I%20want%20to%20protect%20my%20Shopify%20Meta%20ads" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-siren-500 to-rose-600 hover:from-siren-600 hover:to-rose-700 text-white text-xs font-bold shadow-lg shadow-siren-500/25 transition-all">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.97.531 1.83.821 2.796.821 3.183 0 5.772-2.587 5.773-5.771 0-3.182-2.589-5.803-5.773-5.803zm3.393 8.243c-.144.405-.837.774-1.17.824-.312.045-.694.072-2.222-.556-1.956-.804-3.21-2.793-3.308-2.923-.097-.13-.787-1.047-.787-1.994 0-.948.497-1.413.673-1.608.177-.195.388-.243.518-.243.13 0 .259.002.373.007.12.005.281-.045.44.336.163.389.561 1.365.61 1.464.05.099.082.215.016.345-.066.13-.099.213-.197.327-.099.115-.208.256-.297.345-.1.099-.204.207-.088.406.116.199.516.852 1.109 1.381.764.682 1.408.894 1.607.993.199.099.315.087.432-.047.117-.133.5-.583.633-.784.133-.199.266-.166.449-.099.183.066 1.163.548 1.362.648.199.099.332.149.382.232.049.083.049.48-.095.885z"/>
+          </svg>
+          Open on WhatsApp
         </a>
       </div>
 
     </div>
-  </nav>
+  </header>
 
-  <!-- ================= HERO SECTION ================= -->
-  <section class="relative pt-12 pb-24 md:pt-20 md:pb-36 overflow-hidden hero-glow-bg dot-grid">
-    <div class="radial-green-blur -top-40 left-1/2 -translate-x-1/2"></div>
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        
-        <!-- Left Hero Column -->
-        <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
-          
-          <!-- Pill Tag -->
-          <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 text-xs font-bold tracking-wider uppercase shadow-inner">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            ZERO APP DOWNLOADS • 100% NATIVE ON WHATSAPP
+  <!-- ============================================================= -->
+  <!-- Hero Section & Live Diagnostic Scanner -->
+  <!-- ============================================================= -->
+  <section class="relative pt-12 pb-20 px-4 lg:px-8 bg-grid">
+    <div class="max-w-6xl mx-auto text-center relative z-10">
+
+      <!-- Eyebrow Pill -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-siren-500/10 border border-siren-500/30 text-siren-400 text-xs font-semibold mb-6">
+        <span class="h-2 w-2 rounded-full bg-siren-500 animate-ping"></span>
+        AUTONOMOUS AD WASTE WATCHDOG FOR SHOPIFY BRANDS
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight sm:leading-none max-w-4xl mx-auto">
+        Never Burn Another Rupee Running Ads to <span class="text-transparent bg-clip-text bg-gradient-to-r from-siren-500 via-rose-400 to-amber-400">"Sold Out"</span> Products.
+      </h1>
+
+      <!-- Subheadline -->
+      <p class="mt-6 text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
+        Your hero SKU sells out at 11:30 PM. Your media buyer sleeps until 9:00 AM. In between, you burn <strong class="text-white font-semibold">₹15,000 on dead clicks</strong>. RoasSiren monitors your ad destination URLs 24/7 and fires an emergency <strong class="text-siren-400 font-semibold">60-second WhatsApp siren</strong> the moment stock drops to zero.
+      </p>
+
+      <!-- ============================================================= -->
+      <!-- Interactive Live Scanner Widget Box -->
+      <!-- ============================================================= -->
+      <div id="scanner" class="mt-10 max-w-4xl mx-auto glass-card-glow rounded-2xl p-4 sm:p-7 text-left relative overflow-hidden transition-all duration-300">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4 mb-5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-3 h-3 rounded-full bg-siren-500 animate-ping"></div>
+            <h3 class="text-sm sm:text-base font-bold text-white tracking-wide uppercase">Free Instant Stock & Ad Destination Diagnostic</h3>
           </div>
-          
-          <!-- Main Hero Heading -->
-          <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black font-display tracking-tight text-white leading-[1.06]">
-            Your Autonomous <br class="hidden sm:inline" />
-            <span class="shimmer-emerald">AI Life Vault</span> &amp; <br />
-            Smart Assistant.
-          </h1>
-          
-          <!-- Subtitle Copy -->
-          <p class="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
-            Talk freely like ChatGPT in English, Hindi, or Hinglish with an autonomous life companion. Store vehicle RCs, insurance policies, and bills with <span class="text-emerald-400 font-semibold">instant original file return</span>, automated expiry protection before fines hit, and daily 7:00 AM life briefs.
-          </p>
-
-          <!-- Primary CTAs -->
-          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-            <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-obsidian-950 font-black text-base shadow-2xl shadow-emerald-500/30 hover:scale-[1.02] active:scale-95 transition-all">
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-              <span>Say "Hi" on WhatsApp (+91 98705 30066)</span>
-            </a>
-            
-            <a href="#pricing" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-obsidian-900 border border-slate-700 hover:border-emerald-500/50 text-slate-200 font-bold text-base hover:bg-obsidian-850 transition-all">
-              <span>View Plans (From ₹0)</span>
-              <span class="text-emerald-400">&darr;</span>
-            </a>
-          </div>
-
-          <!-- Micro-Trust Badges -->
-          <div class="pt-6 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-              <span class="text-emerald-400 text-base">🎁</span>
-              <span><strong>5 Files</strong> Free Forever</span>
-            </div>
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-              <span class="text-emerald-400 text-base">🛡️</span>
-              <span><strong>AES-256</strong> Bank Grade</span>
-            </div>
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-              <span class="text-emerald-400 text-base">⚖️</span>
-              <span><strong>DPDP 2023</strong> Compliant</span>
-            </div>
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-              <span class="text-emerald-400 text-base">🚫</span>
-              <span><strong>Zero</strong> Auto-Debits</span>
-            </div>
-          </div>
-
+          <span class="text-xs text-slate-400 font-mono">100% Native Shopify JSON API • Zero App Install</span>
         </div>
 
-        <!-- Right Hero Column: Interactive WhatsApp Simulator -->
-        <div id="simulator" class="lg:col-span-5 relative">
-          
-          <!-- Outer Phone Body -->
-          <div class="relative mx-auto max-w-sm rounded-[2.8rem] bg-obsidian-900 p-3.5 shadow-2xl shadow-emerald-500/10 border-4 border-slate-800">
-            
-            <!-- Dynamic Prompt Chips Bar -->
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-3 pt-1 px-1 text-[11px] font-semibold text-slate-300 no-scrollbar">
-              <button onclick="setSimScenario('rc')" id="chip-rc" class="sim-chip px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap transition-all">🚗 Car RC</button>
-              <button onclick="setSimScenario('reminder')" id="chip-reminder" class="sim-chip px-2.5 py-1 rounded-lg bg-obsidian-800 text-slate-400 border border-slate-700 whitespace-nowrap transition-all">⏰ Dawa Reminder</button>
-              <button onclick="setSimScenario('brief')" id="chip-brief" class="sim-chip px-2.5 py-1 rounded-lg bg-obsidian-800 text-slate-400 border border-slate-700 whitespace-nowrap transition-all">☀️ 7 AM Brief</button>
-              <button onclick="setSimScenario('vault')" id="chip-vault" class="sim-chip px-2.5 py-1 rounded-lg bg-obsidian-800 text-slate-400 border border-slate-700 whitespace-nowrap transition-all">📁 Kaagaz</button>
-            </div>
-
-            <!-- WhatsApp Header -->
-            <div class="bg-emerald-950/90 -mx-3.5 px-4 py-3 text-white flex items-center gap-3 border-b border-emerald-900/60">
-              <div class="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-emerald-400 flex-shrink-0">
-                <img src="/logo.jpg" alt="Keepr AI Official Avatar" class="w-full h-full object-cover" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="font-bold text-sm flex items-center gap-1.5 truncate">
-                  <span>Keepr AI 🤖</span>
-                  <span class="text-[9px] bg-emerald-500 text-obsidian-950 font-extrabold px-1.5 py-0.2 rounded-full uppercase">Official</span>
-                </div>
-                <div class="text-[11px] text-emerald-300/80 flex items-center gap-1 truncate">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>online • +91 9870530066</span>
-                </div>
+        <!-- Input Bar -->
+        <form id="scanForm" onsubmit="handleScanSubmit(event)" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div class="md:col-span-8 relative">
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5">Shopify Product / Meta Ad Destination URL</label>
+              <div class="relative">
+                <input 
+                  type="url" 
+                  id="targetUrlInput"
+                  required
+                  placeholder="https://shop.boat-lifestyle.com/products/rockerz-450" 
+                  class="w-full bg-obsidian-950/80 border border-white/15 focus:border-siren-500 focus:ring-2 focus:ring-siren-500/20 text-white placeholder-slate-500 text-sm rounded-xl px-4 py-3 outline-none transition-all font-mono"
+                />
+                <button type="button" onclick="pasteSampleUrl('https://shop.boat-lifestyle.com/products/rockerz-450')" class="absolute right-3 top-3 text-[11px] text-slate-400 hover:text-white bg-white/10 px-2 py-0.5 rounded">
+                  Sample
+                </button>
               </div>
             </div>
 
-            <!-- WhatsApp Chat Body (Dark Wallpaper) -->
-            <div id="sim-chat-body" class="bg-[#0b141a] -mx-3.5 p-3.5 space-y-3 text-[12px] min-h-[420px] max-h-[460px] overflow-y-auto flex flex-col justify-end rounded-b-[2.3rem]">
-              
-              <!-- Chat items injected via JavaScript -->
-
+            <div class="md:col-span-4">
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5">Daily Ad Spend on this SKU</label>
+              <select id="adSpendInput" class="w-full bg-obsidian-950/80 border border-white/15 focus:border-siren-500 text-white text-sm rounded-xl px-3.5 py-3 outline-none transition-all font-mono">
+                <option value="1500">₹1,500 / day</option>
+                <option value="3000" selected>₹3,000 / day (Average)</option>
+                <option value="7500">₹7,500 / day</option>
+                <option value="15000">₹15,000 / day (Scale)</option>
+                <option value="30000">₹30,000 / day</option>
+              </select>
             </div>
-
-            <!-- WhatsApp Bottom Chat Bar -->
-            <div class="bg-obsidian-900 -mx-3.5 -mb-3.5 p-3 flex items-center gap-2 border-t border-slate-800 rounded-b-[2.8rem]">
-              <input type="text" disabled value="Type a message or drop document..." class="bg-obsidian-800 text-slate-500 text-xs px-3.5 py-2 rounded-full flex-1 border border-slate-700 cursor-not-allowed" />
-              <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-obsidian-950 font-black shadow hover:bg-emerald-400 transition-colors">
-                &rarr;
-              </a>
-            </div>
-
           </div>
 
-          <div class="text-center mt-3">
-            <span class="text-[11px] text-slate-500 font-mono">Tap the chips above to test different scenarios ↑</span>
+          <!-- Quick Try Store Chips -->
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <span class="text-xs text-slate-400">Quick Test Stores:</span>
+            <button type="button" onclick="pasteSampleUrl('https://snitch.co.in/products/air-mesh-oversized-tee')" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-2.5 py-1 rounded-lg transition-colors">
+              Snitch Apparel
+            </button>
+            <button type="button" onclick="pasteSampleUrl('https://shop.boat-lifestyle.com/products/rockerz-450')" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-2.5 py-1 rounded-lg transition-colors">
+              boAt Audio
+            </button>
+            <button type="button" onclick="pasteSampleUrl('https://snitch.co.in/products/oversized-dead-stock-sample-404')" class="text-xs bg-siren-500/10 hover:bg-siren-500/20 border border-siren-500/30 text-siren-400 px-2.5 py-1 rounded-lg transition-colors">
+              Test Broken 404 URL
+            </button>
           </div>
 
+          <!-- Submit Button -->
+          <div class="pt-2">
+            <button 
+              type="submit" 
+              id="scanBtn"
+              class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-siren-500 to-rose-600 hover:from-siren-600 hover:to-rose-700 text-white font-bold text-sm shadow-xl shadow-siren-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-95"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Run Instant Stock & Waste Diagnostic</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Scanning Terminal Animation (Hidden by default) -->
+        <div id="scanningProgress" class="hidden mt-6 p-4 rounded-xl bg-obsidian-950/90 border border-white/10 font-mono text-xs space-y-2">
+          <div class="flex items-center gap-2 text-siren-400">
+            <span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full"></span>
+            <span id="scanStatusStep">Connecting to Shopify domain...</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div id="progressBar" class="bg-siren-500 h-1.5 transition-all duration-300" style="width: 20%"></div>
+          </div>
+        </div>
+
+        <!-- Diagnostic Result Display (Hidden by default) -->
+        <div id="scanResultContainer" class="hidden mt-6 pt-5 border-t border-white/10 space-y-5 animate-fadeIn">
+          <!-- Populated by JS -->
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- ================= 4 SUPERPOWERS ================= -->
-  <section id="superpowers" class="py-24 bg-obsidian-900/60 border-t border-slate-800/80 relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-      
-      <div class="text-center max-w-3xl mx-auto space-y-4">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-          Silicon Valley Architecture • Indian Cultural Soul
-        </div>
-        <h2 class="text-3xl sm:text-5xl font-extrabold font-display text-white">4 Superpowers Inside WhatsApp</h2>
-        <p class="text-slate-400 text-base sm:text-lg">No new logins, zero app downloads, and zero phone memory used.</p>
+  <!-- ============================================================= -->
+  <!-- The "3 AM Stockout Disaster" Timeline Storyboard -->
+  <!-- ============================================================= -->
+  <section id="nightmare" class="py-20 px-4 lg:px-8 border-t border-white/5 bg-obsidian-900/50">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold text-siren-400 uppercase tracking-wider">The Cost of Blind Spots</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-2">The "3 AM Stockout" Nightmare</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-3">Why 84% of D2C brands burn over ₹30,000 every month on dead Meta ad traffic without knowing it.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        <!-- Feature 1 -->
-        <div class="p-7 rounded-3xl glass-card space-y-4">
-          <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl text-emerald-400">
-            📁
+        <!-- Scenario A: Without RoasSiren -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 border-siren-500/20 relative">
+          <div class="flex items-center justify-between mb-6">
+            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-siren-500/20 text-siren-400 border border-siren-500/30 uppercase">
+              Without RoasSiren
+            </span>
+            <span class="text-xs font-mono text-siren-400 font-bold">₹14,500 Wasted</span>
           </div>
-          <h3 class="text-xl font-bold font-display text-white">Original Kaagaz Vault</h3>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Drop car RCs, insurance, PUC, electricity bills, or medical prescriptions. Whenever traffic police or a doctor asks, Keepr sends back the <strong>exact uncompressed original PDF or photo</strong> in seconds.
-          </p>
-          <div class="pt-2 text-xs font-mono text-emerald-400 flex items-center gap-1">
-            <span>✓ 0-second instant search</span>
+
+          <div class="space-y-6 relative border-l-2 border-siren-500/30 ml-3 pl-6">
+            <div>
+              <div class="text-xs font-mono text-slate-400">11:34 PM</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">Hero Product Sells Out</h4>
+              <p class="text-xs text-slate-400 mt-1">A creator reel spikes traffic. The last 14 units of Size L & M sell out. Inventory hits 0.</p>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-slate-400">02:15 AM</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">Meta Algorithm Bids Aggressively</h4>
+              <p class="text-xs text-slate-400 mt-1">High conversion history makes Meta allocate ₹8,000 during midnight auctions. Clicks pour in.</p>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-slate-400">06:40 AM</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">380 High-Intent Shoppers Bounce</h4>
+              <p class="text-xs text-slate-400 mt-1">Shoppers land, see "Sold Out", and leave angry. Zero checkouts. Ad Relevance score plunges.</p>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-siren-400 font-bold">09:45 AM</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">Media Buyer Wakes Up to Bloodbath</h4>
+              <p class="text-xs text-slate-400 mt-1">Opens Ads Manager. ₹14,500 spent overnight with a 0.1x ROAS. Ad budget burned permanently.</p>
+            </div>
           </div>
         </div>
 
-        <!-- Feature 2 -->
-        <div class="p-7 rounded-3xl glass-card space-y-4">
-          <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl text-amber-400">
-            🛡️
+        <!-- Scenario B: With RoasSiren -->
+        <div class="glass-card-green rounded-2xl p-6 sm:p-8 relative">
+          <div class="flex items-center justify-between mb-6">
+            <span class="px-3 py-1 rounded-lg text-xs font-bold bg-radar-500/20 text-radar-400 border border-radar-500/30 uppercase">
+              With RoasSiren 🚨
+            </span>
+            <span class="text-xs font-mono text-radar-400 font-bold">₹14,200 Protected</span>
           </div>
-          <h3 class="text-xl font-bold font-display text-white">Loss-Preventing Expiry Alerts</h3>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Never pay another ₹2,000 traffic challan, missed insurance penalty, or lapsed warranty. Keepr auto-extracts expiry dates with Gemini 2.0 Vision and alerts you at 30, 7, and 1 day before.
-          </p>
-          <div class="pt-2 text-xs font-mono text-amber-400 flex items-center gap-1">
-            <span>✓ Saves ₹2,000+ per year</span>
-          </div>
-        </div>
 
-        <!-- Feature 3 -->
-        <div class="p-7 rounded-3xl glass-card space-y-4">
-          <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl text-amber-400">
-            ☀️
-          </div>
-          <h3 class="text-xl font-bold font-display text-white">7:00 AM Daily Morning Brief</h3>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Wake up to a single crisp WhatsApp card every morning at 7:00 AM sharp. Combines upcoming bill expiries, vehicle document renewals, family medicine timings, and road safety alerts in 4 bullets.
-          </p>
-          <div class="pt-2 text-xs font-mono text-amber-400 flex items-center gap-1">
-            <span>✓ Start each day in complete control</span>
-          </div>
-        </div>
+          <div class="space-y-6 relative border-l-2 border-radar-500/30 ml-3 pl-6">
+            <div>
+              <div class="text-xs font-mono text-slate-400">11:34 PM</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">Hero Product Sells Out</h4>
+              <p class="text-xs text-slate-400 mt-1">Inventory counter on Shopify reaches 0 across all remaining variants.</p>
+            </div>
 
-        <!-- Feature 4 -->
-        <div class="p-7 rounded-3xl glass-card space-y-4">
-          <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl text-emerald-400">
-            💬
-          </div>
-          <h3 class="text-xl font-bold font-display text-white">English Default + Any Language</h3>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Speaks fluent English by default, but seamlessly adapts to Hindi, Hinglish, Marathi, Tamil, Bengali, or Gujarati the moment you chat. Zero robotic menus or language pickers required.
-          </p>
-          <div class="pt-2 text-xs font-mono text-emerald-400 flex items-center gap-1">
-            <span>✓ Dynamic Multilingual Mirroring</span>
+            <div>
+              <div class="text-xs font-mono text-radar-400 font-bold">11:35 PM (60 Seconds Later)</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">🚨 WhatsApp Siren Dispatched</h4>
+              <p class="text-xs text-slate-400 mt-1">RoasSiren detects the stockout via native JSON. High-priority alert buzzes founder & media buyer phones.</p>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-slate-400">11:37 PM</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">Adset Paused or URL Swapped</h4>
+              <p class="text-xs text-slate-400 mt-1">Media buyer opens Meta Ads app in 2 taps, pauses AdSet #84920 or routes traffic to In-Stock collection.</p>
+            </div>
+
+            <div>
+              <div class="text-xs font-mono text-radar-400 font-bold">Next Morning</div>
+              <h4 class="text-sm font-bold text-white mt-0.5">ROAS Intact & Restock Alert Ready</h4>
+              <p class="text-xs text-slate-400 mt-1">₹14,200 in ad budget saved. When warehouse restocks, RoasSiren sends a green signal to turn ads back on!</p>
+            </div>
           </div>
         </div>
 
       </div>
-
     </div>
   </section>
 
-  <!-- ================= HOW IT WORKS ================= -->
-  <section id="how-it-works" class="py-24 bg-obsidian-950 border-t border-slate-800/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-      
-      <div class="text-center max-w-2xl mx-auto space-y-4">
-        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Pure WhatsApp Simplicity</h2>
-        <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">How Keepr Works in 3 Quick Steps</h3>
+  <!-- ============================================================= -->
+  <!-- Interactive ROI & Ad Waste Calculator -->
+  <!-- ============================================================= -->
+  <section id="calculator" class="py-20 px-4 lg:px-8 border-t border-white/5 bg-obsidian-950">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Financial Impact Simulator</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-2">How Much Ad Budget Are You Burning?</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-3">Adjust your monthly Meta ad spend and estimated stockout frequency to see your projected annual savings.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 sm:p-10 border border-white/10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          <!-- Controls -->
+          <div class="lg:col-span-7 space-y-8">
+            <!-- Slider 1: Monthly Ad Spend -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <label class="text-sm font-bold text-white">Monthly Meta / Google Ad Spend</label>
+                <span id="adSpendDisplay" class="text-base font-mono font-extrabold text-siren-400">₹3,00,000 / mo</span>
+              </div>
+              <input 
+                type="range" 
+                id="calcAdSpend" 
+                min="50000" 
+                max="2500000" 
+                step="25000" 
+                value="300000" 
+                oninput="updateCalculator()"
+                class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+              />
+              <div class="flex justify-between text-[11px] text-slate-500 mt-1 font-mono">
+                <span>₹50,000</span>
+                <span>₹10,00,000</span>
+                <span>₹25,00,000+</span>
+              </div>
+            </div>
+
+            <!-- Slider 2: Stockout Nights -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <label class="text-sm font-bold text-white">Estimated Stockouts / Month</label>
+                <span id="stockoutsDisplay" class="text-base font-mono font-extrabold text-amber-400">3 Nights / month</span>
+              </div>
+              <input 
+                type="range" 
+                id="calcStockouts" 
+                min="1" 
+                max="10" 
+                step="1" 
+                value="3" 
+                oninput="updateCalculator()"
+                class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+              />
+              <div class="flex justify-between text-[11px] text-slate-500 mt-1 font-mono">
+                <span>1 Night</span>
+                <span>5 Nights</span>
+                <span>10 Nights</span>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-300">
+              💡 <em>Industry Benchmark:</em> Average D2C brands spend 35% of daily budget between 10 PM and 6 AM. When a product is sold out during these hours, that traffic produces 0 conversions.
+            </div>
+          </div>
+
+          <!-- Output Scorecard -->
+          <div class="lg:col-span-5 p-6 rounded-2xl bg-gradient-to-br from-obsidian-900 to-obsidian-850 border border-siren-500/30 text-center space-y-6">
+            <div>
+              <div class="text-xs text-slate-400 font-medium uppercase tracking-wider">Estimated Monthly Wasted Spend</div>
+              <div id="wastedAmount" class="text-3xl sm:text-4xl font-black text-siren-500 mt-1 font-mono">₹31,500</div>
+              <div class="text-[11px] text-slate-400 mt-1">₹3,78,000 burned annually on zero-inventory clicks</div>
+            </div>
+
+            <div class="pt-4 border-t border-white/10">
+              <div class="text-xs text-slate-400 font-medium uppercase tracking-wider">RoasSiren Starter Tier</div>
+              <div class="text-lg font-bold text-white mt-0.5">₹1,999 / mo</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-radar-500/10 border border-radar-500/30">
+              <div class="text-xs text-radar-400 font-bold uppercase tracking-wider">Net Monthly ROAS Saved</div>
+              <div id="netSavings" class="text-2xl font-black text-radar-400 font-mono mt-1">+₹29,501</div>
+              <div id="roiMultiple" class="text-xs font-bold text-slate-300 mt-0.5">15.8x Immediate ROI</div>
+            </div>
+
+            <a href="#pricing" class="block w-full py-3 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs tracking-wide uppercase transition-all shadow-lg shadow-siren-500/30">
+              Protect My Ad Spend Now
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- How It Works (Architecture & Protocol) -->
+  <!-- ============================================================= -->
+  <section id="how-it-works" class="py-20 px-4 lg:px-8 border-t border-white/5 bg-obsidian-900/40">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold text-radar-400 uppercase tracking-wider">Zero Scraping • 100% Deterministic</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-2">How RoasSiren Protects Your Budget</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-3">Built specifically for performance marketers and Shopify brands. No messy Chrome extensions or brittle web scraping.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        <div class="p-8 rounded-3xl glass-card space-y-4 relative">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-obsidian-950 font-black flex items-center justify-center text-base">
-            1
+        <!-- Step 1 -->
+        <div class="glass-card rounded-2xl p-7 border border-white/10 relative">
+          <div class="w-12 h-12 rounded-xl bg-siren-500/10 border border-siren-500/30 flex items-center justify-center text-siren-400 font-black text-lg mb-5">
+            01
           </div>
-          <h4 class="text-xl font-bold font-display text-white">Say "Hi" on WhatsApp</h4>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Click any button on this page or text <strong>+91 98705 30066</strong>. Choose your preferred language (Hinglish, Hindi, or English) in 1 tap.
+          <h3 class="text-lg font-bold text-white">Zero Store Code or Apps</h3>
+          <p class="text-xs text-slate-400 mt-2.5 leading-relaxed">
+            Never install heavy Shopify apps that inject bloated JavaScript into your theme liquid. Simply enter your active Meta ad landing page URLs or connect via WhatsApp.
           </p>
         </div>
 
-        <div class="p-8 rounded-3xl glass-card space-y-4 relative">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-obsidian-950 font-black flex items-center justify-center text-base">
-            2
+        <!-- Step 2 -->
+        <div class="glass-card rounded-2xl p-7 border border-white/10 relative">
+          <div class="w-12 h-12 rounded-xl bg-radar-500/10 border border-radar-500/30 flex items-center justify-center text-radar-400 font-black text-lg mb-5">
+            02
           </div>
-          <h4 class="text-xl font-bold font-display text-white">Drop Photos or Voice Notes</h4>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Forward your car RC, health insurance, electricity bill, or voice note: <i>"Kal subah 10 baje mummy ki dawa yaad dilana"</i>.
+          <h3 class="text-lg font-bold text-white">5-Min Native JSON Radar</h3>
+          <p class="text-xs text-slate-400 mt-2.5 leading-relaxed">
+            RoasSiren queries native Shopify <code class="text-radar-400 bg-white/5 px-1 py-0.5 rounded text-[11px]">/products/{handle}.js</code> endpoints. It reads real-time variant inventories, prices, and HTTP status codes in under 120 milliseconds.
           </p>
         </div>
 
-        <div class="p-8 rounded-3xl glass-card space-y-4 relative">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-obsidian-950 font-black flex items-center justify-center text-base">
-            3
+        <!-- Step 3 -->
+        <div class="glass-card rounded-2xl p-7 border border-white/10 relative">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-black text-lg mb-5">
+            03
           </div>
-          <h4 class="text-xl font-bold font-display text-white">Keepr Protects &amp; Remembers</h4>
-          <p class="text-sm text-slate-300 leading-relaxed">
-            Your files are encrypted and locked. Auto-reminders trigger before expiries, and asking "Mera car RC bhejo" returns the exact PDF immediately.
+          <h3 class="text-lg font-bold text-white">60-Second WhatsApp Siren</h3>
+          <p class="text-xs text-slate-400 mt-2.5 leading-relaxed">
+            The instant inventory hits 0 or a page throws a 404, an emergency WhatsApp alert fires directly to the founder and media buyer with exact adset instructions.
           </p>
         </div>
 
       </div>
-
     </div>
   </section>
 
-  <!-- ================= PRICING PLANS ================= -->
-  <section id="pricing" class="py-24 bg-obsidian-900/40 border-t border-slate-800/80 relative">
-    <div class="radial-green-blur top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-60"></div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16 relative z-10">
-      
-      <div class="text-center max-w-3xl mx-auto space-y-4">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-          Fair, Transparent &amp; Zero Risk
+  <!-- ============================================================= -->
+  <!-- Live Radar Ticker -->
+  <!-- ============================================================= -->
+  <section class="py-8 border-y border-white/5 bg-obsidian-950 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="h-2 w-2 rounded-full bg-radar-500 animate-ping"></span>
+        <span class="text-xs font-mono font-bold text-white uppercase tracking-wider">Live Watchdog Feed</span>
+      </div>
+      <div class="flex items-center gap-6 overflow-x-auto text-xs font-mono text-slate-400 py-1">
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-radar-400">●</span> <strong>boAt</strong> Rockerz 450 • In Stock (10 variants) • <span class="text-slate-500">2m ago</span>
         </div>
-        <h2 class="text-3xl sm:text-5xl font-extrabold font-display text-white">Simple Plans. Zero Auto-Debit Traps.</h2>
-        <p class="text-slate-300 text-base sm:text-lg">
-          We never store credit card numbers or force recurring auto-debits. You decide every year when you want to renew.
-        </p>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-siren-400">●</span> <strong>Snitch</strong> Air Mesh Tee • Size M Out of Stock • <span class="text-slate-500">8m ago</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-radar-400">●</span> <strong>Minimalist</strong> Niacinamide 10% • In Stock • <span class="text-slate-500">14m ago</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-radar-400">●</span> <strong>The Souled Store</strong> Oversized Tee • In Stock • <span class="text-slate-500">19m ago</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- Pricing Plans Section -->
+  <!-- ============================================================= -->
+  <section id="pricing" class="py-24 px-4 lg:px-8 bg-obsidian-900/30">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold text-siren-400 uppercase tracking-wider">Transparent B2B Pricing</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-2">Priced to Pay for Itself on Day 1</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-3">Preventing just 1 midnight stockout saves 3x to 10x your monthly subscription cost.</p>
       </div>
 
-      <!-- 4 Plans Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
         
-        <!-- Plan 1: Free Pack -->
-        <div class="p-7 rounded-3xl glass-card flex flex-col justify-between space-y-6">
-          <div class="space-y-4">
-            <div class="inline-block text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">Starter Vault</div>
-            <h3 class="text-xl font-bold font-display text-white">Free Pack</h3>
-            <div class="text-4xl font-black text-white font-display">₹0 <span class="text-xs font-normal text-slate-400">/ lifetime</span></div>
-            <p class="text-xs text-slate-400">Perfect for trying Keepr and storing essential ID cards &amp; bills.</p>
-            <div class="border-t border-slate-800 pt-4 space-y-2.5 text-xs text-slate-300">
-              <div class="flex items-center gap-2 text-emerald-400 font-semibold"><span>✓</span> 5 Encrypted Files &amp; PDFs</div>
-              <div class="flex items-center gap-2"><span>✓</span> Instant WhatsApp Search (0 ms)</div>
-              <div class="flex items-center gap-2"><span>✓</span> 1 Free Expiry Reminder Trial</div>
-              <div class="flex items-center gap-2"><span>✓</span> 24/7 Smart Companion Chat</div>
-              <div class="flex items-center gap-2 text-slate-400"><span>✓</span> +5 files per friend invited</div>
-            </div>
-          </div>
-          <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="w-full text-center py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-850 border border-slate-700 hover:border-emerald-500/50 font-bold text-xs text-slate-200 transition-all">
-            Start Free on WhatsApp
-          </a>
-        </div>
-
-        <!-- Plan 2: Yaad Plan (Featured) -->
-        <div class="p-7 rounded-3xl glass-card-featured flex flex-col justify-between space-y-6 relative scale-[1.02] z-20">
-          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-emerald-400 text-obsidian-950 text-[10px] font-black tracking-widest uppercase px-3.5 py-1 rounded-full shadow-lg shadow-emerald-500/30">
-            Most Popular • Single Shield
-          </div>
-          <div class="space-y-4 pt-1">
-            <div class="inline-block text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-500/40">Personal Pro</div>
-            <h3 class="text-xl font-bold font-display text-white">Yaad Plan</h3>
-            <div class="text-4xl font-black text-white font-display">₹249 <span class="text-xs font-normal text-emerald-300/80">/ year (₹20/mo)</span></div>
-            <p class="text-xs text-slate-300">Challan, late penalty, and lapsed warranty freedom.</p>
-            <div class="border-t border-emerald-500/20 pt-4 space-y-2.5 text-xs text-slate-200">
-              <div class="flex items-center gap-2 font-bold text-emerald-300"><span>✓</span> 50 Encrypted Files &amp; PDFs</div>
-              <div class="flex items-center gap-2 font-bold text-emerald-300"><span>✓</span> 25 Automated WhatsApp Alerts</div>
-              <div class="flex items-center gap-2"><span>✓</span> 30, 7 &amp; 1 Day Prior Notice</div>
-              <div class="flex items-center gap-2"><span>✓</span> Natural Voice &amp; Task Reminders</div>
-              <div class="flex items-center gap-2"><span>✓</span> Daily 7:00 AM Morning Brief &amp; Expiry Alerts</div>
-              <div class="flex items-center gap-2 text-emerald-400"><span>✓</span> Saves ₹2,000+ in traffic fines</div>
-            </div>
-          </div>
-          <a href="https://wa.me/919870530066?text=Yaad%20Plan%20Upgrade" class="w-full text-center py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-obsidian-950 font-black text-xs shadow-lg shadow-emerald-500/30 hover:scale-[1.02] transition-all">
-            Get Yaad Plan (₹249/yr)
-          </a>
-        </div>
-
-        <!-- Plan 3: Ghar Plan (Family) -->
-        <div class="p-7 rounded-3xl glass-card flex flex-col justify-between space-y-6">
-          <div class="space-y-4">
-            <div class="inline-block text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">Family Protection</div>
-            <h3 class="text-xl font-bold font-display text-white">Ghar Plan</h3>
-            <div class="text-4xl font-black text-white font-display">₹499 <span class="text-xs font-normal text-slate-400">/ year (₹41/mo)</span></div>
-            <p class="text-xs text-slate-400">For households managing 2-3 vehicles, appliances &amp; bills.</p>
-            <div class="border-t border-slate-800 pt-4 space-y-2.5 text-xs text-slate-300">
-              <div class="flex items-center gap-2 font-semibold text-white"><span>✓</span> 200 Encrypted Documents</div>
-              <div class="flex items-center gap-2 font-bold text-emerald-400"><span>✓</span> 4 Family Member WhatsApp Seats</div>
-              <div class="flex items-center gap-2 font-bold text-emerald-400"><span>✓</span> Unlimited Expiry Alerts</div>
-              <div class="flex items-center gap-2"><span>✓</span> Unified Family Expiry Dashboard</div>
-              <div class="flex items-center gap-2"><span>✓</span> Priority WhatsApp Delivery Engine</div>
-            </div>
-          </div>
-          <a href="https://wa.me/919870530066?text=Ghar%20Plan%20Upgrade" class="w-full text-center py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-850 border border-slate-700 hover:border-emerald-500/50 font-bold text-xs text-slate-200 transition-all">
-            Get Ghar Plan (₹499/yr)
-          </a>
-        </div>
-
-        <!-- Plan 4: Vault Plan (VIP / Succession) -->
-        <div class="p-7 rounded-3xl glass-card flex flex-col justify-between space-y-6">
-          <div class="space-y-4">
-            <div class="inline-block text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">VIP &amp; Business</div>
-            <h3 class="text-xl font-bold font-display text-white">Vault Plan</h3>
-            <div class="text-4xl font-black text-white font-display">₹899 <span class="text-xs font-normal text-slate-400">/ year (₹75/mo)</span></div>
-            <p class="text-xs text-slate-400">Business owners, multiple properties &amp; legacy succession.</p>
-            <div class="border-t border-slate-800 pt-4 space-y-2.5 text-xs text-slate-300">
-              <div class="flex items-center gap-2 font-semibold text-white"><span>✓</span> 500 Encrypted Documents</div>
-              <div class="flex items-center gap-2 font-bold text-emerald-400"><span>✓</span> 6 Family Seats + CA/Tax Link</div>
-              <div class="flex items-center gap-2 font-bold text-emerald-400"><span>✓</span> WarisPath Nominee Succession</div>
-              <div class="flex items-center gap-2"><span>✓</span> Unlimited Automated Reminders</div>
-              <div class="flex items-center gap-2"><span>✓</span> Dedicated VIP WhatsApp Support</div>
-            </div>
-          </div>
-          <a href="https://wa.me/919870530066?text=Vault%20Plan%20Upgrade" class="w-full text-center py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-850 border border-slate-700 hover:border-emerald-500/50 font-bold text-xs text-slate-200 transition-all">
-            Get Vault Plan (₹899/yr)
-          </a>
-        </div>
-
-      </div>
-
-      <!-- No Auto-Debit Guarantee Callout -->
-      <div class="p-6 rounded-2xl bg-obsidian-900/80 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xl text-emerald-400 flex-shrink-0">
-            🛡️
-          </div>
+        <!-- Starter D2C -->
+        <div class="glass-card rounded-2xl p-7 border border-white/10 flex flex-col justify-between">
           <div>
-            <h4 class="font-bold text-white text-sm">100% Zero Auto-Debit Guarantee</h4>
-            <p class="text-xs text-slate-400">We do not store your credit card or set recurring bank mandates. Your Free Pack files remain safe forever even if you do not renew.</p>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Starter D2C</span>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="text-3xl font-black text-white">₹1,999</span>
+              <span class="text-xs text-slate-400">/ month</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">For brands spending ₹50k – ₹3L / mo on Meta ads.</p>
+
+            <ul class="mt-6 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Up to <strong>15 active ad URLs</strong> monitored</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span><strong>15-minute</strong> autonomous radar sweeps</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Instant 60-second WhatsApp sirens</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>404 Broken link & Out-of-Stock alerts</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>1 WhatsApp siren recipient phone</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-white/10">
+            <a href="https://wa.me/919870530066?text=Hi,%20I%20want%20to%20activate%20RoasSiren%20Starter%20Plan%20(₹1,999)" target="_blank" class="block w-full py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center border border-white/15 transition-all">
+              Activate Starter Plan
+            </a>
           </div>
         </div>
-        <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="px-5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold border border-emerald-500/40 whitespace-nowrap transition-all">
-          Start Risk-Free &rarr;
-        </a>
-      </div>
 
+        <!-- Growth Brand (Featured) -->
+        <div class="glass-card-glow rounded-2xl p-7 relative flex flex-col justify-between transform md:-translate-y-2">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-siren-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-lg shadow-siren-500/40">
+            Most Popular For Scaling Brands
+          </div>
+
+          <div>
+            <span class="text-xs font-bold text-siren-400 uppercase tracking-wider">Growth Brand</span>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="text-3xl font-black text-white">₹4,999</span>
+              <span class="text-xs text-slate-400">/ month</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">For scaling brands spending ₹3L – ₹25L / mo.</p>
+
+            <ul class="mt-6 space-y-3 text-xs text-slate-200">
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Up to <strong>50 active ad URLs</strong> monitored</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Ultra-fast <strong>5-minute radar frequency</strong></span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span><strong>Multi-Buyer Sirens:</strong> Up to 3 team phones</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span><strong>Variant-Level Inventory Alarms</strong> (e.g. Size M OOS)</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Automated Restock Recovery WhatsApp alerts</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-white/10">
+            <a href="https://wa.me/919870530066?text=Hi,%20I%20want%20to%20activate%20RoasSiren%20Growth%20Plan%20(₹4,999)" target="_blank" class="block w-full py-3.5 rounded-xl bg-gradient-to-r from-siren-500 to-rose-600 hover:from-siren-600 hover:to-rose-700 text-white font-bold text-xs text-center shadow-lg shadow-siren-500/30 transition-all">
+              Activate Growth Radar ⚡
+            </a>
+          </div>
+        </div>
+
+        <!-- Agency Fleet -->
+        <div class="glass-card rounded-2xl p-7 border border-white/10 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Agency Fleet</span>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="text-3xl font-black text-white">₹9,999</span>
+              <span class="text-xs text-slate-400">/ month</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">For Performance Marketing Agencies managing multiple Shopify clients.</p>
+
+            <ul class="mt-6 space-y-3 text-xs text-slate-300">
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Up to <strong>200 ad URLs across 10 client stores</strong></span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Continuous 5-minute radar across all accounts</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Client-tagged WhatsApp alert routing</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Weekly Ad Waste Saved audit reports</span>
+              </li>
+              <li class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-radar-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>Dedicated Slack / WhatsApp Webhook bridge</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-white/10">
+            <a href="https://wa.me/919870530066?text=Hi,%20I%20run%20an%20agency%20and%20want%20to%20activate%20RoasSiren%20Agency%20Fleet%20(₹9,999)" target="_blank" class="block w-full py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center border border-white/15 transition-all">
+              Activate Agency Fleet
+            </a>
+          </div>
+        </div>
+
+      </div>
     </div>
   </section>
 
-  <!-- ================= PLAN COMPARISON MATRIX ================= -->
-  <section class="py-20 bg-obsidian-950 border-t border-slate-800/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-      
-      <div class="text-center space-y-3">
-        <h3 class="text-2xl sm:text-3xl font-extrabold font-display text-white">Compare Plan Features</h3>
-        <p class="text-xs sm:text-sm text-slate-400">Select the ideal vault tier for your household or business.</p>
+  <!-- ============================================================= -->
+  <!-- Test Siren Modal / Demo Simulator -->
+  <!-- ============================================================= -->
+  <section class="py-16 px-4 lg:px-8 border-t border-white/5 bg-obsidian-950">
+    <div class="max-w-3xl mx-auto glass-card rounded-2xl p-6 sm:p-8 border border-siren-500/30 text-center">
+      <div class="w-12 h-12 mx-auto rounded-full bg-siren-500/20 text-siren-400 flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
       </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr class="border-b border-slate-800 text-slate-400 font-mono">
-              <th class="py-3 px-4 font-semibold">Feature</th>
-              <th class="py-3 px-4 font-semibold text-center">Free (₹0)</th>
-              <th class="py-3 px-4 font-semibold text-center text-emerald-400 bg-emerald-950/20 rounded-t-lg">Yaad (₹249)</th>
-              <th class="py-3 px-4 font-semibold text-center">Ghar (₹499)</th>
-              <th class="py-3 px-4 font-semibold text-center">Vault (₹899)</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60 text-slate-300">
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Encrypted Document Storage</td>
-              <td class="py-3.5 px-4 text-center">5 Files</td>
-              <td class="py-3.5 px-4 text-center text-emerald-300 font-bold bg-emerald-950/20">50 Files</td>
-              <td class="py-3.5 px-4 text-center">200 Files</td>
-              <td class="py-3.5 px-4 text-center">500 Files</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Automated Expiry Alerts</td>
-              <td class="py-3.5 px-4 text-center">1 Trial</td>
-              <td class="py-3.5 px-4 text-center text-emerald-300 font-bold bg-emerald-950/20">25 / year</td>
-              <td class="py-3.5 px-4 text-center font-semibold text-emerald-400">Unlimited</td>
-              <td class="py-3.5 px-4 text-center font-semibold text-emerald-400">Unlimited</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Family WhatsApp Seats</td>
-              <td class="py-3.5 px-4 text-center">1</td>
-              <td class="py-3.5 px-4 text-center bg-emerald-950/20">1</td>
-              <td class="py-3.5 px-4 text-center text-white font-bold">4 Seats</td>
-              <td class="py-3.5 px-4 text-center text-white font-bold">6 Seats</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Original PDF/Photo Retrieval</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400">✓</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400 bg-emerald-950/20">✓</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400">✓</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400">✓</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">Daily 6 AM Universal Astro Guide</td>
-              <td class="py-3.5 px-4 text-center text-slate-600">—</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400 bg-emerald-950/20">✓</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400">✓</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400">✓</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">CA / Accountant Read-Only Link</td>
-              <td class="py-3.5 px-4 text-center text-slate-600">—</td>
-              <td class="py-3.5 px-4 text-center text-slate-600 bg-emerald-950/20">—</td>
-              <td class="py-3.5 px-4 text-center text-slate-600">—</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400 font-bold">✓ Included</td>
-            </tr>
-            <tr>
-              <td class="py-3.5 px-4 font-medium text-white">WarisPath Succession Kit</td>
-              <td class="py-3.5 px-4 text-center text-slate-600">—</td>
-              <td class="py-3.5 px-4 text-center text-slate-600 bg-emerald-950/20">—</td>
-              <td class="py-3.5 px-4 text-center text-slate-600">—</td>
-              <td class="py-3.5 px-4 text-center text-emerald-400 font-bold">✓ Included</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ================= SECURITY & DPDP ACT ================= -->
-  <section id="security" class="py-24 bg-obsidian-900/60 border-t border-slate-800/80">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-      
-      <div class="text-center max-w-2xl mx-auto space-y-3">
-        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Enterprise Privacy</h2>
-        <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">Your Privacy is Sacred &amp; Sovereign</h3>
-        <p class="text-sm text-slate-400">Strictly engineered under the Digital Personal Data Protection (DPDP) Act 2023.</p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        
-        <div class="p-6 rounded-3xl glass-card space-y-3">
-          <div class="text-2xl text-emerald-400">🔒</div>
-          <h4 class="font-bold text-white text-base">AES-256 GCM Encryption</h4>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Every document is encrypted with military-grade keys in Supabase Vault before being saved. Only you can access your files.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-3xl glass-card space-y-3">
-          <div class="text-2xl text-emerald-400">🚫</div>
-          <h4 class="font-bold text-white text-base">Zero Model Training</h4>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Your private family papers, health records, and conversations are never used to train public AI models.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-3xl glass-card space-y-3">
-          <div class="text-2xl text-emerald-400">🛡️</div>
-          <h4 class="font-bold text-white text-base">Zero Spam / No Telecalling</h4>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            We will never sell your number to insurance brokers, telemarketers, or third parties. Your number stays clean.
-          </p>
-        </div>
-
-      </div>
-
-      <div class="text-center">
-        <p class="text-xs text-slate-500">
-          Want full transparency? Read our complete 
-          <a href="/privacy" class="text-emerald-400 underline hover:text-emerald-300">Privacy Policy</a> 
-          and 
-          <a href="/terms" class="text-emerald-400 underline hover:text-emerald-300">Terms of Service</a>.
-        </p>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ================= TESTIMONIALS & SOCIAL PROOF ================= -->
-  <section class="py-24 bg-obsidian-950 border-t border-slate-800/80">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-      
-      <div class="text-center space-y-3">
-        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Loved Across India</h2>
-        <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">Real Stories from WhatsApp Users</h3>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <div class="p-6 rounded-3xl glass-card space-y-4">
-          <div class="flex items-center gap-1 text-amber-400 text-sm">
-            ★★★★★
-          </div>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            "Traffic police caught me at DND flyway asking for original RC and pollution cert. I just typed 'mera car RC' in Keepr WhatsApp and showed the downloaded PDF within 10 seconds. Saved ₹2,000 challan on the spot!"
-          </p>
-          <div class="flex items-center gap-3 pt-2">
-            <div class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">
-              AK
-            </div>
-            <div>
-              <div class="text-xs font-bold text-white">Amit Kumar</div>
-              <div class="text-[10px] text-slate-500">Noida, Uttar Pradesh</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-6 rounded-3xl glass-card space-y-4">
-          <div class="flex items-center gap-1 text-amber-400 text-sm">
-            ★★★★★
-          </div>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            "Keepr feels like an autonomous COO in your pocket. The 7 AM morning brief with pending bill deadlines, medicine alerts and road safety cautions is the first thing I read every morning. It speaks English and Hinglish completely naturally."
-          </p>
-          <div class="flex items-center gap-3 pt-2">
-            <div class="w-9 h-9 rounded-full bg-teal-500/20 text-teal-400 font-bold flex items-center justify-center text-xs">
-              PS
-            </div>
-            <div>
-              <div class="text-xs font-bold text-white">Pooja Sharma</div>
-              <div class="text-[10px] text-slate-500">Gurugram, Haryana</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-6 rounded-3xl glass-card space-y-4">
-          <div class="flex items-center gap-1 text-amber-400 text-sm">
-            ★★★★★
-          </div>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            "We have 3 cars and an elderly mother at home. Ghar Plan gives all of us access. Whenever Maa needs medicines, Keepr reminds her exactly at 9 PM. No other app has made my life this stress-free."
-          </p>
-          <div class="flex items-center gap-3 pt-2">
-            <div class="w-9 h-9 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center text-xs">
-              RV
-            </div>
-            <div>
-              <div class="text-xs font-bold text-white">Rajesh Verma</div>
-              <div class="text-[10px] text-slate-500">Bengaluru, Karnataka</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ================= FAQ SECTION ================= -->
-  <section id="faq" class="py-24 bg-obsidian-900/40 border-t border-slate-800/80">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-      
-      <div class="text-center space-y-3">
-        <h2 class="text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Got Questions?</h2>
-        <h3 class="text-3xl sm:text-4xl font-extrabold font-display text-white">Frequently Asked Questions</h3>
-      </div>
-
-      <div class="space-y-4">
-        
-        <div class="p-6 rounded-2xl glass-card space-y-2">
-          <h4 class="font-bold text-white text-base">Q: What language does Keepr speak?</h4>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Keepr communicates in fluent, professional English by default. However, it dynamically understands and mirrors your language the moment you chat — including Hindi, Hinglish, Marathi, Gujarati, Tamil, Bengali, or Telugu. You never have to deal with clunky language menus.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl glass-card space-y-2">
-          <h4 class="font-bold text-white text-base">Q: What is the 7:00 AM Daily Morning Brief?</h4>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Every morning at 7:00 AM, Keepr prepares a concise 4-bullet card summarizing today's bill deadlines, family medicine schedules, committed promises, and road safety alerts. You can also view it anytime by texting "aaj kya hai" or "morning brief".
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl glass-card space-y-2">
-          <h4 class="font-bold text-white text-base">Q: Do I need to install an app or create an account?</h4>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            No! Keepr runs 100% inside your existing WhatsApp. Just click any green button or text <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="text-emerald-400 font-semibold underline">+91 98705 30066</a>. There are no passwords to remember and no apps eating your phone storage.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl glass-card space-y-2">
-          <h4 class="font-bold text-white text-base">Q: Can I get my original uncompressed PDF file back?</h4>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Yes, absolutely! When you drop a PDF (like an insurance policy, car RC, or invoice), Keepr stores the exact original file in your encrypted vault. When you ask "Send my RC", Keepr sends the original PDF file back natively in WhatsApp.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl glass-card space-y-2">
-          <h4 class="font-bold text-white text-base">Q: How do the expiry reminders work?</h4>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            When you upload a document, Gemini 2.0 Vision automatically extracts the expiry date (e.g., insurance expiry: 14 Oct 2026). Keepr schedules automated reminders at 30 days, 7 days, and 1 day prior, sending you a proactive WhatsApp alert with renewal details.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl glass-card space-y-2">
-          <h4 class="font-bold text-white text-base">Q: Will my credit card be automatically charged next year?</h4>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Never. We do not support hidden recurring auto-debits. When your plan completes 1 year, you decide whether to renew via 1-tap UPI or let it revert to the Free Pack. Your existing 5 free files remain securely stored forever.
-          </p>
-        </div>
-
-        <div class="p-6 rounded-2xl glass-card space-y-2">
-          <h4 class="font-bold text-white text-base">Q: Is my personal data safe? Can Keepr staff read my files?</h4>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Your documents are encrypted using AES-256 GCM encryption. Only automated AI pipelines process metadata for expiry extraction. We strictly follow DPDP Act 2023 regulations and never sell user data or train public AI models on private files.
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ================= FINAL CTA BANNER ================= -->
-  <section class="py-24 bg-gradient-to-b from-obsidian-900 to-obsidian-950 border-t border-slate-800/80 relative overflow-hidden">
-    <div class="radial-green-blur top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-70"></div>
-
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
-      
-      <div class="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-emerald-400 mx-auto shadow-xl shadow-emerald-500/25">
-        <img src="/logo.jpg" alt="Keepr Logo" class="w-full h-full object-cover" />
-      </div>
-
-      <h2 class="text-4xl sm:text-6xl font-black font-display text-white tracking-tight">
-        Secure Your Family's Documents in <span class="shimmer-emerald">60 Seconds</span>.
-      </h2>
-
-      <p class="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto">
-        Join thousands of smart users who never miss a renewal deadline, never lose an RC, and wake up to 7:00 AM daily briefs.
+      <h3 class="text-2xl font-black text-white">Experience an Authentic WhatsApp Siren</h3>
+      <p class="text-slate-400 text-xs sm:text-sm mt-2 max-w-lg mx-auto">
+        Enter your WhatsApp phone number to receive a live 60-second test siren directly from our official Meta Cloud API gateway.
       </p>
 
-      <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-10 py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-obsidian-950 font-black text-lg shadow-2xl shadow-emerald-500/40 hover:scale-[1.03] active:scale-95 transition-all">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-          <span>Start Free on WhatsApp (+91 98705 30066)</span>
-        </a>
-      </div>
-
-      <div class="text-xs text-slate-500 font-medium">
-        5 Files Free Forever • No App Download Required • 100% Secure
-      </div>
-
+      <form onsubmit="handleTestSiren(event)" class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+        <input 
+          type="tel" 
+          id="demoPhoneInput"
+          required
+          placeholder="e.g. 919560931596" 
+          class="w-full bg-obsidian-900 border border-white/20 text-white placeholder-slate-500 text-sm rounded-xl px-4 py-3 outline-none focus:border-siren-500 font-mono"
+        />
+        <button 
+          type="submit" 
+          id="demoSirenBtn"
+          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs whitespace-nowrap shadow-lg shadow-siren-500/30 transition-all"
+        >
+          Send Test Siren
+        </button>
+      </form>
+      <div id="demoSirenFeedback" class="mt-3 text-xs font-mono hidden"></div>
     </div>
   </section>
 
-  <!-- ================= FOOTER ================= -->
-  <footer class="bg-obsidian-950 text-slate-400 py-16 border-t border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-      
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        
-        <!-- Brand Col -->
-        <div class="space-y-4 md:col-span-2">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl overflow-hidden ring-1 ring-emerald-400 shadow">
-              <img src="/logo.jpg" alt="Keepr Logo" class="w-full h-full object-cover" />
-            </div>
-            <div>
-              <span class="text-white font-black text-xl font-display">Keepr 🤖</span>
-              <span class="text-[10px] block text-emerald-400 font-mono tracking-wide uppercase">Autonomous AI Life Vault</span>
-            </div>
-          </div>
-          <p class="text-xs text-slate-400 max-w-md leading-relaxed">
-            Keepr is an autonomous conversational AI companion and encrypted digital document vault operating natively on WhatsApp using the official Meta WhatsApp Cloud API.
-          </p>
-          <div class="text-xs text-slate-400 flex items-center gap-2">
-            <span>WhatsApp Line:</span>
-            <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="text-emerald-400 font-bold underline">+91 98705 30066</a>
-          </div>
-        </div>
-
-        <!-- Quick Links -->
-        <div class="space-y-3">
-          <h5 class="text-xs font-mono font-bold uppercase tracking-wider text-white">Platform</h5>
-          <ul class="space-y-2 text-xs text-slate-400">
-            <li><a href="#superpowers" class="hover:text-white transition-colors">Superpowers</a></li>
-            <li><a href="#simulator" class="hover:text-white transition-colors">Interactive Demo</a></li>
-            <li><a href="#pricing" class="hover:text-white transition-colors">Plans &amp; Pricing</a></li>
-            <li><a href="#security" class="hover:text-white transition-colors">Security Architecture</a></li>
-            <li><a href="#faq" class="hover:text-white transition-colors">FAQ</a></li>
-          </ul>
-        </div>
-
-        <!-- Legal & Contact -->
-        <div class="space-y-3">
-          <h5 class="text-xs font-mono font-bold uppercase tracking-wider text-white">Trust &amp; Legal</h5>
-          <ul class="space-y-2 text-xs text-slate-400">
-            <li><a href="/privacy" class="hover:text-white transition-colors">Privacy Policy</a></li>
-            <li><a href="/terms" class="hover:text-white transition-colors">Terms of Service</a></li>
-            <li><a href="https://keepr-bot.onrender.com/health" class="hover:text-white transition-colors">API System Health</a></li>
-            <li><a href="mailto:care@keepr-bot.onrender.com" class="text-emerald-400 hover:underline">Support: care@keepr-bot.onrender.com</a></li>
-          </ul>
-        </div>
-
+  <!-- ============================================================= -->
+  <!-- Footer -->
+  <!-- ============================================================= -->
+  <footer class="border-t border-white/10 bg-obsidian-950 py-12 px-4 lg:px-8 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-6 h-6 rounded-lg bg-siren-500 flex items-center justify-center text-white text-[10px] font-bold">🚨</div>
+        <span class="font-bold text-slate-300">RoasSiren™ Technologies Inc.</span>
+        <span>• Autonomous Meta Ad Spend Protection</span>
       </div>
 
-      <div class="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <div>
-          © 2026 Keepr AI Technologies Inc. All rights reserved. Strictly compliant with DPDP Act 2023.
-        </div>
-        <div class="flex items-center gap-6">
-          <a href="https://wa.me/919870530066?text=Hi%20Keepr" class="text-emerald-400 hover:text-emerald-300 font-bold">Open WhatsApp</a>
-          <a href="/privacy" class="hover:text-slate-300 transition-colors">Privacy</a>
-          <a href="/terms" class="hover:text-slate-300 transition-colors">Terms</a>
-        </div>
+      <div class="flex items-center gap-6">
+        <a href="/privacy" class="hover:text-slate-300 transition-colors">Privacy Policy</a>
+        <a href="/terms" class="hover:text-slate-300 transition-colors">Terms of Service</a>
+        <a href="https://wa.me/919870530066" target="_blank" class="text-siren-400 hover:underline">WhatsApp Support</a>
       </div>
-
     </div>
   </footer>
 
-  <!-- ================= FLOATING WHATSAPP BUTTON ================= -->
-  <aside aria-label="WhatsApp Quick Action" class="fixed bottom-6 right-6 z-50">
-    <a href="https://wa.me/919870530066?text=Hi%20Keepr" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-3 px-4 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 text-obsidian-950 font-bold text-sm shadow-2xl shadow-emerald-500/40 hover:scale-105 active:scale-95 transition-all duration-300 border border-emerald-300/40">
-      <span class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-300 text-obsidian-950 text-[9px] font-black rounded-full flex items-center justify-center animate-bounce">1</span>
-      <div class="w-8 h-8 rounded-full overflow-hidden ring-2 ring-obsidian-950 flex-shrink-0">
-        <img src="/logo.jpg" alt="Keepr Logo" class="w-full h-full object-cover" />
-      </div>
-      <div class="hidden sm:block text-left pr-1">
-        <div class="text-xs font-black leading-none">Chat with Keepr</div>
-        <div class="text-[10px] text-emerald-950 font-semibold leading-tight">Online • 24/7 Active</div>
-      </div>
-      <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.145.39-.086s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
-    </a>
-  </aside>
-
-  <!-- ================= INTERACTIVE SIMULATOR SCRIPT ================= -->
+  <!-- ============================================================= -->
+  <!-- Front-end Logic (Scanner, Calculator, Simulation) -->
+  <!-- ============================================================= -->
   <script>
-    const scenarios = {
-      rc: [
-        { sender: 'user', text: '📄 car_insurance_policy.pdf' },
-        { 
-          sender: 'bot', 
-          title: '✅ Car Insurance Safely Locked!', 
-          text: '• Policy No: HDFC-ERGO-98124<br>• Vehicle: DL 8C AX 4590<br>• Expiry: <b>14 Oct 2026</b><br>• Reminder locked: 30, 7 & 1 day pehle alert aayega!<br><span class="text-emerald-400 font-semibold">📦 Safe Vault: 1/5 files used • Free Plan</span>' 
-        },
-        { sender: 'user', text: 'Mera car RC wapas bhejo' },
-        { 
-          sender: 'bot', 
-          title: '📁 Original File Dispatch (0.4s)', 
-          text: 'Ye lijiye Dhruv ji! Aapki original RC PDF file.<br><span class="text-xs text-slate-300">📄 Car_RC_DL8CAX4590.pdf (1.2 MB uncompressed)</span>' 
-        }
-      ],
-      reminder: [
-        { sender: 'user', text: 'Kal subah 10 baje mummy ki BP dawa yaad dilana' },
-        { 
-          sender: 'bot', 
-          title: '⏰ Reminder Locked Successfully!', 
-          text: 'Zaroor Dhruv ji! Maine note kar liya hai:<br>• Task: <b>Mummy ki BP dawa</b><br>• Samay: <b>Kal subah 10:00 AM</b><br>Aap nishchint rahiye, theek 10:00 AM par WhatsApp par alert bhej dunga! 🙏' 
-        }
-      ],
-      brief: [
-        { sender: 'user', text: 'aaj kya hai' },
-        { 
-          sender: 'bot', 
-          title: '☀️ Keepr Morning Brief (7:00 AM)', 
-          text: 'Good morning! Here is your 7:00 AM brief:<br>1. 🚗 <b>Car Insurance:</b> Renewal due in 4 days (12 Sept)<br>2. 💊 <b>Papa Medicine:</b> Telma 40 at 9:00 AM<br>3. 📌 <b>Reminder:</b> Collect ₹15,000 from Sharma<br>4. 🛡️ <b>Road Safety:</b> Drive carefully during evening rush hour.<br><br><i>Would you like to set a reminder for anything?</i>' 
-        }
-      ],
-      vault: [
-        { sender: 'user', text: 'Mere pass kaun kaun se documents safe hain?' },
-        { 
-          sender: 'bot', 
-          title: '🔐 Aapka Surakshit Kaagaz Vault', 
-          text: '1. 📄 <b>Car RC:</b> DL 8C AX 4590 (Valid till 2035)<br>2. 🛡️ <b>Health Policy:</b> Star Health Family (Due: 18 Nov 2026)<br>3. 💡 <b>BSES Bijli Bill:</b> Due ₹2,450 (12 Sept 2026)<br>4. 💊 <b>Papa Dr Prescription:</b> Apollo Delhi<br><br>Kisi bhi document ka naam likhiye, turant original file mil jayegi!' 
-        }
-      ]
-    };
-
-    function setSimScenario(type) {
-      document.querySelectorAll('.sim-chip').forEach(el => {
-        el.className = 'sim-chip px-2.5 py-1 rounded-lg bg-obsidian-800 text-slate-400 border border-slate-700 whitespace-nowrap transition-all';
-      });
-      const activeChip = document.getElementById('chip-' + type);
-      if (activeChip) {
-        activeChip.className = 'sim-chip px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 whitespace-nowrap transition-all';
-      }
-
-      const container = document.getElementById('sim-chat-body');
-      container.innerHTML = '';
-      
-      const items = scenarios[type] || scenarios.rc;
-      items.forEach((msg) => {
-        const wrapper = document.createElement('div');
-        if (msg.sender === 'user') {
-          wrapper.className = 'bg-[#005c4b] text-white p-2.5 px-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-xs';
-          wrapper.innerHTML = `<p>${msg.text}</p><div class="text-[9px] text-emerald-200/70 text-right mt-0.5">10:42 AM ✓✓</div>`;
-        } else {
-          wrapper.className = 'bg-[#202c33] text-slate-100 p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[92%] space-y-1 text-xs border-l-4 border-emerald-500';
-          wrapper.innerHTML = `
-            ${msg.title ? `<p class="font-bold text-emerald-400 text-xs">${msg.title}</p>` : ''}
-            <p class="leading-relaxed text-slate-200">${msg.text}</p>
-            <div class="text-[9px] text-slate-400 text-right mt-1">10:42 AM</div>
-          `;
-        }
-        container.appendChild(wrapper);
-      });
-      container.scrollTop = container.scrollHeight;
+    function pasteSampleUrl(url) {
+      document.getElementById('targetUrlInput').value = url;
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      setSimScenario('rc');
-    });
-  </script>
+    async function handleScanSubmit(e) {
+      e.preventDefault();
+      const url = document.getElementById('targetUrlInput').value.trim();
+      const dailyAdSpend = document.getElementById('adSpendInput').value;
+      const scanBtn = document.getElementById('scanBtn');
+      const progress = document.getElementById('scanningProgress');
+      const progressBar = document.getElementById('progressBar');
+      const stepText = document.getElementById('scanStatusStep');
+      const resultContainer = document.getElementById('scanResultContainer');
 
+      if (!url) return;
+
+      scanBtn.disabled = true;
+      scanBtn.classList.add('opacity-50');
+      progress.classList.remove('hidden');
+      resultContainer.classList.add('hidden');
+
+      // Step animations
+      stepText.textContent = "Connecting to Shopify store...";
+      progressBar.style.width = "30%";
+
+      setTimeout(() => {
+        stepText.textContent = "Reading native /products/{handle}.js inventory matrix...";
+        progressBar.style.width = "65%";
+      }, 500);
+
+      setTimeout(() => {
+        stepText.textContent = "Inspecting variants, sizes, and HTTP response...";
+        progressBar.style.width = "85%";
+      }, 900);
+
+      try {
+        const resp = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, dailyAdSpend: Number(dailyAdSpend) })
+        });
+        const data = await resp.json();
+
+        progressBar.style.width = "100%";
+        setTimeout(() => {
+          progress.classList.add('hidden');
+          scanBtn.disabled = false;
+          scanBtn.classList.remove('opacity-50');
+
+          if (data.success && data.result) {
+            renderScanResult(data.result);
+          } else {
+            alert(data.error || 'Scan failed. Ensure URL is a valid store link.');
+          }
+        }, 1200);
+
+      } catch (err) {
+        progress.classList.add('hidden');
+        scanBtn.disabled = false;
+        scanBtn.classList.remove('opacity-50');
+        alert("Failed to reach scanner server: " + err.message);
+      }
+    }
+
+    function renderScanResult(diag) {
+      const container = document.getElementById('scanResultContainer');
+      const isCritical = diag.status === 'CRITICAL_OUT_OF_STOCK' || diag.status === 'DEAD_LINK_404';
+      const isPartial = diag.status === 'PARTIAL_OUT_OF_STOCK';
+      const isSafe = diag.status === 'SAFE_IN_STOCK';
+
+      let statusColor = isCritical ? 'text-siren-400 bg-siren-500/10 border-siren-500/30' : isPartial ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' : 'text-radar-400 bg-radar-500/10 border-radar-500/30';
+      let statusIcon = isCritical ? '🚨' : isPartial ? '⚠️' : '✅';
+
+      let variantHtml = '';
+      if (diag.variants && diag.variants.length > 0) {
+        variantHtml = `
+          <div class="mt-4">
+            <div class="text-xs font-bold text-slate-400 mb-2">Variant & Size Breakdown (${diag.inStockVariants}/${diag.totalVariants} In Stock):</div>
+            <div class="flex flex-wrap gap-2">
+              ${diag.variants.map(v => `
+                <span class="px-2.5 py-1 rounded-md text-xs font-mono font-medium border ${v.available ? 'bg-radar-500/10 text-radar-400 border-radar-500/30' : 'bg-siren-500/10 text-siren-400 border-siren-500/30 line-through'}">
+                  ${v.title}: ${v.available ? 'In Stock' : 'Sold Out'}
+                </span>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="p-5 rounded-xl border ${statusColor}">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">${statusIcon}</span>
+              <div>
+                <h4 class="text-base font-extrabold text-white">${diag.adWasteRisk.actionHeadline}</h4>
+                <p class="text-xs text-slate-300 mt-0.5">${diag.brandName} • ${diag.productTitle} ${diag.price ? `(₹${diag.price})` : ''}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-400 font-mono">Response Time</div>
+              <div class="text-xs font-bold text-white font-mono">${diag.responseTimeMs} ms • HTTP ${diag.httpStatus}</div>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-300 mt-3 pt-3 border-t border-white/10 leading-relaxed">
+            ${diag.adWasteRisk.actionAdvice}
+          </p>
+
+          ${variantHtml}
+
+          <div class="mt-5 p-4 rounded-xl bg-obsidian-950 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div class="text-[11px] text-slate-400 uppercase font-mono">Current Ad Spend Bleed Rate:</div>
+              <div class="text-xl font-extrabold text-white font-mono">
+                ~₹${diag.adWasteRisk.hourlyBurnRateInr}/hour <span class="text-xs font-normal text-slate-400">(At ₹${diag.adWasteRisk.estimatedDailySpend}/day budget)</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+              <a 
+                href="https://wa.me/919870530066?text=monitor%20${encodeURIComponent(diag.url)}" 
+                target="_blank"
+                class="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs text-center flex items-center justify-center gap-2 shadow-lg shadow-siren-500/25 transition-all"
+              >
+                <span>Lock 24/7 Siren Radar for this SKU 🚨</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.classList.remove('hidden');
+    }
+
+    // Calculator updates
+    function updateCalculator() {
+      const spend = Number(document.getElementById('calcAdSpend').value);
+      const stockouts = Number(document.getElementById('calcStockouts').value);
+
+      document.getElementById('adSpendDisplay').textContent = '₹' + spend.toLocaleString('en-IN') + ' / mo';
+      document.getElementById('stockoutsDisplay').textContent = stockouts + (stockouts === 1 ? ' Night / month' : ' Nights / month');
+
+      // Formula: daily spend = monthly / 30. Night spend = daily * 0.35. Wasted = stockouts * night spend
+      const dailySpend = spend / 30;
+      const nightSpend = dailySpend * 0.35;
+      const monthlyWaste = Math.round(nightSpend * stockouts);
+      const roasSirenCost = 1999;
+      const net = Math.max(0, monthlyWaste - roasSirenCost);
+      const roi = (monthlyWaste / roasSirenCost).toFixed(1);
+
+      document.getElementById('wastedAmount').textContent = '₹' + monthlyWaste.toLocaleString('en-IN');
+      document.getElementById('netSavings').textContent = '+₹' + net.toLocaleString('en-IN');
+      document.getElementById('roiMultiple').textContent = roi + 'x Immediate ROI';
+    }
+
+    // Live Test Siren Handler
+    async function handleTestSiren(e) {
+      e.preventDefault();
+      const phoneInput = document.getElementById('demoPhoneInput');
+      const btn = document.getElementById('demoSirenBtn');
+      const feedback = document.getElementById('demoSirenFeedback');
+
+      const phone = phoneInput.value.trim();
+      if (!phone) return;
+
+      btn.disabled = true;
+      btn.textContent = "Dispatching...";
+      feedback.classList.remove('hidden');
+      feedback.className = "mt-3 text-xs font-mono text-slate-400";
+      feedback.textContent = "Connecting to Meta WhatsApp Cloud API...";
+
+      try {
+        const resp = await fetch('/api/simulate-siren', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await resp.json();
+
+        btn.disabled = false;
+        btn.textContent = "Send Test Siren";
+
+        if (data.success) {
+          feedback.className = "mt-3 text-xs font-mono text-radar-400 font-bold";
+          feedback.textContent = "✅ Siren dispatched to " + phone + "! Check your WhatsApp.";
+        } else {
+          feedback.className = "mt-3 text-xs font-mono text-siren-400";
+          feedback.textContent = "⚠️ " + (data.message || 'Failed to dispatch siren.');
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "Send Test Siren";
+        feedback.className = "mt-3 text-xs font-mono text-siren-400";
+        feedback.textContent = "Error: " + err.message;
+      }
+    }
+  </script>
 </body>
 </html>

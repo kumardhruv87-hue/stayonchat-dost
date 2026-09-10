@@ -1,103 +1,157 @@
-# 🤖 Keepr — Autonomous AI Life Vault & Smart Assistant
-> **Keep every document. Never miss an expiry.**  
-> Official Domain: [usekeepr.com](https://usekeepr.com) | Contact: `care@usekeepr.com`
+# 🚨 RoasSiren™ — Autonomous Meta Ad Waste & Shopify Stock Watchdog
+> **Stop burning ad spend on out-of-stock products & dead links.**  
+> Live Platform: [https://keepr-bot.onrender.com](https://keepr-bot.onrender.com) | Official WhatsApp: `+91 9870530066`
 
 ---
 
 ## 📌 Executive Summary
 
-**Keepr** is a Silicon Valley grade, WhatsApp-native autonomous life vault and document assistant. It operates like an invisible personal butler for households and professionals:
-- **Instant Ingestion & OCR:** Saves bills, warranty cards, vehicle RC/PUC/insurance, handwritten doctor prescriptions, and insurance policies directly on WhatsApp.
-- **Single-Pass Intelligence:** Uses **Google Gemini 3.6 Flash Vision** to extract dates, policy numbers, amounts, and deadlines upon upload with strict schema validation.
-- **Zero Ongoing LLM Search Cost:** Sub-millisecond retrieval on WhatsApp (`"my RC"`, `"Havells bill"`, `"reminders"`) using PostgreSQL Trigram (`pg_trgm`) fuzzy matching.
-- **Proactive Protection:** Automated WhatsApp utility alerts sent at 30, 7, and 1 day before expiry to protect users from penalties (e.g. ₹10,000 traffic challans, lapsed NCB).
-- **Stateless & Scalable:** Redis-ready session caching and pluggable omnichannel gateway architecture (Meta Official Cloud API + UltraMsg fallback).
+**RoasSiren™** is a category-defining B2B micro-SaaS engineered for Shopify D2C brands and performance marketing agencies. 
+
+### The Core Problem:
+Performance marketers burn ₹5,000 to ₹50,000 every week when top-converting Meta (Facebook/Instagram) or Google ads continue driving high-cost paid traffic to products that went **"Sold Out"** at midnight or landing pages that broke into **404 Not Found**. Media buyers only discover this 8–12 hours later when opening Shopify analytics.
+
+### The RoasSiren Solution:
+- **Zero-Code Architecture:** Requires **0 Shopify app installs** and injects **zero bloated code** into client themes.
+- **Deterministic 100% Native Polling:** Directly queries native `/products/{handle}.js` endpoints and HTTP status codes with sub-200ms latency.
+- **60-Second WhatsApp Sirens:** Dispatches high-urgency WhatsApp alert messages to founders and media buyers via official Meta Cloud API within 60 seconds of a stockout.
+- **Variant-Level Stockout Detection:** Flags when core sizes (e.g. Size L or M) sell out, even if peripheral sizes (e.g. XS) remain in stock.
+- **Automatic Restock Recovery:** Sends a green-light recovery notification once inventory is replenished so media buyers can safely scale ads back up.
 
 ---
 
 ## 🏗️ System Architecture
 
 ```
-                       [ WhatsApp User ]
-                               │
-                     (Voice / Text / Image)
-                               │
-                               ▼
-        [ Omnichannel Gateway: Meta Cloud API (Primary) / UltraMsg ]
-                               │
-                               ▼
-                   [ Keepr Core API (Express) ]
-                ┌──────────────┴──────────────┐
-                │                             │
-        (Text/Search Query)         (File/Voice Upload)
-                │                             │
-                ▼                             ▼
-       [ Fast Search Router ]       [ AI Vision & Voice Engine ]
-        - Keyword / Trigram Match    - Gemini 3.6 Flash Vision (OCR)
-        - Expiry List                - Multimodal Audio Transcription
-        - Sub-millisecond latency    - Strict Zod Schema Validation
-                │                             │
-                └──────────────┬──────────────┘
-                               ▼
-             [ Data & Storage: Supabase & Redis ]
-              - PostgreSQL RLS Multi-Tenant Schema
-              - Client-Side AES-256-GCM Encryption
-              - Redis Stateless Session & Prompt Cache
-                               │
-                               ▼
-            [ Automated Alert Engine & Schedulers ]
-              - 06:00 AM IST: Daily Morning Life Guidance
-              - 09:00 AM IST: Expiry & Renewal Alerts
-              - Every 1 Minute: Real-time Task Reminders
+                 [ Meta / IG Ad Traffic ]
+                            │
+                            ▼
+              [ Shopify Product Destination ]
+                            ▲
+                            │ (Every 5-15 mins)
+               [ RoasSiren Autonomous Watchdog ]
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+    [ Native Shopify JSON ]      [ HTTP Link Rot Radar ]
+     - /products/{handle}.js      - 200 OK vs 301 Redirect
+     - Variant availability       - 404 Page Not Found
+     - Total vs OOS inventory     - 5xx Server Outages
+              │                           │
+              └─────────────┬─────────────┘
+                            ▼
+             [ ROAS Burn Impact Evaluator ]
+              - Hourly ad spend burn rate (₹/hr)
+              - Bounce risk calculation
+                            ▼
+         [ 60-Second WhatsApp Siren Dispatcher ]
+              - Meta Cloud API (Verified Primary)
+              - Instant WhatsApp alert to Media Buyer
+              - Cooldown & deduplication protocol
 ```
 
 ---
 
-## 💰 Subscription Plans
+## ⚡ WhatsApp Bot Commands
 
-1. **Free Pack (₹0):** 5 files, instant search, 1 free reminder trial.
-2. **Yaad Plan (₹249 / year):** 50 files, 25 automated WhatsApp alerts, 30/7/1 day notifications. (~₹20/month)
-3. **Ghar Plan (₹499 / year):** 200 files, 4 family members, unlimited reminders. (~₹41/month)
-4. **Vault Plan (₹899 / year):** 500 files, Family + CA read-only access link, WarisPath succession kit. (~₹75/month)
+Subscribers can manage their watchdogs directly via WhatsApp (`+91 98705 30066`):
+
+| Command | Action |
+| :--- | :--- |
+| `scan <url>` | Runs an instant stock & ad waste audit on any Shopify product URL. |
+| `monitor <url>` | Adds the target URL to the 24/7 autonomous radar (every 15 mins). |
+| `list` | Displays all active monitored ad URLs and their latest stock status. |
+| `test` | Sends an authentic sample WhatsApp emergency siren to verify phone alerts. |
+| `stop <url>` | Removes a URL from active watchdog monitoring. |
 
 ---
 
-## 🚀 Quick Start & Deployment
+## 📡 REST API Endpoints
 
-### 1. Environment Setup
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
+### 1. `POST /api/scan`
+Public instant scan endpoint used by the homepage widget:
+```json
+{
+  "url": "https://snitch.co.in/products/air-mesh-oversized-tee",
+  "dailyAdSpend": 5000
+}
 ```
-Fill in the credentials in `.env`:
-- `APP_NAME`: `Keepr`
-- `APP_DOMAIN`: `usekeepr.com`
-- `WHATSAPP_PRIMARY_GATEWAY`: `meta`
-- `GEMINI_API_KEY`: From [Google AI Studio](https://aistudio.google.com/)
-- `WHATSAPP_TOKEN`: Permanent System User Token from Meta Developer Portal
-- `WHATSAPP_PHONE_NUMBER_ID`: From WhatsApp API Setup in Meta
-- `WHATSAPP_VERIFY_TOKEN`: `keepr_secure_verify_token_2026`
-- `SUPABASE_URL`: From Supabase Project Settings
-- `SUPABASE_SERVICE_ROLE_KEY`: Service role secret from Supabase
-- `RAZORPAY_KEY_ID`: Razorpay API Key
-- `RAZORPAY_KEY_SECRET`: Razorpay Secret Key
+**Response:**
+```json
+{
+  "success": true,
+  "result": {
+    "status": "DEAD_LINK_404",
+    "isAvailable": false,
+    "httpStatus": 404,
+    "adWasteRisk": {
+      "level": "CRITICAL",
+      "hourlyBurnRateInr": 208,
+      "estimatedWastePct": 100,
+      "actionHeadline": "🚨 DEAD AD DESTINATION (404 NOT FOUND)"
+    },
+    "responseTimeMs": 737
+  }
+}
+```
 
-### 2. Run Locally
+### 2. `POST /api/monitor`
+Register an ad URL for 24/7 autonomous background sweeps:
+```json
+{
+  "url": "https://snitch.co.in/products/oversized-tee",
+  "phone": "919560931596",
+  "brandName": "Snitch",
+  "dailyAdSpend": 5000
+}
+```
+
+### 3. `POST /api/simulate-siren`
+Test WhatsApp siren delivery to any verified WhatsApp mobile number.
+
+---
+
+## 💰 B2B Subscription Tiers
+
+1. **Starter D2C (₹1,999 / mo):**
+   - Up to 15 active ad URLs monitored
+   - 15-minute background sweep cycle
+   - 60-second emergency WhatsApp sirens
+   - Broken link & Out-of-Stock detection
+   
+2. **Growth Brand (₹4,999 / mo) — Most Popular:**
+   - Up to 50 active ad URLs monitored
+   - Ultra-fast 5-minute background sweeps
+   - Multi-buyer sirens (up to 3 team members)
+   - Variant-level inventory exhaustion alerts
+   - Automated Restock Recovery notifications
+
+3. **Agency Fleet (₹9,999 / mo):**
+   - Up to 200 ad URLs across 10 client Shopify stores
+   - Continuous 5-minute radar
+   - Client-tagged WhatsApp alert routing
+   - Weekly Ad Waste Saved audit reports
+   - Dedicated Slack/WhatsApp webhook bridge
+
+---
+
+## 🛠️ Local Development & Testing
+
 ```bash
-# Run Dev Server with tsx watch
+# Install dependencies
+npm install
+
+# Run TypeScript type check
+cmd.exe /c "npx tsc --noEmit"
+
+# Run automated watchdog test suite
+npm run test:watchdog
+
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
-### 3. Production Deployment (Render / Hostinger VPS)
-* **Render.com:** Connect your repo with `render.yaml`. 1-click deploy with automatic HTTPS and environment variable configuration.
-* **VPS (PM2):** Start via `pm2 start ecosystem.config.cjs`.
-
 ---
-
-## 🛡️ Bank-Grade Security & Privacy
-- **Client-Side Encryption:** All uploads encrypted with AES-256-GCM before storage.
-- **No Shared Training:** User documents are never used to train public LLM models.
-- **Data Sovereignty:** Enterprise PostgreSQL with Row Level Security (RLS).
-
----
-© 2026 Keepr AI Technologies Inc. • Support: `care@usekeepr.com`
+© 2026 RoasSiren Technologies Inc. All rights reserved.

@@ -9,18 +9,18 @@ import { PLANS, BRAND } from '../config/constants.js';
 
 export const personaService = {
   /**
-   * 4-Line Zero-Friction Human Greeting (Default English, adapts to user language)
+   * 4-Line Zero-Friction Human Greeting for RoasSiren
    */
   getHumanGreeting(userName: string = 'Friend', language: string = 'english'): string {
-    const cleanLang = (language || 'english').toLowerCase();
-    if (cleanLang === 'hi' || cleanLang === 'hindi') {
-      return `मैं Keepr हूँ। जो भी सुरक्षित रखना हो भेज दीजिए — फ़ोटो, PDF, वॉइस नोट।\nयाद रखना हो तो लिख दीजिए। कभी भी ज़रूरत हो तो पूछ लीजिए।\n\nजैसे: "बेटी स्कूल फ़ीस 12 सितम्बर 18400" या "कल शाम पापा की दवाई"`;
-    }
-    if (cleanLang === 'hinglish') {
-      return `Main Keepr hoon. Jo rakhna hai bhej do — photo, PDF, voice note.\nYaad rakhna hai to likh do. Nikalna ho to pooch lo.\n\nJaise: "beti school fee 12 Sept 18400" ya "kal shaam papa ki dawai"`;
-    }
-    // Default English
-    return `I'm Keepr. Drop whatever you want to protect — photos, PDFs, voice notes.\nType to remember. Ask anytime to retrieve.\n\nLike: "daughter school fee 12 Sept 18400" or "remind me car insurance tomorrow"`;
+    return `🚨 *I'm RoasSiren* — The Autonomous Meta Ad Waste & Out-of-Stock Watchdog for Shopify Brands.
+
+Stop burning ad spend on "Sold Out" products and dead 404 links.
+
+⚡ *Commands:*
+1. Send *any Shopify product URL* (or \`scan <url>\`) for an instant stock & ad waste audit.
+2. Type \`monitor <url>\` to put an ad destination on 24/7 siren radar.
+3. Type \`list\` to view your active monitored ad URLs.
+4. Type \`test\` to receive a sample WhatsApp emergency siren.`;
   },
 
   /**
@@ -39,34 +39,16 @@ export const personaService = {
   },
 
   getPhotoNamingPrompt(userName: string = 'Friend', language: string = 'english'): string {
-    if (language === 'hi') {
-      return `📸 फ़ोटो सुरक्षित हो गई ✅\n\nइसे किस नाम से याद रखना है? (जैसे: "घर की रजिस्ट्री" या "फ़ैमिली फ़ोटो") ताकि माँगते ही निकाल दूँ।`;
-    }
-    if (language === 'hinglish') {
-      return `📸 Photo save ho gayi ✅\n\nIse kis naam se yaad rakhna hai? (Jaise: "Ghar ki Registry" ya "Vacation Photo") taaki maangte hi nikaal doon.`;
-    }
-    return `📸 Photo saved ✅\n\nHow should I label this? (e.g. "Property Registry" or "Vacation Photo") so you can retrieve it instantly anytime.`;
+    return `📸 Photo received. You can also paste any Shopify product URL to audit its stock availability for Meta ads.`;
   },
 
   getMenuMessage(userName: string = 'Friend', language: string = 'english'): { text: string; buttons: { id: string; title: string }[] } {
-    if (language === 'hi' || language === 'hinglish') {
-      return {
-        text: `Main Keepr hoon. Jo rakhna hai bhej do, nikalna ho to pooch lo.\n\nNiche ke options se bhi dekh sakte hain:`,
-        buttons: [
-          { id: 'btn_my_docs', title: '📁 Mere Kaagaz' },
-          { id: 'btn_my_reminders', title: '⏰ Reminders' },
-          { id: 'btn_my_numerology', title: '☀️ Daily Brief' },
-          { id: 'btn_plans', title: `📋 Plans` },
-        ],
-      };
-    }
     return {
-      text: `I'm Keepr. Drop whatever you want to protect, or ask anytime to retrieve.\n\nYou can also explore the quick options below:`,
+      text: `🚨 *RoasSiren Watchdog Controls*\n\nAutonomous Meta Ad Spend Protection for D2C Brands:\n\n• Send any Shopify URL to run an instant inventory audit\n• Monitor ad URLs 24/7 to stop ad waste at midnight`,
       buttons: [
-        { id: 'btn_my_docs', title: '📁 My Vault' },
-        { id: 'btn_my_reminders', title: '⏰ Reminders' },
-        { id: 'btn_my_numerology', title: '☀️ Daily Brief' },
-        { id: 'btn_plans', title: `📋 Plans` },
+        { id: 'btn_test_siren', title: '🚨 Test Siren Alert' },
+        { id: 'btn_my_monitors', title: '📡 Monitored URLs' },
+        { id: 'btn_plans', title: `📋 B2B Plans` },
       ],
     };
   },

@@ -11,6 +11,8 @@ import { geminiService } from '../services/gemini.js';
 import { storageService } from '../services/storage.js';
 import { whatsappService } from '../services/whatsapp.js';
 import { paymentService } from '../services/razorpay.js';
+import { watchdogService } from '../services/watchdog.service.js';
+import { sirenService } from '../services/siren.service.js';
 import { personaService } from './persona.js';
 import { PLANS, BRAND } from '../config/constants.js';
 
@@ -526,22 +528,92 @@ export const botRouter = {
         return;
       }
 
-      // 4.1 Interactive Menu Command
-      if (['menu', 'help', 'madad', 'options', 'suvidha', 'features'].includes(lowerText)) {
-        dbService.setUserPromptState(fromPhone, 'main_menu');
-        const menu = personaService.getMenuMessage(resolvedName, activeLang);
-        await whatsappService.sendInteractiveButtons(fromPhone, menu.text, menu.buttons);
+      // =============================================================
+      // RoasSiren Watchdog Commands
+      // =============================================================
+
+      // A. Test WhatsApp Siren
+      if (['test', 'test siren', 'siren', 'demo siren'].includes(lowerText)) {
+        await sirenService.sendTestSiren(fromPhone);
         return;
       }
 
-      // 4.2 Language Selection Command
-      if (['language', 'bhasha', 'lang', 'change language', 'bhasha badlo'].includes(lowerText)) {
-        dbService.setUserPromptState(fromPhone, 'pending_language');
-        const picker = personaService.getLanguageSelectionMessage();
-        await whatsappService.sendTextMessage(fromPhone, picker);
-        await dbService.saveChatMessage(fromPhone, 'model', picker);
+      // B. Monitor URL Command: "monitor https://..." or "watch https://..."
+      if (lowerText.startsWith('monitor ') || lowerText.startsWith('watch ') || lowerText.startsWith('track ')) {
+        const rawUrl = text.replace(/^(monitor|watch|track)\s+/i, '').trim();
+        const urlMatch = rawUrl.match(/(https?:\/\/[^\s]+)/i);
+        const targetUrl = urlMatch ? urlMatch[0] : rawUrl;
+
+        if (!targetUrl.includes('.')) {
+          await whatsappService.sendTextMessage(fromPhone, '⚠️ Please provide a valid store URL, e.g.:\n`monitor https://brand.com/products/summer-tee`');
+          return;
+        }
+
+        // Run instant initial check
+        const initialDiag = await watchdogService.scanUrl(targetUrl);
+        const monitored = watchdogService.registerMonitoredUrl({
+          url: targetUrl,
+          userPhone: fromPhone,
+          brandName: initialDiag.brandName,
+        });
+
+        const statusEmoji = initialDiag.isAvailable ? '✅' : '🚨';
+        const msg = `🛡️ *[ROASSIREN RADAR LOCKED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Store:* ${monitored.brandName}\n📦 *Product:* ${initialDiag.productTitle}\n${statusEmoji} *Initial Status:* ${initialDiag.status}\n🔗 *Target:* ${monitored.url}\n\n🕒 *Frequency:* 24/7 Autonomous Radar (Every 15 mins)\n⚡ *Siren Protocol:* If this product goes out of stock or breaks into a 404, an emergency WhatsApp siren will alert your phone within 60 seconds!\n━━━━━━━━━━━━━━━━━━━━\n_Type \`list\` anytime to see all monitored ad destinations._`;
+        await whatsappService.sendTextMessage(fromPhone, msg);
         return;
       }
+
+      // C. List Active Monitored URLs: "list", "radar", "monitors"
+      if (['list', 'radar', 'monitors', 'my monitors', 'urls', 'status'].includes(lowerText)) {
+        const userUrls = watchdogService.getMonitoredUrlsByPhone(fromPhone);
+        if (userUrls.length === 0) {
+          const emptyMsg = `📡 *No URLs on your RoasSiren Radar yet.*\n\nTo lock an active Meta ad destination under 24/7 siren protection, reply with:\n\`monitor https://yourbrand.com/products/hero-sku\``;
+          await whatsappService.sendTextMessage(fromPhone, emptyMsg);
+          return;
+        }
+
+        let listMsg = `📡 *Your Active RoasSiren Watchdogs (${userUrls.length}):*\n━━━━━━━━━━━━━━━━━━━━\n`;
+        userUrls.forEach((item, idx) => {
+          const icon = item.lastStatus === 'SAFE_IN_STOCK' ? '🟢' : item.lastStatus === 'CRITICAL_OUT_OF_STOCK' ? '🔴' : '🟡';
+          listMsg += `${idx + 1}. ${icon} *${item.brandName}*\n   🔗 ${item.url}\n   📊 Status: ${item.lastStatus}\n   🕒 Last Sweep: ${new Date(item.lastCheckedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}\n\n`;
+        });
+        listMsg += `_To add another URL, reply: \`monitor <url>\`_`;
+        await whatsappService.sendTextMessage(fromPhone, listMsg);
+        return;
+      }
+
+      // D. Instant Stock Scan: "scan https://..." or pasting any HTTP/HTTPS URL
+      const hasUrl = /(https?:\/\/[^\s]+)/i.test(text);
+      if (lowerText.startsWith('scan ') || hasUrl) {
+        const urlMatch = text.match(/(https?:\/\/[^\s]+)/i);
+        const targetUrl = urlMatch ? urlMatch[0] : text.replace(/^scan\s+/i, '').trim();
+
+        if (targetUrl.startsWith('http')) {
+          await whatsappService.sendTextMessage(fromPhone, `🔍 *Scanning ad destination:* ${targetUrl} ...`);
+          const diag = await watchdogService.scanUrl(targetUrl);
+
+          const statusBadge = diag.isAvailable ? '✅ IN STOCK (Ready for Ads)' : '🚨 CRITICAL OUT OF STOCK';
+          let scanReport = `🛡️ *[ROASSIREN DIAGNOSTIC AUDIT]*\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Store:* ${diag.brandName}\n📦 *Product:* ${diag.productTitle}\n${diag.price ? `💰 *Price:* ₹${diag.price}\n` : ''}📊 *Status:* ${statusBadge}\n`;
+
+          if (diag.totalVariants > 0) {
+            scanReport += `🛒 *Inventory:* ${diag.inStockVariants}/${diag.totalVariants} variants in stock\n`;
+          }
+
+          if (diag.adWasteRisk.level === 'CRITICAL') {
+            scanReport += `\n💸 *ESTIMATED AD WASTE:* ~₹${diag.adWasteRisk.hourlyBurnRateInr}/hour\n⚠️ *Action:* ${diag.adWasteRisk.actionHeadline}\n${diag.adWasteRisk.actionAdvice}\n`;
+          } else if (diag.adWasteRisk.level === 'HIGH') {
+            scanReport += `\n⚠️ *Bounce Risk:* ~${diag.adWasteRisk.estimatedWastePct}% (Some popular sizes sold out)\n`;
+          } else {
+            scanReport += `\n🟢 *Verdict:* 100% safe to drive Meta ad traffic.\n`;
+          }
+
+          scanReport += `\n━━━━━━━━━━━━━━━━━━━━\n⚡ *Want 24/7 WhatsApp Sirens?*\nReply: \`monitor ${diag.url}\``;
+          await whatsappService.sendTextMessage(fromPhone, scanReport);
+          return;
+        }
+      }
+
+      // 4.1 Interactive Menu Command
 
       // 4.3 Zero-Friction Human Greeting (NO IVR, NO brochures)
       if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'dost', 'keepr'].includes(lowerText)) {
