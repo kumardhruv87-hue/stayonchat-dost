@@ -36,7 +36,56 @@ export const whatsappProfileService = {
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return await res.json();
+    return (await res.json()) as any;
+  },
+
+  /**
+   * Fetch WhatsApp phone number details including verified display name
+   */
+  async getPhoneDetails(): Promise<any> {
+    const token = getWhatsAppToken();
+    const phoneId = getWhatsAppPhoneId();
+    const url = `https://graph.facebook.com/v19.0/${phoneId}?fields=display_phone_number,verified_name,code_verification_status,quality_rating,name_status,new_name_status`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return (await res.json()) as any;
+  },
+
+  /**
+   * Request and apply new WhatsApp Business Display Name on Meta
+   */
+  async updateDisplayName(newName: string = 'RoasSiren', pin: string = '123456'): Promise<{ success: boolean; data?: any; error?: string }> {
+    const token = getWhatsAppToken();
+    const phoneId = getWhatsAppPhoneId();
+
+    try {
+      // 1. Submit new display name
+      const nameRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ new_display_name: newName, pin }),
+      });
+      const nameData = (await nameRes.json()) as any;
+
+      // 2. Re-register phone number to apply name immediately
+      const regRes = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/register`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messaging_product: 'whatsapp', pin }),
+      });
+      const regData = (await regRes.json()) as any;
+
+      return { success: regData.success === true, data: { nameData, regData } };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
   },
 
   /**

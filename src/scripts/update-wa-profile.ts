@@ -21,13 +21,14 @@ async function main() {
   const logoResult = await whatsappProfileService.updateProfilePicture();
   console.log('Logo Update Result:', logoResult);
 
-  // 3. Read back verified profile
-  console.log('3️⃣ Fetching live verified profile from Meta Graph API...');
+  // 3. Read back verified profile & display name
+  console.log('3️⃣ Fetching live verified profile & display name from Meta Graph API...');
   const live = await whatsappProfileService.getProfile();
-  console.log('Live Meta Profile:');
-  console.log(JSON.stringify(live, null, 2));
+  const phone = await whatsappProfileService.getPhoneDetails();
+  console.log('Live Meta Profile:', JSON.stringify(live, null, 2));
+  console.log('Live Meta Phone & Display Name:', JSON.stringify(phone, null, 2));
 
-  console.log('✅ [RoasSiren] WhatsApp Profile & Logo Sync Complete!');
+  console.log('✅ [RoasSiren] WhatsApp Profile, Name & Logo Sync Complete!');
 }
 
 main().catch((err) => {
