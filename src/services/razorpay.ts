@@ -126,8 +126,9 @@ export const paymentService = {
         await dbService.upgradeUserPlan(userPhone, planKey, paymentId);
         console.log(`User ${userPhone} successfully upgraded to ${planKey} via Razorpay`);
 
-        const planName = PLANS[planKey]?.name || 'Plan';
-        const celebrationMsg = `🎉 Badhai ho! Aapka ${planName} successfully activate ho gaya hai! 🤖✨\n\nAb aapka account saal bhar ke liye upgrade ho chuka hai. Saare kaagaz aur reminders poore vishwas ke saath safe rahenge. ${BRAND.name} hamesha aapki seva mein hazir hai! 🙏`;
+        const plan = PLANS[planKey];
+        const planName = plan?.name || 'RoasSiren Pro';
+        const celebrationMsg = `🎉 *[PAYMENT CONFIRMED — ROASSIREN ACTIVATED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\nWelcome to the *${planName}* Tier!\n\n🛡️ *Your 24/7 Autonomous Radar is Live:*\n• Monitored SKUs: Up to ${plan?.maxMonitoredUrls || 15} Destinations\n• Radar Sweep Frequency: Every ${plan?.scanFrequencyMinutes || 15} Minutes\n• 60-Second WhatsApp Sirens: Active 24/7\n• Ad Bleed Protection: Saving ~₹25,000 to ₹1,50,000+ monthly\n\n⚡ *Next Steps:*\nReply: \`monitor <product-url>\` to lock your active ad destinations.\nReply: \`plan\` or \`account\` anytime to view your active subscription and radar usage.\n━━━━━━━━━━━━━━━━━━━━\n_${BRAND.name} Autonomous Engine • roassiren.com_`;
         await whatsappService.sendTextMessage(userPhone, celebrationMsg);
       }
     }

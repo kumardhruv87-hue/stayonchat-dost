@@ -109,6 +109,14 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2.5">
+        <!-- My Plan & Quota Drawer Trigger -->
+        <button onclick="openPlanDrawer()" id="navPlanBadge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-amber-500/10 hover:from-amber-500/20 hover:to-rose-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all shadow-sm">
+          <span class="text-sm">💎</span>
+          <span id="navPlanName">Starter D2C</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="navPlanQuota" class="font-mono text-[11px] text-slate-300">0/15 Slots</span>
+        </button>
+
         <button onclick="triggerSimulatedSiren()" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-siren-500/10 hover:bg-siren-500/20 border border-siren-500/30 text-siren-400 text-xs font-bold transition-all">
           <span>⚡ Test WhatsApp Siren</span>
         </button>
@@ -372,6 +380,109 @@
     </div>
   </div>
 
+  <!-- ============================================================= -->
+  <!-- MODAL / DRAWER: My Plan, Lock-In Quota & Upgrades -->
+  <!-- ============================================================= -->
+  <div id="modalPlanDrawer" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card-glow rounded-2xl p-6 sm:p-7 max-w-2xl w-full border border-white/20 space-y-6 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-rose-600 flex items-center justify-center text-xl shadow-lg shadow-rose-500/20">
+            💎
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <span>Account & Radar Lock-In</span>
+              <span id="drawerPlanBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-radar-500/20 text-radar-300 border border-radar-500/30">ACTIVE</span>
+            </h3>
+            <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+              <span>Subscriber:</span>
+              <span id="drawerPhoneDisplay" class="font-mono font-semibold text-slate-200">+91 95609 31596</span>
+              <button onclick="changeSubscriberPhone()" class="text-siren-400 hover:text-siren-300 underline text-[11px]">Change Phone</button>
+            </div>
+          </div>
+        </div>
+        <button onclick="closeModal('modalPlanDrawer')" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors text-lg">&times;</button>
+      </div>
+
+      <!-- Current Subscription Status Card -->
+      <div class="p-5 rounded-xl bg-obsidian-900 border border-white/10 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div class="text-xs text-slate-400 font-medium">Current Active Plan</div>
+            <div class="text-xl font-black text-white flex items-center gap-2 mt-0.5">
+              <span id="drawerPlanName">Starter D2C</span>
+              <span id="drawerPlanPrice" class="text-sm font-semibold text-amber-400 font-mono">₹1,999 / mo</span>
+            </div>
+          </div>
+          <div class="text-left sm:text-right">
+            <div class="text-xs text-slate-400 font-medium">Renewal / Expiry</div>
+            <div id="drawerPlanExpiry" class="text-xs font-mono font-bold text-slate-200 mt-0.5">Active (Monthly)</div>
+          </div>
+        </div>
+
+        <!-- Quota Progress Meter -->
+        <div class="space-y-1.5 pt-2 border-t border-white/5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-300 font-medium">Radar Slot Allocation</span>
+            <span id="drawerQuotaText" class="font-mono font-bold text-amber-300">0 / 15 Slots Used</span>
+          </div>
+          <div class="w-full h-2.5 rounded-full bg-obsidian-950 border border-white/10 overflow-hidden">
+            <div id="drawerQuotaProgressBar" class="h-full rounded-full bg-gradient-to-r from-amber-400 to-rose-500 transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+            <span id="drawerQuotaAvailable">15 Slots Available</span>
+            <span id="drawerSweepFrequency">⚡ 15-Minute Sweep Cycle</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Locked SKUs Preview -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider">Locked-In SKUs (<span id="drawerLockedCount">0</span>)</h4>
+          <span class="text-[11px] text-slate-500 font-mono">60s WhatsApp Sirens Active</span>
+        </div>
+        <div id="drawerLockedList" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Available Upgrade Tiers -->
+      <div class="space-y-3 pt-3 border-t border-white/10">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold uppercase text-slate-300 tracking-wider">Upgrade / Expand Radar Capacity</h4>
+          <span class="text-[10px] text-slate-500 font-mono">Instant Razorpay Activation</span>
+        </div>
+
+        <div id="drawerUpgradePlans" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Dynamically populated with 1-click Razorpay payment links -->
+        </div>
+      </div>
+
+      <!-- WhatsApp Bot Shortcut Help -->
+      <div class="p-3.5 rounded-xl bg-white/5 border border-white/5 flex items-start gap-3 text-xs">
+        <span class="text-lg">🤖</span>
+        <div class="space-y-1">
+          <div class="font-bold text-white">WhatsApp Bot Quick Check</div>
+          <p class="text-slate-400 text-[11px] leading-relaxed">
+            Send <code class="text-amber-300 bg-obsidian-950 px-1 py-0.5 rounded font-mono">plan</code> or <code class="text-amber-300 bg-obsidian-950 px-1 py-0.5 rounded font-mono">lock in</code> on WhatsApp (+91 98705 30066) anytime to get your live account report, slot utilization, and siren logs directly on your phone.
+          </p>
+        </div>
+      </div>
+
+      <!-- Close Action -->
+      <div class="flex justify-end">
+        <button type="button" onclick="closeModal('modalPlanDrawer')" class="px-5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-slate-300 transition-all">
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="border-t border-white/10 bg-obsidian-950 py-8 px-4 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -391,6 +502,7 @@
   <script>
     let radarData = [];
     let currentFilter = 'all';
+    let currentPlanData = null;
 
     // Get remembered phone or default
     function getStoredPhone() {
@@ -399,6 +511,130 @@
 
     function setStoredPhone(phone) {
       if (phone) localStorage.setItem('roas_phone', phone.replace(/\D/g, ''));
+    }
+
+    // Plan & Subscription Data Loading
+    async function loadPlanData() {
+      try {
+        const phone = getStoredPhone();
+        const resp = await fetch(`/api/user/plan?phone=${encodeURIComponent(phone)}`);
+        const data = await resp.json();
+        if (!data.success) return;
+
+        currentPlanData = data;
+        renderPlanNavBadge(data);
+        renderPlanDrawer(data);
+      } catch (err) {
+        console.error('Failed to load plan data:', err);
+      }
+    }
+
+    function renderPlanNavBadge(data) {
+      const p = data.plan;
+      const navName = document.getElementById('navPlanName');
+      const navQuota = document.getElementById('navPlanQuota');
+      if (navName) navName.textContent = p.name;
+      if (navQuota) navQuota.textContent = `${p.usedUrls}/${p.maxUrls} Slots`;
+    }
+
+    function renderPlanDrawer(data) {
+      const p = data.plan;
+      const phone = data.phone;
+
+      const phoneEl = document.getElementById('drawerPhoneDisplay');
+      if (phoneEl) phoneEl.textContent = '+' + phone;
+
+      const nameEl = document.getElementById('drawerPlanName');
+      if (nameEl) nameEl.textContent = p.name;
+
+      const priceEl = document.getElementById('drawerPlanPrice');
+      if (priceEl) priceEl.textContent = `₹${p.priceInr.toLocaleString('en-IN')} / ${p.period}`;
+
+      const expiryDate = p.expiresAt ? new Date(p.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Active (Monthly)';
+      const expEl = document.getElementById('drawerPlanExpiry');
+      if (expEl) expEl.textContent = `Valid Until: ${expiryDate}`;
+
+      const quotaTextEl = document.getElementById('drawerQuotaText');
+      if (quotaTextEl) quotaTextEl.textContent = `${p.usedUrls} / ${p.maxUrls} Slots Used (${p.quotaPct}%)`;
+
+      const barEl = document.getElementById('drawerQuotaProgressBar');
+      if (barEl) barEl.style.width = `${Math.max(5, p.quotaPct)}%`;
+
+      const availEl = document.getElementById('drawerQuotaAvailable');
+      if (availEl) availEl.textContent = `${p.availableUrls} Slots Remaining`;
+
+      const sweepEl = document.getElementById('drawerSweepFrequency');
+      if (sweepEl) sweepEl.textContent = `⚡ Every ${p.scanFrequencyMinutes} Min Sweeps`;
+
+      const lockedCountEl = document.getElementById('drawerLockedCount');
+      if (lockedCountEl) lockedCountEl.textContent = p.usedUrls;
+
+      // Render locked list
+      const listEl = document.getElementById('drawerLockedList');
+      if (listEl) {
+        if (!data.monitoredUrls || data.monitoredUrls.length === 0) {
+          listEl.innerHTML = '<div class="text-xs text-slate-500 py-2">No SKUs locked in yet. Add any product URL to begin 24/7 protection.</div>';
+        } else {
+          listEl.innerHTML = data.monitoredUrls.map((item, idx) => {
+            const isCritical = item.lastStatus === 'CRITICAL_OUT_OF_STOCK' || item.lastStatus === 'DEAD_LINK_404';
+            const statusIcon = isCritical ? '🔴' : '🟢';
+            return `
+              <div class="p-2.5 rounded-lg bg-obsidian-950/80 border border-white/5 flex items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2 truncate">
+                  <span>${statusIcon}</span>
+                  <span class="font-bold text-white truncate">${item.brandName || 'SKU'}</span>
+                  <span class="text-slate-400 font-mono text-[11px] truncate max-w-[200px]">${item.url}</span>
+                </div>
+                <span class="text-[10px] font-mono font-bold ${isCritical ? 'text-siren-400' : 'text-radar-400'} shrink-0">
+                  ${item.lastStatus.replace(/_/g, ' ')}
+                </span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Render upgrade options
+      const upgradeEl = document.getElementById('drawerUpgradePlans');
+      if (upgradeEl && data.availablePlans) {
+        upgradeEl.innerHTML = data.availablePlans.map(plan => {
+          const isCurrent = p.id === plan.id;
+          return `
+            <div class="rounded-xl p-3.5 border ${plan.recommended ? 'border-amber-500/50 bg-amber-500/10' : 'border-white/10 bg-obsidian-950'} flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-white">${plan.name}</span>
+                  <span class="text-[9px] font-mono px-1.5 py-0.5 rounded ${plan.recommended ? 'bg-amber-400 text-black font-extrabold' : 'bg-white/10 text-slate-300'}">${plan.badge}</span>
+                </div>
+                <div class="text-base font-black text-white mt-1">₹${plan.priceInr.toLocaleString('en-IN')}<span class="text-xs font-normal text-slate-400">/mo</span></div>
+                <div class="text-[11px] text-slate-400 mt-1">Up to <strong>${plan.maxUrls} URLs</strong> • ${plan.scanFrequencyMinutes}-min scans</div>
+              </div>
+              ${isCurrent 
+                ? `<div class="w-full py-2 text-center rounded-lg bg-white/10 text-slate-300 text-xs font-bold">Current Active Tier</div>`
+                : `<a href="${plan.checkoutUrl}" target="_blank" class="w-full py-2 text-center rounded-lg ${plan.recommended ? 'bg-amber-400 hover:bg-amber-300 text-black' : 'bg-siren-500 hover:bg-siren-600 text-white'} text-xs font-bold shadow transition-all block">Upgrade Now ⚡</a>`
+              }
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function openPlanDrawer() {
+      loadPlanData();
+      openModal('modalPlanDrawer');
+    }
+
+    function changeSubscriberPhone() {
+      const current = getStoredPhone();
+      const next = prompt('Enter your 10-digit WhatsApp phone number to view your plan and locked URLs:', current);
+      if (next && next.trim()) {
+        setStoredPhone(next);
+        const inputEl = document.getElementById('bulkPhoneInput');
+        if (inputEl) inputEl.value = getStoredPhone();
+        loadPlanData();
+        loadDashboardData(true);
+        showToast(`Switched account to +${getStoredPhone()}`);
+      }
     }
 
     // Interactive Toast Notification
@@ -427,7 +663,11 @@
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('bulkPhoneInput').value = getStoredPhone();
       loadDashboardData();
-      setInterval(() => loadDashboardData(false), 30000); // 30-sec background sync
+      loadPlanData();
+      setInterval(() => {
+        loadDashboardData(false);
+        loadPlanData();
+      }, 30000); // 30-sec background sync
     });
 
     async function loadDashboardData(showNotification = false) {
@@ -669,10 +909,17 @@
         btn.disabled = false;
         btn.innerHTML = '<span>+ Lock into Radar 🚨</span>';
 
+        if (resp.status === 403 || data.quotaExceeded) {
+          showToast(data.error || 'Radar quota reached! Please upgrade your plan.', 'warn');
+          openPlanDrawer();
+          return;
+        }
+
         if (data.success) {
           urlInput.value = '';
           showToast(`Locked into 24/7 radar: ${data.monitored.brandName}`);
           loadDashboardData();
+          loadPlanData();
         } else {
           showToast(data.error || 'Failed to add URL', 'error');
         }
@@ -775,6 +1022,7 @@
         if (data.success) {
           showToast('Product destination removed from radar');
           loadDashboardData();
+          loadPlanData();
         } else {
           showToast('Failed to remove item', 'error');
         }
@@ -820,6 +1068,7 @@
       document.getElementById('bulkUrlsInput').value = '';
       showToast(`Successfully imported ${urls.length} ad destinations!`);
       loadDashboardData();
+      loadPlanData();
     }
   </script>
 </body>

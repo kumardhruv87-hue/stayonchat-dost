@@ -586,6 +586,18 @@ export const botRouter = {
           return;
         }
 
+        // Quota check based on purchased plan
+        const userUrls = watchdogService.getMonitoredUrlsByPhone(fromPhone);
+        const planKey = user.plan || (userUrls.length > 0 ? 'starter_1999' : 'free_scan');
+        const planDetail = PLANS[planKey] || PLANS.starter_1999;
+        const maxQuota = planDetail.maxMonitoredUrls || 15;
+
+        if (userUrls.length >= maxQuota) {
+          const quotaReachedMsg = `⚠️ *[RADAR QUOTA REACHED]*\n━━━━━━━━━━━━━━━━━━━━\nYou have locked in all *${maxQuota}/${maxQuota}* available slots on your *${planDetail.name}* plan.\n\nTo expand your radar and monitor more ad destinations:\n👉 Reply \`buy growth\` for 50 URLs (₹4,999/mo)\n👉 Reply \`buy agency\` for 200 URLs (₹9,999/mo)\n\nType \`plan\` to view your full subscription & lock-in status.`;
+          await whatsappService.sendTextMessage(fromPhone, quotaReachedMsg);
+          return;
+        }
+
         // Run instant initial check
         const initialDiag = await watchdogService.scanUrl(targetUrl);
         const monitored = watchdogService.registerMonitoredUrl({
@@ -597,13 +609,54 @@ export const botRouter = {
         const isQuickCommerce = initialDiag.platform === 'BLINKIT';
         const statusEmoji = initialDiag.isAvailable ? '✅' : '🚨';
         const platformLabel = isQuickCommerce ? '⚡ Blinkit Quick Commerce' : '🛍️ Shopify D2C';
+        const usedCount = userUrls.length + 1;
 
-        const msg = `🛡️ *[ROASSIREN RADAR LOCKED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Platform:* ${platformLabel}\n🏷️ *Store / Brand:* ${monitored.brandName}\n📦 *Product:* ${initialDiag.productTitle}\n${statusEmoji} *Initial Status:* ${initialDiag.status}\n🔗 *Target:* ${monitored.url}\n\n🕒 *Radar Frequency:* 24/7 Autonomous Radar (Every 15 mins)\n⚡ *Siren Protocol:* If stock drops to zero or URL hits 404, an emergency WhatsApp siren will alert your phone within 60 seconds!\n━━━━━━━━━━━━━━━━━━━━\n_Type \`list\` anytime to view all monitored destinations._`;
+        const msg = `🛡️ *[ROASSIREN RADAR LOCKED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Platform:* ${platformLabel}\n🏷️ *Store / Brand:* ${monitored.brandName}\n📦 *Product:* ${initialDiag.productTitle}\n${statusEmoji} *Initial Status:* ${initialDiag.status}\n🔗 *Target:* ${monitored.url}\n\n📊 *Radar Quota:* ${usedCount}/${maxQuota} Used (${maxQuota - usedCount} available)\n🕒 *Sweep Frequency:* 24/7 Autonomous Radar (Every ${planDetail.scanFrequencyMinutes} mins)\n⚡ *Siren Protocol:* If stock drops to zero or URL hits 404, an emergency WhatsApp siren will alert your phone within 60 seconds!\n━━━━━━━━━━━━━━━━━━━━\n_Type \`plan\` to see subscription details or \`list\` for all locked SKUs._`;
         await whatsappService.sendTextMessage(fromPhone, msg);
         return;
       }
 
-      // C. List Active Monitored URLs: "list", "radar", "monitors"
+      // C1. Check Active Plan, Subscription & Lock-in Quota: "plan", "my plan", "account", "quota", "lock in"
+      if (['plan', 'my plan', 'account', 'quota', 'lock in', 'lockin', 'subscription', 'my account', 'my radar'].includes(lowerText)) {
+        const userUrls = watchdogService.getMonitoredUrlsByPhone(fromPhone);
+        const planKey = user.plan || (userUrls.length > 0 ? 'starter_1999' : 'free_scan');
+        const planDetail = PLANS[planKey] || PLANS.starter_1999;
+        
+        const usedCount = userUrls.length;
+        const maxQuota = planDetail.maxMonitoredUrls || 15;
+        const availableQuota = Math.max(0, maxQuota - usedCount);
+
+        let expiryDate = 'Active (Monthly)';
+        if (user.plan_expires_at) {
+          expiryDate = new Date(user.plan_expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        } else {
+          const defaultExp = new Date();
+          defaultExp.setDate(defaultExp.getDate() + 30);
+          expiryDate = defaultExp.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        const totalProtected = userUrls.reduce((acc, curr) => acc + (curr.dailyAdSpend || 3000), 0) * 30;
+
+        let statusReport = `💎 *[ROASSIREN ACCOUNT & RADAR LOCK-IN]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n👤 *Subscriber:* +${fromPhone.replace(/\D/g, '')}\n📦 *Current Plan:* ${planDetail.name.toUpperCase()} (₹${planDetail.priceInr.toLocaleString('en-IN')}/${planDetail.period})\n🛡️ *Radar Status:* ACTIVE 🟢\n🕒 *Valid Until:* ${expiryDate}\n\n📊 *Radar Quota Allocation:*\n• Monitored SKUs: ${usedCount} / ${maxQuota} Slots (${availableQuota} Available)\n• Sweep Frequency: Every ${planDetail.scanFrequencyMinutes} Minutes\n• Monthly Ad Spend Protected: ₹${totalProtected.toLocaleString('en-IN')}\n• Siren Recipient: +${fromPhone.replace(/\D/g, '')}\n`;
+
+        if (userUrls.length > 0) {
+          statusReport += `\n📡 *Your Locked SKUs (${userUrls.length}):*\n`;
+          userUrls.forEach((item, idx) => {
+            const icon = item.lastStatus === 'SAFE_IN_STOCK' ? '🟢' : item.lastStatus === 'CRITICAL_OUT_OF_STOCK' ? '🔴' : '🟡';
+            const pBadge = item.platform === 'BLINKIT' ? '⚡ Blinkit' : '🛍️ Shopify';
+            statusReport += `${idx + 1}. ${icon} *${item.brandName}* [${pBadge}]\n   🔗 ${item.url}\n   📊 Status: ${item.lastStatus.replace(/_/g, ' ')}\n`;
+          });
+        } else {
+          statusReport += `\n⚠️ *No SKUs locked in yet.* Reply \`monitor <product-url>\` to lock your first active Meta ad destination.\n`;
+        }
+
+        statusReport += `\n━━━━━━━━━━━━━━━━━━━━\n⚡ *Quick Actions:*\n• Lock another SKU: \`monitor <url>\`\n• Audit full store: \`audit <brand.com>\`\n• Upgrade Plan: \`pricing\`\n• Test Siren: \`test\`\n• Web Dashboard: https://keepr-bot.onrender.com/dashboard`;
+
+        await whatsappService.sendTextMessage(fromPhone, statusReport);
+        return;
+      }
+
+      // C2. List Active Monitored URLs: "list", "radar", "monitors"
       if (['list', 'radar', 'monitors', 'my monitors', 'urls', 'status'].includes(lowerText)) {
         const userUrls = watchdogService.getMonitoredUrlsByPhone(fromPhone);
         if (userUrls.length === 0) {
@@ -618,7 +671,7 @@ export const botRouter = {
           const pBadge = item.platform === 'BLINKIT' ? '⚡ Blinkit' : '🛍️ Shopify';
           listMsg += `${idx + 1}. ${icon} *${item.brandName}* [${pBadge}]\n   🔗 ${item.url}\n   📊 Status: ${item.lastStatus}\n   🕒 Last Sweep: ${new Date(item.lastCheckedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}\n\n`;
         });
-        listMsg += `_To add another URL, reply: \`monitor <url>\`_`;
+        listMsg += `_To add another URL, reply: \`monitor <url>\` | Type \`plan\` to view quota_`;
         await whatsappService.sendTextMessage(fromPhone, listMsg);
         return;
       }

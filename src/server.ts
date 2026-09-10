@@ -15,7 +15,7 @@ import { schedulerService } from './services/scheduler.js';
 import { watchdogService } from './services/watchdog.service.js';
 import { sirenService } from './services/siren.service.js';
 import { webhookService } from './services/webhook.service.js';
-import { BRAND } from './config/constants.js';
+import { BRAND, PLANS } from './config/constants.js';
 
 dotenv.config();
 
@@ -116,17 +116,36 @@ app.post('/api/scan', async (req: Request, res: Response) => {
 });
 
 // Register an Ad URL for 24/7 Autonomous Watchdog Monitoring
-// Register an Ad URL for 24/7 Autonomous Watchdog Monitoring
-app.post('/api/monitor', (req: Request, res: Response) => {
+app.post('/api/monitor', async (req: Request, res: Response) => {
   try {
     const { url, phone, brandName, dailyAdSpend, webhookUrl, alertRecipients } = req.body;
     if (!url || !phone) {
       return res.status(400).json({ error: 'Both URL and WhatsApp phone number are required.' });
     }
 
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const user = await dbService.getOrCreateUser(cleanPhone);
+    const userUrls = watchdogService.getMonitoredUrlsByPhone(cleanPhone);
+    const planKey = user.plan || (userUrls.length > 0 ? 'starter_1999' : 'free_scan');
+    const planDetail = PLANS[planKey] || PLANS.starter_1999;
+    const maxQuota = planDetail.maxMonitoredUrls || 15;
+
+    // If the URL is already being monitored by this phone, allow updating
+    const existing = userUrls.find(u => u.url === url);
+    if (!existing && userUrls.length >= maxQuota) {
+      return res.status(403).json({
+        success: false,
+        quotaExceeded: true,
+        error: `Radar quota reached (${userUrls.length}/${maxQuota} slots used) on your ${planDetail.name} plan. Please upgrade to monitor more URLs.`,
+        plan: planDetail.name,
+        maxUrls: maxQuota,
+        usedUrls: userUrls.length,
+      });
+    }
+
     const item = watchdogService.registerMonitoredUrl({
       url,
-      userPhone: String(phone),
+      userPhone: cleanPhone,
       brandName,
       dailyAdSpend: dailyAdSpend ? Number(dailyAdSpend) : undefined,
       webhookUrl: webhookUrl || undefined,
@@ -208,6 +227,97 @@ app.get('/api/monitor', (req: Request, res: Response) => {
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
+  }
+});
+
+// User Subscription Plan & Radar Quota
+app.get('/api/user/plan', async (req: Request, res: Response) => {
+  try {
+    const phone = (req.query.phone as string) || '919560931596';
+    const cleanPhone = phone.replace(/\D/g, '');
+    const user = await dbService.getOrCreateUser(cleanPhone);
+    const monitoredUrls = watchdogService.getMonitoredUrlsByPhone(cleanPhone);
+
+    // Resolve plan details
+    const planKey = user.plan || (monitoredUrls.length > 0 ? 'starter_1999' : 'free_scan');
+    const planDetail = PLANS[planKey] || PLANS.starter_1999;
+
+    const usedCount = monitoredUrls.length;
+    const maxQuota = planDetail.maxMonitoredUrls || 15;
+    const availableQuota = Math.max(0, maxQuota - usedCount);
+    const quotaPct = Math.min(100, Math.round((usedCount / maxQuota) * 100));
+
+    // Calculate expiry (30 days from activation or future date)
+    const activatedAt = user.plan_activated_at || user.created_at || new Date().toISOString();
+    let expiresAt = user.plan_expires_at;
+    if (!expiresAt) {
+      const expDate = new Date(activatedAt);
+      expDate.setDate(expDate.getDate() + 30);
+      expiresAt = expDate.toISOString();
+    }
+
+    const availablePlans = [
+      {
+        id: 'starter_1999',
+        name: 'Starter D2C',
+        priceInr: 1999,
+        period: '1 Month',
+        maxUrls: 15,
+        scanFrequencyMinutes: 15,
+        description: 'For emerging D2C brands spending ₹50k–₹3L / mo on Meta ads',
+        checkoutUrl: 'https://rzp.io/rzp/ukMXxGY',
+        recommended: false,
+        badge: 'Standard',
+      },
+      {
+        id: 'growth_4999',
+        name: 'Growth Brand',
+        priceInr: 4999,
+        period: '1 Month',
+        maxUrls: 50,
+        scanFrequencyMinutes: 5,
+        description: 'For scaling D2C brands spending ₹3L–₹25L / mo on Meta & Google ads',
+        checkoutUrl: 'https://rzp.io/rzp/OOIVXyJ',
+        recommended: true,
+        badge: 'Most Popular',
+      },
+      {
+        id: 'agency_9999',
+        name: 'Agency Fleet',
+        priceInr: 9999,
+        period: '1 Month',
+        maxUrls: 200,
+        scanFrequencyMinutes: 5,
+        description: 'For performance marketing agencies managing 5–25 client ad accounts',
+        checkoutUrl: 'https://rzp.io/rzp/SjNJKT0',
+        recommended: false,
+        badge: 'Agency Scale',
+      },
+    ];
+
+    return res.json({
+      success: true,
+      phone: user.phone_number,
+      plan: {
+        id: planDetail.id,
+        name: planDetail.name,
+        priceInr: planDetail.priceInr,
+        period: planDetail.period,
+        maxUrls: maxQuota,
+        usedUrls: usedCount,
+        availableUrls: availableQuota,
+        quotaPct,
+        scanFrequencyMinutes: planDetail.scanFrequencyMinutes || 15,
+        maxAlertRecipients: planDetail.maxAlertRecipients || 1,
+        activatedAt,
+        expiresAt,
+        isPro: planDetail.priceInr > 0,
+      },
+      availablePlans,
+      monitoredUrls,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Failed to fetch plan' });
   }
 });
 
