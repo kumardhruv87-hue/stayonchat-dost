@@ -62,7 +62,7 @@ app.get('/client', (req: Request, res: Response) => {
 });
 
 app.get('/admin', (req: Request, res: Response) => {
-  res.sendFile(path.join(process.cwd(), 'public', 'admin.html'));
+  res.redirect('/dashboard#adminSection');
 });
 
 // =================================================================

@@ -126,8 +126,8 @@
           <span>Catalog Audit</span>
         </a>
 
-        <a href="/admin" target="_blank" class="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-obsidian-950 hover:bg-white/5 border border-white/10 text-xs font-semibold text-slate-400 hover:text-white transition-all">
-          <span>🛡️ Admin</span>
+        <a href="#adminSection" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-siren-600/20 to-rose-600/20 hover:from-siren-600/30 hover:to-rose-600/30 border border-siren-500/30 text-xs font-bold text-siren-400 hover:text-white transition-all shadow-sm">
+          <span>🛡️ Admin Command</span>
         </a>
 
         <button onclick="openModal('modalBulkAdd')" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-semibold text-slate-300 transition-all">
@@ -351,6 +351,467 @@
         + Add My First SKU
       </button>
     </div>
+
+  
+    <!-- ============================================================= -->
+    <!-- 8. Unified Master Admin Command Center (Bottom Section) -->
+    <!-- ============================================================= -->
+    <section id="adminSection" class="pt-12 border-t border-white/10 mt-12 space-y-6">
+      
+      <!-- Admin Master Header Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card rounded-2xl p-6 border border-white/15 bg-gradient-to-r from-obsidian-950 via-obsidian-900 to-siren-950/30 shadow-2xl">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-siren-500 to-rose-700 flex items-center justify-center text-2xl shadow-lg shadow-siren-500/30 shrink-0">
+            🛡️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-black text-white">RoasSiren™ Admin Command Center</h2>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-siren-500/20 text-siren-400 border border-siren-500/30 uppercase">
+                Master Control
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Paid Subscribers & MRR Revenue, 24x7 Real-Time Strike Engine, SirenGrowth D2C Pipeline & Customer Support Desk.
+            </p>
+          </div>
+        </div>
+
+        <div id="adminLockStatusContainer" class="flex items-center gap-2 self-start sm:self-auto font-mono text-xs">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Inline Admin Auth Card (Shown when locked) -->
+      <div id="adminInlineAuthCard" class="glass-card rounded-2xl p-8 border border-white/15 max-w-lg mx-auto text-center space-y-5">
+        <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl mx-auto">
+          🔒
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Admin Command Center Locked</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+            Enter your Master Admin Key to access Paid Subscribers, 24x7 Real-Time Strike Engine, and Support Tickets.
+          </p>
+        </div>
+        <form onsubmit="handleInlineAdminAuth(event)" class="space-y-3">
+          <input type="password" id="adminInlineKeyInput" placeholder="Master Admin Secret (e.g. roassiren_admin_2026)" class="w-full px-4 py-2.5 rounded-xl bg-obsidian-950 border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-siren-500" required />
+          <div id="adminInlineAuthErrMsg" class="hidden text-xs text-siren-400 font-mono"></div>
+          <button type="submit" id="adminInlineAuthBtn" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-siren-600 to-rose-700 hover:from-siren-500 hover:to-rose-600 text-white font-bold text-xs shadow-lg shadow-siren-600/30 transition-all">
+            Authenticate & Unlock Command Center 🛡️
+          </button>
+        </form>
+      </div>
+
+      <!-- Admin Console (Shown when unlocked) -->
+      <div id="adminConsoleBody" class="hidden space-y-6">
+        <!-- Admin Navigation Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/10 scrollbar-none font-sans text-xs">
+          <button onclick="switchAdminTab('subscriptions')" id="adminTabBtn-subscriptions" class="admin-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-siren-600 text-white flex items-center gap-2 shrink-0">
+            <span>💎 Subscribers & Revenue</span>
+            <span id="subscribersMrrBadge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">₹0</span>
+          </button>
+          <button onclick="switchAdminTab('growth')" id="adminTabBtn-growth" class="admin-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-white/5 flex items-center gap-2 shrink-0">
+            <span>🚀 Agent SirenGrowth & Strike Radar</span>
+            <span class="px-1.5 py-0.5 rounded-md bg-radar-500/20 text-radar-400 text-[10px] font-mono" id="pipelineCountBadge">20+ Brands</span>
+          </button>
+          <button onclick="switchAdminTab('tickets')" id="adminTabBtn-tickets" class="admin-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-white/5 flex items-center gap-2 shrink-0">
+            <span>🎧 Support Desk & Issues</span>
+            <span id="openTicketsBadge" class="hidden px-1.5 py-0.5 rounded-full bg-siren-500 text-white text-[10px] font-mono">0</span>
+          </button>
+          <button onclick="switchAdminTab('strategy')" id="adminTabBtn-strategy" class="admin-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-white/5 flex items-center gap-2 shrink-0">
+            <span>🧠 Autonomous Strategy Engine</span>
+          </button>
+          <button onclick="switchAdminTab('metrics')" id="adminTabBtn-metrics" class="admin-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-white/5 flex items-center gap-2 shrink-0">
+            <span>📈 Platform System Health</span>
+          </button>
+        </div>
+
+        
+
+    <!-- ========================================================= -->
+    <!-- TAB 1: Platform Health & Monitored SKUs -->
+    <!-- ========================================================= -->
+    <div id="tabContent-metrics" class="space-y-6">
+      
+      <!-- Top Metrics Ribbon -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Monitored Ad Dest.</span>
+            <span class="text-base">📡</span>
+          </div>
+          <div class="text-3xl font-black text-white mt-2 font-mono" id="statMonitoredCount">-</div>
+          <div class="text-[11px] text-radar-400 mt-1 flex items-center gap-1 font-mono">
+            <span>🟢 24/7 Autonomous Radar</span>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Protected Ad Budget</span>
+            <span class="text-base">🛡️</span>
+          </div>
+          <div class="text-3xl font-black text-emerald-400 mt-2 font-mono" id="statProtectedSpend">-</div>
+          <div class="text-[11px] text-slate-400 mt-1 font-mono">
+            Monthly spend shielded
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Critical Out-of-Stock</span>
+            <span class="text-base">🚨</span>
+          </div>
+          <div class="text-3xl font-black text-siren-400 mt-2 font-mono" id="statCriticalAlerts">-</div>
+          <div class="text-[11px] text-slate-400 mt-1 font-mono">
+            Urgent sirens dispatched
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Open Support Tickets</span>
+            <span class="text-base">🎫</span>
+          </div>
+          <div class="text-3xl font-black text-amber-400 mt-2 font-mono" id="statOpenTickets">-</div>
+          <div class="text-[11px] text-slate-400 mt-1 font-mono">
+            Bugs & feature suggestions
+          </div>
+        </div>
+      </div>
+
+      <!-- Monitored URLs List -->
+      <div class="glass-card rounded-2xl p-6 border border-white/10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              <span>Radar Monitored SKUs</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-white/10 font-mono text-slate-300" id="monitoredBadge">0</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Live store catalog destinations under autonomous 24/7 background sweeps.</p>
+          </div>
+          <button onclick="loadAdminMetrics()" class="text-xs text-slate-300 hover:text-white px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center gap-1.5 self-start">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            <span>Refresh Radar</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-white/10 text-slate-400 uppercase tracking-wider font-mono">
+                <th class="pb-3 pl-2">Store / Brand</th>
+                <th class="pb-3">Ad Destination URL</th>
+                <th class="pb-3">Daily Spend</th>
+                <th class="pb-3">Status</th>
+                <th class="pb-3">Meta AdSet</th>
+                <th class="pb-3 text-right pr-2">Watchdog Actions</th>
+              </tr>
+            </thead>
+            <tbody id="monitoredTableBody" class="divide-y divide-white/5 font-mono">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-slate-500">Loading monitored URLs...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB: 💎 Subscribers & Revenue (Paid Plans) -->
+    <!-- ========================================================= -->
+    <div id="tabContent-subscriptions" class="hidden space-y-6">
+      
+      <!-- Revenue Summary Ribbon -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Live Monthly MRR</span>
+            <span class="text-base">💰</span>
+          </div>
+          <div class="text-3xl font-black text-emerald-400 mt-2 font-mono" id="subTotalMrr">₹0</div>
+          <div class="text-[11px] text-slate-400 mt-1 font-mono">
+            Recurring subscription revenue
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Paying Subscribers</span>
+            <span class="text-base">👥</span>
+          </div>
+          <div class="text-3xl font-black text-white mt-2 font-mono" id="subPaidCount">0</div>
+          <div class="text-[11px] text-radar-400 mt-1 font-mono">
+            Active paid B2B accounts
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Tier Distribution</span>
+            <span class="text-base">📦</span>
+          </div>
+          <div class="text-xs font-mono text-white mt-3 space-y-1">
+            <div>Starter (₹1,999): <strong class="text-amber-400" id="subStarterCount">0</strong></div>
+            <div>Growth (₹4,999): <strong class="text-radar-400" id="subGrowthCount">0</strong></div>
+            <div>Fleet (₹9,999): <strong class="text-purple-400" id="subAgencyCount">0</strong></div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5 border border-white/10">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span>Monitored Slots Protected</span>
+            <span class="text-base">🛡️</span>
+          </div>
+          <div class="text-3xl font-black text-siren-400 mt-2 font-mono" id="subTotalSlots">0</div>
+          <div class="text-[11px] text-slate-400 mt-1 font-mono">
+            Active hero SKUs under radar
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscribers Table -->
+      <div class="glass-card rounded-2xl p-6 border border-white/10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              <span>Active Subscribers & Paid Plans</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono" id="subscribersListBadge">0 Accounts</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Manage subscriber plans, expiry dates, and dispatch WhatsApp payment renewal links.</p>
+          </div>
+          <button onclick="loadAdminSubscriptions()" class="text-xs text-slate-300 hover:text-white px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center gap-1.5 self-start">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            <span>Refresh Subscribers</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-white/10 text-slate-400 uppercase tracking-wider font-mono">
+                <th class="pb-3 pl-2">Subscriber / Brand</th>
+                <th class="pb-3">WhatsApp Phone</th>
+                <th class="pb-3">Current Plan & Fee</th>
+                <th class="pb-3">Radar Quota</th>
+                <th class="pb-3">Validity & Status</th>
+                <th class="pb-3 text-right pr-2">Admin Actions</th>
+              </tr>
+            </thead>
+            <tbody id="subscribersTableBody" class="divide-y divide-white/5 font-mono">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-slate-500">Loading subscriber accounts...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 2: Support Desk & Problem Resolver -->
+    <!-- ========================================================= -->
+    <div id="tabContent-tickets" class="hidden space-y-6">
+      
+      <div class="glass-card rounded-2xl p-6 border border-white/10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              <span>Support Desk & Issue Resolver</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-siren-500/20 text-siren-400 font-mono" id="ticketsCountBadge">0 Tickets</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Founder bug reports, feature requests, and agency onboarding inquiries.</p>
+          </div>
+
+          <!-- Category Filters -->
+          <div class="flex items-center gap-1 bg-obsidian-900 p-1 rounded-xl border border-white/10 text-xs">
+            <button onclick="filterTickets('ALL')" class="ticket-filter-btn px-3 py-1.5 rounded-lg font-bold bg-white/10 text-white" data-filter="ALL">All</button>
+            <button onclick="filterTickets('PROBLEM')" class="ticket-filter-btn px-3 py-1.5 rounded-lg font-bold text-slate-400 hover:text-white" data-filter="PROBLEM">🚨 Bugs</button>
+            <button onclick="filterTickets('SUGGESTION')" class="ticket-filter-btn px-3 py-1.5 rounded-lg font-bold text-slate-400 hover:text-white" data-filter="SUGGESTION">💡 Suggestions</button>
+            <button onclick="filterTickets('SALES_INQUIRY')" class="ticket-filter-btn px-3 py-1.5 rounded-lg font-bold text-slate-400 hover:text-white" data-filter="SALES_INQUIRY">💼 Sales</button>
+          </div>
+        </div>
+
+        <div id="ticketsList" class="space-y-4">
+          <div class="py-12 text-center text-slate-500 font-mono text-xs">Loading support tickets...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 3: Agent SirenGrowth (Autonomous Sales & Marketing) -->
+    <!-- ========================================================= -->
+    <div id="tabContent-growth" class="hidden space-y-6">
+      
+      <!-- Agent Intro Card -->
+      <div class="glass-card rounded-2xl p-6 border border-radar-500/30 bg-gradient-to-r from-obsidian-900 via-obsidian-850 to-radar-950/20 shadow-xl">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-radar-500 to-emerald-700 flex items-center justify-center text-2xl shrink-0 shadow-lg shadow-radar-500/20">
+              🤖
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h3 class="text-xl font-black text-white">Agent SirenGrowth</h3>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-radar-500/15 text-radar-400 border border-radar-500/30 uppercase tracking-wider">
+                  Autonomous Sales & Marketing Manager
+                </span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                Agent SirenGrowth continuously identifies aggressive D2C brands, audits their catalog for out-of-stock items leaking ad spend, and prepares <strong class="text-white">1-Click Ready Outreach in English Default</strong> with direct WhatsApp, Email, and LinkedIn dispatch buttons.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button onclick="discoverFreshLeads()" id="discoverLeadsBtn" class="px-3.5 py-2.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5">
+              <span>🤖 Auto-Discover Fresh Brands (AI Radar)</span>
+            </button>
+            <button onclick="openAddProspectModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-radar-600 to-emerald-700 hover:from-radar-500 hover:to-emerald-600 text-white text-xs font-bold shadow-lg shadow-radar-600/30 transition-all flex items-center gap-2">
+              <span>+ Add Target D2C Store</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 24x7 Real-Time Strike Engine (Ad Bleed Sniping) -->
+      <div class="glass-card rounded-2xl p-6 border border-siren-500/30 bg-gradient-to-br from-obsidian-950 via-obsidian-900 to-siren-950/20 shadow-2xl space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <span class="text-xl">⚡</span>
+              <h3 class="text-lg font-black text-white">24x7 Real-Time Ad Bleed & OOS Strike Engine</h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-siren-500/20 text-siren-400 border border-siren-500/40 uppercase animate-pulse">
+                Live Strike Radar
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+              Autonomously monitors prospect stores in the background. The exact second an ad destination goes <strong class="text-siren-400">Sold Out (0 inventory)</strong> or throws a <strong class="text-siren-400">404 Error</strong>, it immediately strikes the founder with a high-urgency WhatsApp/Email proof before their budget is burnt.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <!-- Autopilot Toggle Button -->
+            <button onclick="toggleAutopilot()" id="autopilotToggleBtn" class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30">
+              <span id="autopilotStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="autopilotLabel">⚡ Autopilot: ACTIVE (Auto-Strike ON)</span>
+            </button>
+            <button onclick="runProspectRadarNow(this)" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold border border-white/15 transition-all flex items-center gap-1.5">
+              <span>⚡ Sweep All Stores Now</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Strike Engine Stats Bar -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 font-mono">
+          <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/5">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Prospect Stores on Radar</div>
+            <div class="text-xl font-bold text-white mt-1" id="statStrikeRadarCount">20+ Brands</div>
+            <div class="text-[10px] text-emerald-400 mt-0.5">● 24/7 background check</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/5">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Live Ad Bleeds Caught</div>
+            <div class="text-xl font-bold text-siren-400 mt-1" id="statStrikesTotal">0</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">OOS / 404 Disasters</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/5">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Emergency Strikes Fired</div>
+            <div class="text-xl font-bold text-emerald-400 mt-1" id="statStrikesDispatched">0</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">WhatsApp & Email alerts</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white/[0.03] border border-white/5">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Hourly Bleed Struck</div>
+            <div class="text-xl font-bold text-amber-400 mt-1" id="statStrikeHourlyBurn">₹0/hr</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">Ad budget loss alerted</div>
+          </div>
+        </div>
+
+        <!-- Live Strike Feed -->
+        <div>
+          <div class="flex items-center justify-between mb-3 text-xs">
+            <span class="font-bold text-white font-sans flex items-center gap-1.5">
+              <span>🔥 Real-Time Strike Opportunities & Alert History</span>
+              <span id="pendingStrikesBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-siren-500 text-white">0 Ready</span>
+            </span>
+            <span class="text-[11px] text-slate-400 font-mono">Real-time alerts sent to founders</span>
+          </div>
+
+          <div id="strikesContainer" class="space-y-3">
+            <div class="py-8 text-center text-slate-500 font-mono text-xs">Loading live strikes...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prospect Brand Pipeline Table -->
+      <div class="glass-card rounded-2xl p-6 border border-white/10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              <span>D2C Brand Acquisition Pipeline</span>
+              <span class="text-xs px-2 py-0.5 rounded bg-white/10 font-mono text-slate-300" id="prospectsCountBadge">20+ Brands</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">High-budget Shopify D2C brands tracked for conversion. Click WhatsApp or Email to message founders directly.</p>
+          </div>
+          <button onclick="loadAdminGrowth()" class="text-xs text-slate-300 hover:text-white px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center gap-1.5 self-start">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            <span>Refresh Pipeline</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="border-b border-white/10 text-slate-400 uppercase tracking-wider font-mono">
+                <th class="pb-3 pl-2">Brand & Domain</th>
+                <th class="pb-3">Category / Est. Spend</th>
+                <th class="pb-3">Decision Maker & Direct Contact</th>
+                <th class="pb-3">Pipeline Stage</th>
+                <th class="pb-3">Catalog Vulnerability</th>
+                <th class="pb-3 text-right pr-2">Autonomous Pitch</th>
+              </tr>
+            </thead>
+            <tbody id="prospectsTableBody" class="divide-y divide-white/5 font-mono">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-slate-500">Loading D2C prospects...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 4: Autonomous Strategy & Self-Improvement Engine -->
+    <!-- ========================================================= -->
+    <div id="tabContent-strategy" class="hidden space-y-6">
+      
+      <div class="glass-card rounded-2xl p-6 border border-white/10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              <span>Autonomous Self-Improvement Strategy Engine</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 uppercase">
+                Feasible Growth Hacks
+              </span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Continuous evaluation of platform metrics, media buyer conversion rates, and revenue bottlenecks.</p>
+          </div>
+
+          <button onclick="generateFreshInsights()" id="generateInsightsBtn" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-700 hover:from-amber-500 hover:to-orange-600 text-white text-xs font-bold shadow-lg shadow-amber-600/30 transition-all flex items-center gap-2 self-start">
+            <span>✨ Generate Fresh AI Growth Hacks</span>
+          </button>
+        </div>
+
+        <div id="insightsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="py-12 text-center text-slate-500 font-mono text-xs col-span-2">Loading strategy recommendations...</div>
+        </div>
+      </div>
+    </div>
+
+  
+      </div>
+    </section>
 
   </main>
 
@@ -1171,6 +1632,1552 @@
     }
   </script>
   <!-- RoasSiren Help & Support Widget -->
-  <script src="/support-widget.js" defer></script>
+  <script src="/support-widget.js" defer>
+
+
+    // =============================================================
+    // Inline Master Admin Authentication & Console Logic
+    // =============================================================
+    let adminKey = sessionStorage.getItem('roassiren_admin_key') || '';
+
+    async function handleInlineAdminAuth(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('adminInlineKeyInput').value.trim();
+      const btn = document.getElementById('adminInlineAuthBtn');
+      const errEl = document.getElementById('adminInlineAuthErrMsg');
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying Secret...';
+      errEl.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/admin/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret: input })
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = 'Authenticate & Unlock Command Center 🛡️';
+
+        if (data.success) {
+          adminKey = input;
+          sessionStorage.setItem('roassiren_admin_key', adminKey);
+          unlockAdminUI();
+          showToast('Admin Command Center Unlocked 🛡️');
+        } else {
+          errEl.textContent = '⚠️ Incorrect Admin Key. Default: roassiren_admin_2026';
+          errEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Authenticate & Unlock Command Center 🛡️';
+        errEl.textContent = '⚠️ Connection error: ' + err.message;
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    async function checkCachedAdminKey() {
+      if (!adminKey) {
+        lockAdminUI();
+        return;
+      }
+      try {
+        const res = await fetch('/api/admin/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret: adminKey })
+        });
+        const data = await res.json();
+        if (data.success) {
+          unlockAdminUI();
+        } else {
+          sessionStorage.removeItem('roassiren_admin_key');
+          adminKey = '';
+          lockAdminUI();
+        }
+      } catch {
+        lockAdminUI();
+      }
+    }
+
+    function unlockAdminUI() {
+      const authCard = document.getElementById('adminInlineAuthCard');
+      const consoleBody = document.getElementById('adminConsoleBody');
+      const statusContainer = document.getElementById('adminLockStatusContainer');
+
+      if (authCard) authCard.classList.add('hidden');
+      if (consoleBody) consoleBody.classList.remove('hidden');
+
+      if (statusContainer) {
+        statusContainer.innerHTML = `
+          <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>UNLOCKED</span>
+          </span>
+          <button onclick="lockAdminSession()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white transition-all">
+            🔒 Lock
+          </button>
+        `;
+      }
+
+      initAdminDashboard();
+    }
+
+    function lockAdminUI() {
+      const authCard = document.getElementById('adminInlineAuthCard');
+      const consoleBody = document.getElementById('adminConsoleBody');
+      const statusContainer = document.getElementById('adminLockStatusContainer');
+
+      if (authCard) authCard.classList.remove('hidden');
+      if (consoleBody) consoleBody.classList.add('hidden');
+
+      if (statusContainer) {
+        statusContainer.innerHTML = `
+          <span class="px-2.5 py-1 rounded-lg bg-white/10 text-slate-400 border border-white/10 flex items-center gap-1">
+            <span>LOCKED</span>
+          </span>
+        `;
+      }
+    }
+
+    function lockAdminSession() {
+      sessionStorage.removeItem('roassiren_admin_key');
+      adminKey = '';
+      lockAdminUI();
+      showToast('Admin Session Locked 🔒', 'warn');
+    }
+
+    function initAdminDashboard() {
+      loadAdminSubscriptions();
+      loadAdminGrowth();
+      loadAdminStrikes();
+      loadAdminTickets();
+      loadAdminMetrics();
+      loadAdminInsights();
+    }
+
+    function handleAdminLogout() {
+      lockAdminSession();
+    }
+
+    // Check cached key when DOM is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      checkCachedAdminKey();
+    });
+
+
+
+    let adminKey = sessionStorage.getItem('roassiren_admin_key') || '';
+    let currentTickets = [];
+    let currentProspects = [];
+    let currentSubscribers = [];
+    let activeOutreachProspect = null;
+
+    // Initialize
+    
+
+    
+
+    ,
+          body: JSON.stringify({ secret: adminKey })
+        });
+        const data = await res.json();
+        if (data.success) {
+          hideAuthModal();
+          initDashboard();
+        } else {
+          sessionStorage.removeItem('roassiren_admin_key');
+          adminKey = '';
+          showAuthModal();
+        }
+      } catch {
+        showAuthModal();
+      }
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem('roassiren_admin_key');
+      window.location.reload();
+    }
+
+    function initDashboard() {
+      loadAdminMetrics();
+      loadAdminSubscriptions();
+      loadAdminTickets();
+      loadAdminGrowth();
+      loadAdminStrikes();
+      loadAdminInsights();
+    }
+
+    // Tab Navigation
+    function switchAdminTab(tabId) {
+      ['metrics', 'subscriptions', 'tickets', 'growth', 'strategy'].forEach(t => {
+        document.getElementById(`tabContent-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`adminTabBtn-${t}`);
+        btn.classList.remove('bg-siren-600', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById(`tabContent-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`adminTabBtn-${tabId}`);
+      activeBtn.classList.remove('text-slate-400');
+      activeBtn.classList.add('bg-siren-600', 'text-white');
+    }
+
+    // =============================================================
+    // Tab 1: Platform Metrics & Monitored URLs
+    // =============================================================
+    async function loadAdminMetrics() {
+      try {
+        const res = await fetch('/api/admin/metrics', {
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        const m = data.metrics;
+        document.getElementById('statMonitoredCount').textContent = m.totalMonitoredSkus;
+        document.getElementById('statProtectedSpend').textContent = '₹' + m.monthlyProtectedSpend.toLocaleString('en-IN');
+        document.getElementById('statCriticalAlerts').textContent = m.criticalAlerts;
+        document.getElementById('statOpenTickets').textContent = m.ticketStats.open;
+        document.getElementById('monitoredBadge').textContent = m.totalMonitoredSkus;
+
+        if (m.ticketStats.open > 0) {
+          const badge = document.getElementById('openTicketsBadge');
+          badge.textContent = m.ticketStats.open;
+          badge.classList.remove('hidden');
+        }
+
+        renderMonitoredTable(data.monitoredUrls || []);
+      } catch (err) {
+        console.error('Error loading admin metrics:', err);
+      }
+    }
+
+    function renderMonitoredTable(items) {
+      const tbody = document.getElementById('monitoredTableBody');
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">No active URLs locked on radar yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(item => {
+        const isCritical = item.lastStatus === 'CRITICAL_OUT_OF_STOCK' || item.lastStatus === 'DEAD_LINK_404';
+        const isSafe = item.lastStatus === 'SAFE_IN_STOCK';
+        const isBlinkit = item.platform === 'BLINKIT';
+
+        return `
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="py-3 pl-2">
+              <div class="font-bold text-white flex items-center gap-1.5 font-sans">
+                <span>${isBlinkit ? '⚡' : '🛍️'}</span>
+                <span>${item.brandName || 'D2C Store'}</span>
+              </div>
+              <div class="text-[10px] text-slate-400 truncate max-w-xs">${item.productTitle || 'Landing Page'}</div>
+            </td>
+            <td class="py-3">
+              <a href="${item.url}" target="_blank" class="text-slate-300 hover:text-white truncate block max-w-xs flex items-center gap-1">
+                <span class="truncate">${item.url}</span>
+                <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
+            </td>
+            <td class="py-3 font-bold text-white">
+              ₹${(item.dailyAdSpend || 3000).toLocaleString('en-IN')}/d
+            </td>
+            <td class="py-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isCritical ? 'bg-siren-500/20 text-siren-400 border border-siren-500/30' : isSafe ? 'bg-radar-500/20 text-radar-400 border border-radar-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">
+                ${item.lastStatus.replace(/_/g, ' ')}
+              </span>
+            </td>
+            <td class="py-3 text-[11px]">
+              ${item.metaAdSetId ? `<span class="text-emerald-400 font-bold">#${item.metaAdSetId}</span>` : `<span class="text-slate-500">Not linked</span>`}
+            </td>
+            <td class="py-3 pr-2 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="rescanSku('${item.id}', this)" class="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all">⚡ Rescan</button>
+                <button onclick="triggerSiren('${item.id}', this)" class="px-2 py-1 rounded bg-siren-500/15 hover:bg-siren-500/30 text-siren-400 transition-all">🚨 Siren</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function rescanSku(id, btn) {
+      btn.textContent = '...';
+      try {
+        await fetch(`/api/monitor/rescan/${id}`, { method: 'POST' });
+        loadAdminMetrics();
+      } catch (err) {
+        alert('Rescan error: ' + err.message);
+      }
+    }
+
+    async function triggerSiren(id, btn) {
+      btn.textContent = 'Dispatched!';
+      try {
+        await fetch(`/api/monitor/siren/${id}`, { method: 'POST' });
+        setTimeout(() => { btn.textContent = '🚨 Siren'; }, 2000);
+      } catch (err) {
+        alert('Siren error: ' + err.message);
+      }
+    }
+
+    // =============================================================
+    // Tab: 💎 Subscribers & Revenue Management
+    // =============================================================
+    async function loadAdminSubscriptions() {
+      try {
+        const res = await fetch('/api/admin/subscriptions', {
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        const s = data.summary;
+        document.getElementById('subTotalMrr').textContent = '₹' + (s.totalPaidMrr || 0).toLocaleString('en-IN');
+        document.getElementById('subscribersMrrBadge').textContent = '₹' + (s.totalPaidMrr || 0).toLocaleString('en-IN');
+        document.getElementById('subPaidCount').textContent = `${s.activePaidSubscribers} Accounts`;
+        document.getElementById('subStarterCount').textContent = s.starterCount;
+        document.getElementById('subGrowthCount').textContent = s.growthCount;
+        document.getElementById('subAgencyCount').textContent = s.agencyCount;
+        document.getElementById('subTotalSlots').textContent = `${s.totalMonitoredSkus} SKUs`;
+        document.getElementById('subscribersListBadge').textContent = `${data.subscribers.length} Accounts`;
+
+        currentSubscribers = data.subscribers || [];
+        renderSubscribersTable(currentSubscribers);
+      } catch (err) {
+        console.error('Error loading subscriptions:', err);
+      }
+    }
+
+    function renderSubscribersTable(subs) {
+      const tbody = document.getElementById('subscribersTableBody');
+      if (subs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">No active subscriber accounts found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = subs.map(sub => {
+        const isActive = sub.status === 'ACTIVE';
+        const isAgency = sub.planId.includes('agency');
+        const isGrowth = sub.planId.includes('growth');
+        const planBadge = isAgency ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : isGrowth ? 'bg-radar-500/20 text-radar-300 border-radar-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+
+        const expFormatted = new Date(sub.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        return `
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="py-3.5 pl-2">
+              <div class="font-bold text-white font-sans text-xs">${sub.name}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${sub.brandName}</div>
+            </td>
+            <td class="py-3.5 text-white font-mono">
+              +${sub.phone}
+            </td>
+            <td class="py-3.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${planBadge} border">
+                ${sub.planName}
+              </span>
+              <div class="text-[11px] font-bold text-white mt-1">₹${sub.priceInr.toLocaleString('en-IN')}/mo</div>
+            </td>
+            <td class="py-3.5">
+              <div class="font-bold text-white">${sub.usedUrls} / ${sub.maxUrls} SKUs</div>
+              <div class="w-24 bg-obsidian-900 rounded-full h-1.5 mt-1 overflow-hidden border border-white/10">
+                <div class="bg-radar-500 h-full rounded-full" style="width: ${Math.min(100, Math.round((sub.usedUrls / sub.maxUrls) * 100))}%"></div>
+              </div>
+            </td>
+            <td class="py-3.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isActive ? 'bg-radar-500/20 text-radar-400 border border-radar-500/30' : 'bg-siren-500/20 text-siren-400 border border-siren-500/30'}">
+                ${sub.status}
+              </span>
+              <div class="text-[10px] text-slate-400 mt-1">Expires: ${expFormatted}</div>
+            </td>
+            <td class="py-3.5 pr-2 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="openChangePlanModal('${sub.phone}', '${sub.planId}')" class="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 text-xs font-bold transition-all">
+                  ⚡ Upgrade
+                </button>
+                <button onclick="sendWhatsAppRenewal('${sub.phone}', '${sub.planId}', this)" class="px-2.5 py-1 rounded bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all" title="Send Razorpay link via WhatsApp">
+                  💬 Pay Link
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openChangePlanModal(phone, currentPlan) {
+      document.getElementById('changePlanPhone').value = phone;
+      document.getElementById('changePlanPhoneDisplay').value = `+${phone}`;
+      document.getElementById('changePlanSelect').value = currentPlan || 'starter_1999';
+      document.getElementById('changePlanModal').classList.remove('hidden');
+      document.getElementById('changePlanModal').classList.add('flex');
+    }
+
+    function closeChangePlanModal() {
+      document.getElementById('changePlanModal').classList.remove('flex');
+      document.getElementById('changePlanModal').classList.add('hidden');
+    }
+
+    async function handleChangePlanSubmit(e) {
+      e.preventDefault();
+      const phone = document.getElementById('changePlanPhone').value;
+      const plan = document.getElementById('changePlanSelect').value;
+      const extendDays = document.getElementById('changePlanDays').value;
+      const btn = document.getElementById('savePlanBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Updating Plan...';
+
+      try {
+        const res = await fetch('/api/admin/subscriptions/update-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ phone, plan, extendDays })
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = 'Apply Plan Upgrade ⚡';
+
+        if (data.success) {
+          closeChangePlanModal();
+          loadAdminSubscriptions();
+          alert('Subscriber plan successfully updated!');
+        } else {
+          alert('Failed to update plan: ' + data.error);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Apply Plan Upgrade ⚡';
+        alert('Error: ' + err.message);
+      }
+    }
+
+    async function sendWhatsAppRenewal(phone, planKey, btn) {
+      btn.textContent = 'Sending...';
+      try {
+        const res = await fetch('/api/admin/subscriptions/send-payment-link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ phone, planKey })
+        });
+        const data = await res.json();
+        btn.textContent = 'Dispatched! ✅';
+        setTimeout(() => { btn.textContent = '💬 Pay Link'; }, 2500);
+      } catch (err) {
+        btn.textContent = '💬 Pay Link';
+        alert('Failed to send payment link: ' + err.message);
+      }
+    }
+
+    // =============================================================
+    // Tab 2: Support Tickets Desk
+    // =============================================================
+    async function loadAdminTickets() {
+      try {
+        const res = await fetch('/api/admin/tickets', {
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        currentTickets = data.tickets || [];
+        document.getElementById('ticketsCountBadge').textContent = `${currentTickets.length} Tickets`;
+        renderTicketsList(currentTickets);
+      } catch (err) {
+        console.error('Error loading tickets:', err);
+      }
+    }
+
+    function filterTickets(cat) {
+      document.querySelectorAll('.ticket-filter-btn').forEach(b => {
+        b.classList.remove('bg-white/10', 'text-white');
+        b.classList.add('text-slate-400');
+      });
+      document.querySelector(`[data-filter="${cat}"]`).classList.add('bg-white/10', 'text-white');
+
+      if (cat === 'ALL') {
+        renderTicketsList(currentTickets);
+      } else {
+        renderTicketsList(currentTickets.filter(t => t.category === cat));
+      }
+    }
+
+    function renderTicketsList(tickets) {
+      const container = document.getElementById('ticketsList');
+      if (tickets.length === 0) {
+        container.innerHTML = `<div class="py-12 text-center text-slate-500 font-mono text-xs">No tickets matching filter.</div>`;
+        return;
+      }
+
+      container.innerHTML = tickets.map(t => {
+        const isProblem = t.category === 'PROBLEM';
+        const isResolved = t.status === 'RESOLVED';
+        const isInProg = t.status === 'IN_PROGRESS';
+
+        const statusClass = isResolved ? 'bg-radar-500/20 text-radar-400 border-radar-500/30' : isInProg ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-siren-500/20 text-siren-400 border-siren-500/30';
+        const categoryLabel = t.category === 'PROBLEM' ? '🚨 Problem / Bug' : t.category === 'SUGGESTION' ? '💡 Suggestion' : t.category === 'SALES_INQUIRY' ? '💼 Sales / Fleet' : '❓ General';
+
+        return `
+          <div class="glass-card rounded-xl p-5 border border-white/10 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-slate-400">#${t.id}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${statusClass} border uppercase">
+                  ${t.status}
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300">
+                  ${categoryLabel}
+                </span>
+              </div>
+              <div class="text-[11px] font-mono text-slate-400">
+                ${new Date(t.createdAt).toLocaleString('en-IN')}
+              </div>
+            </div>
+
+            <div>
+              <div class="text-sm font-bold text-white font-sans">${t.subject}</div>
+              <div class="text-xs text-slate-300 mt-1 leading-relaxed whitespace-pre-wrap">${t.message}</div>
+            </div>
+
+            <div class="p-3 rounded-lg bg-obsidian-950 border border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+              <div>
+                <span class="text-slate-400">User Contact:</span>
+                <strong class="text-white ml-1 font-sans">${t.userContact}</strong>
+                ${t.brandName ? `<span class="ml-2 text-slate-400">(${t.brandName})</span>` : ''}
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400">Update Status:</span>
+                <select onchange="updateTicketStatus('${t.id}', this.value)" class="bg-obsidian-900 border border-white/15 rounded px-2 py-1 text-white font-mono text-xs">
+                  <option value="OPEN" ${t.status === 'OPEN' ? 'selected' : ''}>OPEN</option>
+                  <option value="IN_PROGRESS" ${t.status === 'IN_PROGRESS' ? 'selected' : ''}>IN_PROGRESS</option>
+                  <option value="RESOLVED" ${t.status === 'RESOLVED' ? 'selected' : ''}>RESOLVED</option>
+                </select>
+
+                <button onclick="deleteTicket('${t.id}')" class="text-slate-500 hover:text-siren-400 p-1">🗑️</button>
+              </div>
+            </div>
+
+            <!-- Admin Reply Area -->
+            <div class="pt-2 border-t border-white/5">
+              ${t.adminReply ? `
+                <div class="text-xs text-radar-400 font-mono bg-radar-500/10 p-3 rounded-lg border border-radar-500/20">
+                  <strong>Engineering Note:</strong> ${t.adminReply}
+                </div>
+              ` : `
+                <div class="flex items-center gap-2">
+                  <input type="text" id="replyInput-${t.id}" placeholder="Type engineering note or reply..." class="flex-1 px-3 py-1.5 rounded-lg bg-obsidian-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-siren-500" />
+                  <button onclick="saveAdminReply('${t.id}')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">Save Note</button>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function updateTicketStatus(id, status) {
+      try {
+        await fetch(`/api/admin/tickets/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ status })
+        });
+        loadAdminTickets();
+      } catch (err) {
+        alert('Update failed: ' + err.message);
+      }
+    }
+
+    async function saveAdminReply(id) {
+      const input = document.getElementById(`replyInput-${id}`);
+      const adminReply = input.value.trim();
+      if (!adminReply) return;
+
+      try {
+        await fetch(`/api/admin/tickets/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ adminReply, status: 'IN_PROGRESS' })
+        });
+        loadAdminTickets();
+      } catch (err) {
+        alert('Reply failed: ' + err.message);
+      }
+    }
+
+    async function deleteTicket(id) {
+      if (!confirm('Are you sure you want to delete this ticket?')) return;
+      try {
+        await fetch(`/api/admin/tickets/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-key': adminKey }
+        });
+        loadAdminTickets();
+      } catch (err) {
+        alert('Delete failed: ' + err.message);
+      }
+    }
+
+    // =============================================================
+    // Tab 3: Agent SirenGrowth (Autonomous Sales & Marketing)
+    // =============================================================
+    async function loadAdminGrowth() {
+      try {
+        const res = await fetch('/api/admin/growth/prospects', {
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        currentProspects = data.prospects || [];
+        document.getElementById('prospectsCountBadge').textContent = `${currentProspects.length} Brands`;
+        document.getElementById('pipelineCountBadge').textContent = `${currentProspects.length} Brands`;
+        renderProspectsTable(currentProspects);
+        loadAdminStrikes();
+      } catch (err) {
+        console.error('Error loading prospects:', err);
+      }
+    }
+
+    function renderProspectsTable(prospects) {
+      const tbody = document.getElementById('prospectsTableBody');
+      if (prospects.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">No D2C brands in pipeline yet. Click "Auto-Discover Fresh Brands".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = prospects.map(p => {
+        const isAudited = p.stage !== 'PROSPECT';
+        const cleanPhone = (p.contactWhatsApp || '').replace(/\D/g, '');
+
+        // Generate preformatted WhatsApp text if outreach is ready
+        const waText = p.outreachEnglish ? encodeURIComponent(p.outreachEnglish.whatsapp) : encodeURIComponent(`Hi ${p.targetRole}, saw your Meta ads for ${p.brandName}. RoasSiren watchdog detected out-of-stock items.`);
+        const waUrl = cleanPhone ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${waText}` : `https://api.whatsapp.com/send?text=${waText}`;
+        const mailUrl = p.contactEmail ? `mailto:${p.contactEmail}?subject=${encodeURIComponent(p.outreachEnglish?.emailSubject || `Ad Spend Leak on ${p.brandName}`)}&body=${encodeURIComponent(p.outreachEnglish?.emailBody || 'Hi team, noticed sold out SKUs on active ads.')}` : '#';
+
+        return `
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="py-3.5 pl-2">
+              <div class="font-bold text-white font-sans flex items-center gap-1.5 text-xs">
+                <span>${p.brandName}</span>
+              </div>
+              <a href="https://${p.domain}" target="_blank" class="text-[11px] text-slate-400 hover:text-white flex items-center gap-1">
+                <span>${p.domain}</span>
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+              </a>
+            </td>
+            <td class="py-3.5">
+              <div class="text-white font-bold">₹${(p.estimatedMonthlyAdSpend || 1000000).toLocaleString('en-IN')}/mo</div>
+              <div class="text-[10px] text-slate-400 uppercase font-mono">${p.category}</div>
+            </td>
+            <td class="py-3.5 text-slate-300 font-sans">
+              <div class="font-semibold text-xs text-white">${p.targetRole}</div>
+              
+              <!-- Direct Clickable Action Channels -->
+              <div class="flex items-center gap-1.5 mt-1.5">
+                ${cleanPhone ? `
+                  <a href="${waUrl}" target="_blank" class="px-2 py-0.5 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold transition-all flex items-center gap-1" title="Message on WhatsApp: +${cleanPhone}">
+                    <span>🟢 +${cleanPhone}</span>
+                  </a>
+                ` : `
+                  <button onclick="openEditContactModal('${p.id}')" class="px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-mono">
+                    + Add Phone
+                  </button>
+                `}
+
+                ${p.contactEmail ? `
+                  <a href="${mailUrl}" class="px-2 py-0.5 rounded bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-[10px] font-mono transition-all" title="Send Email: ${p.contactEmail}">
+                    ✉️ Email
+                  </a>
+                ` : ''}
+
+                ${p.linkedInUrl ? `
+                  <a href="${p.linkedInUrl}" target="_blank" class="px-1.5 py-0.5 rounded bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono transition-all" title="LinkedIn Profile">
+                    💼
+                  </a>
+                ` : ''}
+
+                <button onclick="openEditContactModal('${p.id}')" class="text-slate-500 hover:text-white p-1 text-[11px]" title="Edit Contact Details">
+                  ✏️
+                </button>
+              </div>
+            </td>
+            <td class="py-3.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.stage === 'CLOSED_WON' ? 'bg-radar-500/20 text-radar-400 border border-radar-500/30' : p.stage === 'OUTREACH_SENT' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : isAudited ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-white/10 text-slate-300'}">
+                ${p.stage}
+              </span>
+            </td>
+            <td class="py-3.5">
+              ${isAudited ? `
+                <div class="font-bold text-siren-400">${p.outOfStockCount || 0} Hero SKUs Sold Out</div>
+                <div class="text-[10px] text-slate-400">~₹${(p.dailyBleedRiskInr || 0).toLocaleString('en-IN')}/day bleed</div>
+              ` : `
+                <span class="text-slate-500 text-[11px]">Unscanned</span>
+              `}
+            </td>
+            <td class="py-3.5 pr-2 text-right">
+              ${isAudited ? `
+                <button onclick="openOutreachDrawer('${p.id}')" class="px-3 py-1.5 rounded-lg bg-radar-500/15 hover:bg-radar-500/25 text-radar-400 border border-radar-500/30 font-bold transition-all text-xs">
+                  ⚡ View Pitch Copy
+                </button>
+              ` : `
+                <button onclick="auditBrandLead('${p.id}', this)" class="px-3 py-1.5 rounded-lg bg-siren-600 hover:bg-siren-500 text-white font-bold transition-all text-xs shadow-md shadow-siren-600/20">
+                  🔍 Scan & Pitch
+                </button>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function auditBrandLead(id, btn) {
+      btn.disabled = true;
+      btn.textContent = 'Auditing Catalog...';
+
+      try {
+        const res = await fetch('/api/admin/growth/audit-prospect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = 'Audited!';
+
+        if (data.success) {
+          loadAdminGrowth();
+          openOutreachDrawer(id);
+        } else {
+          alert('Audit failed: ' + data.error);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = '🔍 Scan & Pitch';
+        alert('Audit error: ' + err.message);
+      }
+    }
+
+    async function discoverFreshLeads() {
+      const btn = document.getElementById('discoverLeadsBtn');
+      btn.disabled = true;
+      btn.textContent = '🤖 Scouting D2C Brands...';
+
+      try {
+        const res = await fetch('/api/admin/growth/discover', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = '🤖 Auto-Discover Fresh Brands (AI Radar)';
+
+        if (data.success) {
+          loadAdminGrowth();
+          alert(`Successfully discovered ${data.prospects.length} D2C brands in pipeline!`);
+        } else {
+          alert('Discovery failed: ' + data.error);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = '🤖 Auto-Discover Fresh Brands (AI Radar)';
+        alert('Error: ' + err.message);
+      }
+    }
+
+    function openEditContactModal(id) {
+      const p = currentProspects.find(lead => lead.id === id);
+      if (!p) return;
+
+      document.getElementById('editContactLeadId').value = p.id;
+      document.getElementById('editContactBrandTitle').textContent = `Edit Contact: ${p.brandName}`;
+      document.getElementById('editContactRole').value = p.targetRole || '';
+      document.getElementById('editContactWhatsApp').value = p.contactWhatsApp || '';
+      document.getElementById('editContactEmail').value = p.contactEmail || '';
+      document.getElementById('editContactLinkedIn').value = p.linkedInUrl || '';
+
+      document.getElementById('editContactModal').classList.remove('hidden');
+      document.getElementById('editContactModal').classList.add('flex');
+    }
+
+    function closeEditContactModal() {
+      document.getElementById('editContactModal').classList.remove('flex');
+      document.getElementById('editContactModal').classList.add('hidden');
+    }
+
+    async function handleEditContactSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('editContactLeadId').value;
+      const targetRole = document.getElementById('editContactRole').value.trim();
+      const contactWhatsApp = document.getElementById('editContactWhatsApp').value.trim();
+      const contactEmail = document.getElementById('editContactEmail').value.trim();
+      const linkedInUrl = document.getElementById('editContactLinkedIn').value.trim();
+
+      const btn = document.getElementById('saveContactBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const res = await fetch(`/api/admin/growth/prospects/${id}/contact`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ targetRole, contactWhatsApp, contactEmail, linkedInUrl })
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = 'Save Contact Details ✅';
+
+        if (data.success) {
+          closeEditContactModal();
+          loadAdminGrowth();
+        } else {
+          alert('Failed to save contact: ' + data.error);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Save Contact Details ✅';
+        alert('Error: ' + err.message);
+      }
+    }
+
+    function openOutreachDrawer(id) {
+      const prospect = currentProspects.find(p => p.id === id);
+      if (!prospect || !prospect.outreachEnglish) return;
+
+      activeOutreachProspect = prospect;
+
+      document.getElementById('outreachModalBrand').textContent = `${prospect.brandName} Outreach`;
+      document.getElementById('outreachModalSub').textContent = `Target: ${prospect.targetRole} (${prospect.domain})`;
+      document.getElementById('outreachModalSku').textContent = prospect.topSoldOutSku || 'Hero SKU';
+      document.getElementById('outreachModalBleed').textContent = `~₹${(prospect.dailyBleedRiskInr || 4500).toLocaleString('en-IN')} / day`;
+
+      // Prepopulate English Default Outreach Copy
+      document.getElementById('pitchText-wa').textContent = prospect.outreachEnglish.whatsapp;
+      document.getElementById('pitchText-emailSubject').textContent = prospect.outreachEnglish.emailSubject;
+      document.getElementById('pitchText-emailBody').textContent = prospect.outreachEnglish.emailBody;
+      document.getElementById('pitchText-linkedin').textContent = prospect.outreachEnglish.linkedinInmail;
+
+      // Optional Hinglish
+      if (prospect.outreachHinglish) {
+        document.getElementById('pitchText-hinglish').textContent = prospect.outreachHinglish.whatsapp;
+      }
+
+      // Prepopulate Direct Recipient Phone input
+      const phoneInput = document.getElementById('outreachRecipientPhone');
+      phoneInput.value = prospect.contactWhatsApp || '';
+
+      updateOutreachDispatchLinks();
+
+      phoneInput.oninput = () => {
+        updateOutreachDispatchLinks();
+      };
+
+      document.getElementById('modalStageSelect').value = prospect.stage;
+
+      // Default to WhatsApp English tab
+      switchPitchTab('wa');
+
+      const modal = document.getElementById('outreachModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function updateOutreachDispatchLinks() {
+      if (!activeOutreachProspect) return;
+      const phoneClean = document.getElementById('outreachRecipientPhone').value.replace(/\D/g, '');
+      const waText = encodeURIComponent(activeOutreachProspect.outreachEnglish.whatsapp);
+      const waLinkEl = document.getElementById('pitchDirectWaLink');
+
+      if (phoneClean) {
+        waLinkEl.href = `https://api.whatsapp.com/send?phone=${phoneClean}&text=${waText}`;
+      } else {
+        waLinkEl.href = `https://api.whatsapp.com/send?text=${waText}`;
+      }
+
+      const mailEl = document.getElementById('pitchDirectMailLink');
+      const emailSub = encodeURIComponent(activeOutreachProspect.outreachEnglish.emailSubject);
+      const emailBody = encodeURIComponent(activeOutreachProspect.outreachEnglish.emailBody);
+      mailEl.href = activeOutreachProspect.contactEmail 
+        ? `mailto:${activeOutreachProspect.contactEmail}?subject=${emailSub}&body=${emailBody}`
+        : `mailto:?subject=${emailSub}&body=${emailBody}`;
+
+      const liEl = document.getElementById('pitchDirectLiLink');
+      liEl.href = activeOutreachProspect.linkedInUrl || 'https://linkedin.com';
+    }
+
+    function closeOutreachModal() {
+      const modal = document.getElementById('outreachModal');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    function switchPitchTab(channel) {
+      ['wa', 'email', 'linkedin', 'hinglish'].forEach(c => {
+        document.getElementById(`pitchView-${c}`).classList.add('hidden');
+        const btn = document.getElementById(`pitchTabBtn-${c}`);
+        btn.classList.remove('bg-white/10', 'text-white');
+        btn.classList.add('text-slate-400');
+      });
+
+      document.getElementById(`pitchView-${channel}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`pitchTabBtn-${channel}`);
+      activeBtn.classList.remove('text-slate-400');
+      activeBtn.classList.add('bg-white/10', 'text-white');
+    }
+
+    function copyPitchText(elementId, btn) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text);
+      const original = btn.innerHTML;
+      btn.innerHTML = '<span>✅ Copied to Clipboard!</span>';
+      setTimeout(() => { btn.innerHTML = original; }, 2000);
+    }
+
+    function copyElementText(elementId, btn) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text);
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = original; }, 2000);
+    }
+
+    async function saveModalStage() {
+      if (!activeOutreachProspect) return;
+      const stage = document.getElementById('modalStageSelect').value;
+
+      try {
+        await fetch(`/api/admin/growth/prospects/${activeOutreachProspect.id}/stage`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ stage })
+        });
+        loadAdminGrowth();
+        closeOutreachModal();
+      } catch (err) {
+        alert('Failed to update stage: ' + err.message);
+      }
+    }
+
+    function openAddProspectModal() {
+      document.getElementById('addProspectModal').classList.remove('hidden');
+      document.getElementById('addProspectModal').classList.add('flex');
+    }
+
+    function closeAddProspectModal() {
+      document.getElementById('addProspectModal').classList.remove('flex');
+      document.getElementById('addProspectModal').classList.add('hidden');
+    }
+
+    async function handleAddProspectSubmit(e) {
+      e.preventDefault();
+      const brandName = document.getElementById('newBrandName').value.trim();
+      const domain = document.getElementById('newBrandDomain').value.trim();
+      const category = document.getElementById('newBrandCategory').value;
+      const estimatedMonthlyAdSpend = Number(document.getElementById('newBrandSpend').value);
+      const targetRole = document.getElementById('newBrandRole').value.trim();
+      const contactWhatsApp = document.getElementById('newBrandPhone').value.trim();
+      const contactEmail = document.getElementById('newBrandEmail').value.trim();
+
+      const btn = document.getElementById('addProspectSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Adding Brand...';
+
+      try {
+        const res = await fetch('/api/admin/growth/add-prospect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({
+            brandName,
+            domain,
+            category,
+            estimatedMonthlyAdSpend,
+            targetRole,
+            contactWhatsApp,
+            contactEmail
+          })
+        });
+
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = '+ Add to SirenGrowth Radar 🚀';
+
+        if (data.success) {
+          closeAddProspectModal();
+          document.getElementById('addProspectForm').reset();
+          loadAdminGrowth();
+        } else {
+          alert('Failed to add prospect: ' + data.error);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = '+ Add to SirenGrowth Radar 🚀';
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // =============================================================
+    // 24x7 Real-Time Strike Engine Functions
+    // =============================================================
+    let currentStrikes = [];
+
+    async function loadAdminStrikes() {
+      try {
+        const res = await fetch('/api/admin/growth/strikes', {
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        currentStrikes = data.strikes || [];
+        const stats = data.stats || {};
+
+        document.getElementById('statStrikesTotal').textContent = stats.totalDetected || currentStrikes.length;
+        document.getElementById('statStrikesDispatched').textContent = stats.dispatchedCount || 0;
+        document.getElementById('statStrikeHourlyBurn').textContent = '₹' + (stats.totalHourlyBurnCaught || 0).toLocaleString('en-IN') + '/hr';
+        document.getElementById('pendingStrikesBadge').textContent = `${stats.pendingCount || 0} Ready`;
+
+        updateAutopilotUI(stats.autopilotEnabled);
+        renderStrikesList(currentStrikes);
+      } catch (err) {
+        console.error('Error loading strikes:', err);
+      }
+    }
+
+    function updateAutopilotUI(isEnabled) {
+      const btn = document.getElementById('autopilotToggleBtn');
+      const dot = document.getElementById('autopilotStatusDot');
+      const label = document.getElementById('autopilotLabel');
+
+      if (!btn || !dot || !label) return;
+
+      if (isEnabled) {
+        btn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-600/30';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
+        label.textContent = '⚡ Autopilot: ACTIVE (Auto-Strike ON)';
+      } else {
+        btn.className = 'px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 bg-amber-600/20 text-amber-300 border border-amber-500/40 hover:bg-amber-600/30';
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        label.textContent = '⏸️ Review-First Mode (Manual Strikes)';
+      }
+    }
+
+    async function toggleAutopilot() {
+      const isCurrentlyActive = document.getElementById('autopilotLabel').textContent.includes('ACTIVE');
+      const targetState = !isCurrentlyActive;
+
+      try {
+        const res = await fetch('/api/admin/growth/autopilot/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ enabled: targetState })
+        });
+        const data = await res.json();
+        if (data.success) {
+          updateAutopilotUI(data.autopilotEnabled);
+        }
+      } catch (err) {
+        alert('Toggle failed: ' + err.message);
+      }
+    }
+
+    async function runProspectRadarNow(btn) {
+      const original = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg><span>Scanning Stores...</span>';
+
+      try {
+        const res = await fetch('/api/admin/growth/strikes/run-radar', {
+          method: 'POST',
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        btn.disabled = false;
+        btn.innerHTML = original;
+
+        if (data.success) {
+          loadAdminStrikes();
+          loadAdminGrowth();
+          alert(`⚡ Prospect Radar Completed!\nScanned: ${data.result.scanned} stores\nNew OOS Ad Bleeds Caught: ${data.result.newStrikes}\nAuto-Dispatched Strikes: ${data.result.dispatched}`);
+        } else {
+          alert('Radar failed: ' + data.error);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = original;
+        alert('Radar error: ' + err.message);
+      }
+    }
+
+    function renderStrikesList(strikes) {
+      const container = document.getElementById('strikesContainer');
+      if (!container) return;
+      if (strikes.length === 0) {
+        container.innerHTML = `<div class="py-8 text-center text-slate-500 font-mono text-xs">No active stockouts detected right now. Click "Sweep All Stores Now" to scan.</div>`;
+        return;
+      }
+
+      container.innerHTML = strikes.map(s => {
+        const isDispatched = s.status === 'DISPATCHED';
+        const cleanPhone = (s.recipientWhatsApp || '').replace(/\D/g, '');
+        const waText = encodeURIComponent(s.strikeMessageWa);
+        const waUrl = cleanPhone 
+          ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${waText}`
+          : `https://api.whatsapp.com/send?text=${waText}`;
+
+        const mailUrl = s.recipientEmail 
+          ? `mailto:${s.recipientEmail}?subject=${encodeURIComponent(s.strikeSubjectEmail)}&body=${encodeURIComponent(s.strikeBodyEmail)}`
+          : '#';
+
+        const timeAgo = Math.round((Date.now() - new Date(s.detectedAt).getTime()) / (60 * 1000));
+        const timeLabel = timeAgo < 1 ? 'Just now' : `${timeAgo}m ago`;
+
+        return `
+          <div class="glass-card rounded-xl p-4 border ${isDispatched ? 'border-emerald-500/25 bg-emerald-950/10' : 'border-siren-500/40 bg-siren-950/20'} flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
+            <div class="space-y-1.5 flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-bold text-white text-sm font-sans">${s.brandName}</span>
+                <span class="text-slate-400 font-mono text-[11px]">(${s.domain})</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${isDispatched ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-siren-500/20 text-siren-400 border border-siren-500/40 animate-pulse'} uppercase">
+                  ${isDispatched ? '✅ STRIKE SENT' : '🚨 BURNING AD BLEED'}
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono font-bold">🕒 ${timeLabel}</span>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+                <span class="text-slate-300">Sold-Out SKU:</span>
+                <a href="${s.productUrl}" target="_blank" class="text-siren-400 font-bold hover:underline truncate max-w-sm flex items-center gap-1">
+                  <span>${s.productTitle}</span>
+                  <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+                <span class="text-white font-bold bg-siren-500/20 px-2 py-0.5 rounded text-[11px]">
+                  ~₹${(s.hourlyBurnInr || 1200).toLocaleString('en-IN')}/hr Bleed
+                </span>
+              </div>
+
+              <div class="text-[11px] text-slate-400 font-mono flex items-center gap-2">
+                <span>Contact: <strong class="text-slate-200">${s.recipientRole}</strong></span>
+                ${cleanPhone ? `<span class="text-emerald-400 font-bold">● +${cleanPhone}</span>` : '<span class="text-amber-400">● Phone missing</span>'}
+              </div>
+            </div>
+
+            <!-- Strike Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <a href="${waUrl}" target="_blank" onclick="recordStrikeDispatched('${s.id}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
+                <span>🟢 Strike WhatsApp</span>
+              </a>
+
+              ${s.recipientEmail ? `
+                <a href="${mailUrl}" onclick="recordStrikeDispatched('${s.id}', 'EMAIL')" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all flex items-center gap-1">
+                  <span>✉️ Email</span>
+                </a>
+              ` : ''}
+
+              <button onclick="dismissStrikeOpportunity('${s.id}')" class="px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-xs transition-all" title="Dismiss Alert">
+                ✕
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function recordStrikeDispatched(strikeId, method = 'WHATSAPP') {
+      try {
+        await fetch(`/api/admin/growth/strikes/${strikeId}/dispatch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ method })
+        });
+        setTimeout(loadAdminStrikes, 1000);
+      } catch (e) {
+        console.warn('Could not record strike dispatch:', e);
+      }
+    }
+
+    async function dismissStrikeOpportunity(strikeId) {
+      try {
+        await fetch(`/api/admin/growth/strikes/${strikeId}/dismiss`, {
+          method: 'POST',
+          headers: { 'x-admin-key': adminKey }
+        });
+        loadAdminStrikes();
+      } catch (e) {
+        console.warn('Could not dismiss strike:', e);
+      }
+    }
+
+    // =============================================================
+    // Tab 4: Autonomous Strategy Engine
+    // =============================================================
+    async function loadAdminInsights() {
+      try {
+        const res = await fetch('/api/admin/growth/insights', {
+          headers: { 'x-admin-key': adminKey }
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        renderInsightsGrid(data.insights || []);
+      } catch (err) {
+        console.error('Error loading insights:', err);
+      }
+    }
+
+    function renderInsightsGrid(insights) {
+      const container = document.getElementById('insightsGrid');
+      if (insights.length === 0) {
+        container.innerHTML = `<div class="py-12 text-center text-slate-500 font-mono text-xs col-span-2">No strategic recommendations generated yet. Click "Generate Fresh AI Growth Hacks".</div>`;
+        return;
+      }
+
+      container.innerHTML = insights.map(item => {
+        const impactBadge = item.impact === 'MAXIMUM' ? 'bg-siren-500/20 text-siren-400 border-siren-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+        const feasibilityLabel = item.feasibility === '1_HOUR' ? '⚡ 1-Hour Feasibility' : item.feasibility === '1_DAY' ? '📅 1-Day Execution' : '🗓️ 1-Week Sprint';
+
+        return `
+          <div class="glass-card rounded-2xl p-6 border border-white/10 flex flex-col justify-between space-y-4 hover:border-amber-500/30 transition-all">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300 uppercase">
+                  ${item.category}
+                </span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${impactBadge} border uppercase">
+                  ${item.impact} IMPACT
+                </span>
+              </div>
+
+              <h4 class="text-base font-black text-white font-sans">${item.title}</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">${item.summary}</p>
+
+              <div class="p-3 rounded-xl bg-obsidian-900 border border-white/5 space-y-2">
+                <div class="text-[10px] text-slate-400 uppercase font-mono tracking-wider font-bold">Actionable Execution Steps:</div>
+                <ul class="space-y-1.5 text-xs text-slate-300">
+                  ${(item.actionSteps || []).map(step => `
+                    <li class="flex items-start gap-2">
+                      <span class="text-amber-400 mt-0.5 shrink-0">▸</span>
+                      <span>${step}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+              <span class="text-emerald-400 font-bold">${item.expectedRevenueLift}</span>
+              <span class="text-slate-400">${feasibilityLabel}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function generateFreshInsights() {
+      const btn = document.getElementById('generateInsightsBtn');
+      btn.disabled = true;
+      btn.textContent = 'Generating AI Strategies...';
+
+      try {
+        const res = await fetch('/api/admin/growth/insights/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey }
+        });
+
+        const data = await res.json();
+        btn.disabled = false;
+        btn.textContent = '✨ Generate Fresh AI Growth Hacks';
+
+        if (data.success) {
+          renderInsightsGrid(data.insights || []);
+        } else {
+          alert('Generation failed: ' + data.error);
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = '✨ Generate Fresh AI Growth Hacks';
+        alert('Strategy error: ' + err.message);
+      }
+    }
+  
+</script>
+<!-- 1-Click Outreach Drawer / Modal (English Default) -->
+  <!-- ============================================================= -->
+  <div id="outreachModal" class="fixed inset-0 z-[9999] bg-obsidian-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-card rounded-2xl max-w-2xl w-full border border-white/15 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-white/10 flex items-center justify-between bg-obsidian-900">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-black text-white" id="outreachModalBrand">Brand Outreach</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-radar-500/20 text-radar-400 border border-radar-500/30">
+              1-Click Ready (English Default)
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5" id="outreachModalSub">Founder & Media Buyer Conversion Pitch</p>
+        </div>
+        <button onclick="closeOutreachModal()" class="text-slate-400 hover:text-white text-xl p-1">✕</button>
+      </div>
+
+      <!-- Vulnerability Snippet -->
+      <div class="px-5 py-3 bg-siren-500/10 border-b border-siren-500/20 flex items-center justify-between text-xs font-mono">
+        <div>
+          <span class="text-slate-400">Sold-Out Hero SKU:</span>
+          <strong class="text-siren-400 ml-1" id="outreachModalSku">-</strong>
+        </div>
+        <div>
+          <span class="text-slate-400">Est. Daily Ad Bleed:</span>
+          <strong class="text-white ml-1 font-bold" id="outreachModalBleed">-</strong>
+        </div>
+      </div>
+
+      <!-- Quick Dispatch Recipient Input Bar -->
+      <div class="px-5 py-3 bg-obsidian-900 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+          <span class="text-slate-400 font-mono">Recipient Phone:</span>
+          <input type="text" id="outreachRecipientPhone" placeholder="+91 98... WhatsApp Number" class="flex-1 px-3 py-1.5 rounded-lg bg-obsidian-950 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-radar-500" />
+        </div>
+        <div class="flex items-center gap-2">
+          <a id="pitchDirectWaLink" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all flex items-center gap-1">
+            <span>🟢 Send WhatsApp</span>
+          </a>
+          <a id="pitchDirectMailLink" href="#" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold transition-all flex items-center gap-1">
+            <span>✉️ Open Email</span>
+          </a>
+          <a id="pitchDirectLiLink" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-bold transition-all flex items-center gap-1">
+            <span>💼 LinkedIn</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Pitch Channel Tabs -->
+      <div class="flex items-center gap-2 px-5 py-2 bg-obsidian-950 border-b border-white/10 text-xs font-bold">
+        <button onclick="switchPitchTab('wa')" id="pitchTabBtn-wa" class="px-3 py-1.5 rounded-lg bg-white/10 text-white">🟢 WhatsApp DM (English)</button>
+        <button onclick="switchPitchTab('email')" id="pitchTabBtn-email" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">✉️ Cold Email (English)</button>
+        <button onclick="switchPitchTab('linkedin')" id="pitchTabBtn-linkedin" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">💼 LinkedIn InMail (English)</button>
+        <button onclick="switchPitchTab('hinglish')" id="pitchTabBtn-hinglish" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">🇮🇳 Hinglish Option</button>
+      </div>
+
+      <!-- Pitch Content -->
+      <div class="p-5 flex-1 overflow-y-auto space-y-4 text-xs font-mono">
+        
+        <!-- WhatsApp View -->
+        <div id="pitchView-wa" class="space-y-3">
+          <div class="text-[11px] text-slate-400 font-sans">
+            Founder-to-founder direct WhatsApp copy. Cites specific sold-out product and daily bleed calculation.
+          </div>
+          <div class="p-4 rounded-xl bg-obsidian-900 border border-white/10 text-slate-200 whitespace-pre-wrap leading-relaxed select-all" id="pitchText-wa"></div>
+          <div class="flex items-center gap-3 pt-2">
+            <button onclick="copyPitchText('pitchText-wa', this)" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all flex items-center gap-1.5">
+              <span>📋 Copy WhatsApp Pitch</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Email View -->
+        <div id="pitchView-email" class="hidden space-y-3">
+          <div>
+            <label class="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Subject Line</label>
+            <div class="p-2.5 rounded-lg bg-obsidian-900 border border-white/10 text-white font-bold flex items-center justify-between">
+              <span id="pitchText-emailSubject"></span>
+              <button onclick="copyElementText('pitchText-emailSubject', this)" class="text-[11px] text-siren-400 hover:text-siren-300">Copy</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Email Body</label>
+            <div class="p-4 rounded-xl bg-obsidian-900 border border-white/10 text-slate-200 whitespace-pre-wrap leading-relaxed select-all" id="pitchText-emailBody"></div>
+          </div>
+          <div class="pt-2">
+            <button onclick="copyPitchText('pitchText-emailBody', this)" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all">
+              📋 Copy Email Body
+            </button>
+          </div>
+        </div>
+
+        <!-- LinkedIn View -->
+        <div id="pitchView-linkedin" class="hidden space-y-3">
+          <div class="text-[11px] text-slate-400 font-sans">
+            Short, punchy InMail message with live proof link.
+          </div>
+          <div class="p-4 rounded-xl bg-obsidian-900 border border-white/10 text-slate-200 whitespace-pre-wrap leading-relaxed select-all" id="pitchText-linkedin"></div>
+          <div class="pt-2">
+            <button onclick="copyPitchText('pitchText-linkedin', this)" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all">
+              📋 Copy LinkedIn InMail
+            </button>
+          </div>
+        </div>
+
+        <!-- Hinglish View -->
+        <div id="pitchView-hinglish" class="hidden space-y-3">
+          <div class="text-[11px] text-slate-400 font-sans">
+            Natural conversational Hinglish pitch for domestic founders.
+          </div>
+          <div class="p-4 rounded-xl bg-obsidian-900 border border-white/10 text-slate-200 whitespace-pre-wrap leading-relaxed select-all" id="pitchText-hinglish"></div>
+          <div class="pt-2">
+            <button onclick="copyPitchText('pitchText-hinglish', this)" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all">
+              📋 Copy Hinglish Pitch
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advance Pipeline Status -->
+      <div class="p-4 bg-obsidian-900 border-t border-white/10 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-sans">Update Stage:</span>
+          <select id="modalStageSelect" class="bg-obsidian-950 border border-white/15 rounded-lg px-2.5 py-1.5 text-white font-mono">
+            <option value="PROSPECT">PROSPECT</option>
+            <option value="AUDITED">AUDITED</option>
+            <option value="OUTREACH_SENT">OUTREACH_SENT</option>
+            <option value="DEMO_BOOKED">DEMO_BOOKED</option>
+            <option value="CLOSED_WON">CLOSED_WON</option>
+          </select>
+          <button onclick="saveModalStage()" class="px-3 py-1.5 rounded-lg bg-siren-600 hover:bg-siren-500 text-white font-bold transition-all">
+            Save Status
+          </button>
+        </div>
+        <button onclick="closeOutreachModal()" class="text-slate-400 hover:text-white">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- Edit Prospect Contact Modal -->
+  <!-- ============================================================= -->
+  <div id="editContactModal" class="fixed inset-0 z-[9999] bg-obsidian-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-card rounded-2xl max-w-md w-full border border-white/15 shadow-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-black text-white" id="editContactBrandTitle">Edit Contact Details</h3>
+        <button onclick="closeEditContactModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+      </div>
+
+      <form id="editContactForm" onsubmit="handleEditContactSubmit(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="editContactLeadId" />
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Founder / Contact Name</label>
+          <input type="text" id="editContactRole" placeholder="e.g. Aman Gupta (Founder)" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-radar-500" />
+        </div>
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">WhatsApp Phone Number *</label>
+          <input type="text" id="editContactWhatsApp" placeholder="+919876543210" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-radar-500 font-mono" />
+        </div>
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Email Address</label>
+          <input type="email" id="editContactEmail" placeholder="founder@brand.com" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-radar-500" />
+        </div>
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">LinkedIn Profile URL</label>
+          <input type="url" id="editContactLinkedIn" placeholder="https://linkedin.com/in/founder" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-radar-500 font-mono" />
+        </div>
+
+        <button type="submit" id="saveContactBtn" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-radar-600 to-emerald-700 hover:from-radar-500 hover:to-emerald-600 text-white font-bold transition-all mt-4">
+          Save Contact Details ✅
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- Change Subscriber Plan Modal -->
+  <!-- ============================================================= -->
+  <div id="changePlanModal" class="fixed inset-0 z-[9999] bg-obsidian-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-card rounded-2xl max-w-md w-full border border-white/15 shadow-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-black text-white">Upgrade Subscriber Plan</h3>
+        <button onclick="closeChangePlanModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+      </div>
+
+      <form id="changePlanForm" onsubmit="handleChangePlanSubmit(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="changePlanPhone" />
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Subscriber Phone</label>
+          <input type="text" id="changePlanPhoneDisplay" disabled class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-slate-400 font-mono" />
+        </div>
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Select Plan</label>
+          <select id="changePlanSelect" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-radar-500 font-mono">
+            <option value="starter_1999">Starter D2C (₹1,999/mo • 15 SKUs)</option>
+            <option value="growth_4999">Growth Brand (₹4,999/mo • 50 SKUs)</option>
+            <option value="agency_9999">Agency Fleet (₹9,999/mo • 200 SKUs)</option>
+            <option value="free_scan">Free Diagnostic (1 SKU)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Extend Validity (Days)</label>
+          <input type="number" id="changePlanDays" value="30" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white font-mono" />
+        </div>
+
+        <button type="submit" id="savePlanBtn" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-radar-600 to-emerald-700 hover:from-radar-500 hover:to-emerald-600 text-white font-bold transition-all mt-4">
+          Apply Plan Upgrade ⚡
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- Add Prospect Store Modal -->
+  <!-- ============================================================= -->
+  <div id="addProspectModal" class="fixed inset-0 z-[9999] bg-obsidian-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-card rounded-2xl max-w-md w-full border border-white/15 shadow-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-black text-white">Add Target D2C Store</h3>
+        <button onclick="closeAddProspectModal()" class="text-slate-400 hover:text-white text-xl">✕</button>
+      </div>
+
+      <form id="addProspectForm" onsubmit="handleAddProspectSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Brand Name *</label>
+          <input type="text" id="newBrandName" required placeholder="e.g. Bewakoof, Mamaearth" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-siren-500" />
+        </div>
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Store Domain *</label>
+          <input type="text" id="newBrandDomain" required placeholder="bewakoof.com" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-siren-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Category</label>
+            <select id="newBrandCategory" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-siren-500">
+              <option value="FASHION">Fashion & Apparel</option>
+              <option value="BEAUTY">Beauty & Skincare</option>
+              <option value="ELECTRONICS">Electronics</option>
+              <option value="FOOD_HEALTH">Food & Supplements</option>
+              <option value="FOOTWEAR">Footwear</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Est. Mo. Spend (₹)</label>
+            <input type="number" id="newBrandSpend" value="3500000" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-siren-500 font-mono" />
+          </div>
+        </div>
+        <div>
+          <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Target Role / Name</label>
+          <input type="text" id="newBrandRole" placeholder="Founder / Head of Performance" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-siren-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Contact WhatsApp</label>
+            <input type="text" id="newBrandPhone" placeholder="+919876543210" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-siren-500 font-mono" />
+          </div>
+          <div>
+            <label class="text-slate-400 uppercase tracking-wider block mb-1 font-mono">Contact Email</label>
+            <input type="email" id="newBrandEmail" placeholder="growth@brand.com" class="w-full px-3 py-2 rounded-xl bg-obsidian-900 border border-white/10 text-white focus:outline-none focus:border-siren-500" />
+          </div>
+        </div>
+
+        <button type="submit" id="addProspectSubmitBtn" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-radar-600 to-emerald-700 hover:from-radar-500 hover:to-emerald-600 text-white font-bold transition-all mt-4">
+          + Add to SirenGrowth Radar 🚀
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- JavaScript Operations & API Orchestration -->
+  <!-- ============================================================= -->
 </body>
 </html>
