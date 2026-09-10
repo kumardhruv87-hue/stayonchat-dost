@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoasSiren™ — Store Catalog Ad Waste Audit</title>
+  
+  <meta name="description" content="Instant Shopify Store Catalog Audit: Uncover sold-out products burning Meta ad spend in real-time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#030712',
+              900: '#090d16',
+              850: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+            },
+            siren: {
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+            },
+            radar: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #030712;
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .bg-grid {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+  </style>
+</head>
+
+<body class="bg-obsidian-950 text-slate-100 min-h-screen flex flex-col bg-grid selection:bg-siren-500 selection:text-white">
+
+  <!-- Header Navigation -->
+  <header class="sticky top-0 z-40 glass-card border-b border-white/10 px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-siren-500 to-rose-700 flex items-center justify-center p-1.5 shadow-md shadow-siren-500/25">
+          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </div>
+        <div>
+          <span class="text-lg font-black text-white">Roas<span class="text-siren-500">Siren</span></span>
+          <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/10 text-slate-300 font-mono">CATALOG AUDIT</span>
+        </div>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <a href="/dashboard" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-semibold text-slate-300 transition-all">
+          <span>📡 Radar Dashboard</span>
+        </a>
+        <a href="https://wa.me/919870530066" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-siren-500 hover:bg-siren-600 text-white text-xs font-bold shadow-md shadow-siren-500/25 transition-all">
+          <span>🚨 Open WhatsApp Siren</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 lg:px-8 py-10 space-y-8">
+
+    <!-- Search / Audit Input Form -->
+    <div class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 text-center max-w-3xl mx-auto">
+      <span class="px-3 py-1 rounded-full text-xs font-bold bg-siren-500/10 text-siren-400 border border-siren-500/30 uppercase tracking-wider">
+        Store-Wide Ad Risk Discovery
+      </span>
+      <h1 class="text-2xl sm:text-3xl font-black text-white mt-3">Shopify Catalog Out-of-Stock Audit</h1>
+      <p class="text-slate-400 text-xs sm:text-sm mt-2 max-w-xl mx-auto">
+        Scan an entire Shopify store in seconds. Discover all sold-out SKUs and calculate how much ad spend is at risk right now.
+      </p>
+
+      <form id="auditForm" onsubmit="handleAuditSubmit(event)" class="mt-6 flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+        <input 
+          type="text" 
+          id="storeDomainInput" 
+          required 
+          placeholder="e.g. snitch.co.in or shop.boat-lifestyle.com" 
+          class="flex-1 bg-obsidian-950 border border-white/15 focus:border-siren-500 text-white text-xs sm:text-sm rounded-xl px-4 py-3 outline-none font-mono transition-all"
+        />
+        <button 
+          type="submit" 
+          id="auditBtn" 
+          class="px-6 py-3 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-siren-500/25 flex items-center justify-center gap-2 transition-all whitespace-nowrap"
+        >
+          <span>Run Store Audit</span>
+        </button>
+      </form>
+
+      <!-- Quick sample pills -->
+      <div class="flex items-center justify-center gap-2 mt-4 text-xs text-slate-400 flex-wrap">
+        <span>Try Sample Brands:</span>
+        <button type="button" onclick="runSample('snitch.co.in')" class="hover:text-white underline">snitch.co.in</button>
+        <span>•</span>
+        <button type="button" onclick="runSample('shop.boat-lifestyle.com')" class="hover:text-white underline">boat-lifestyle.com</button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="auditLoading" class="hidden text-center py-12 space-y-3">
+      <div class="w-10 h-10 border-4 border-siren-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <div class="text-sm font-bold text-white">Auditing Shopify Catalog...</div>
+      <div class="text-xs text-slate-400 font-mono">Analyzing variants, inventory exhaustion, and ad waste exposure...</div>
+    </div>
+
+    <!-- Audit Results Container -->
+    <div id="auditResults" class="hidden space-y-8 animate-fadeIn">
+
+      <!-- Executive Score Banner -->
+      <div class="glass-card rounded-2xl p-6 sm:p-8 border border-white/15 grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+        <div>
+          <div class="text-xs font-mono text-slate-400 uppercase">Audited Brand</div>
+          <div id="resBrandName" class="text-2xl font-black text-white mt-1">Brand</div>
+          <div id="resDomain" class="text-xs text-slate-400 font-mono mt-0.5">domain.com</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-obsidian-950/80 border border-white/10">
+          <div class="text-xs text-slate-400">Vulnerability Score</div>
+          <div id="resVulnScore" class="text-3xl font-black text-siren-400 font-mono mt-1">0%</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">Catalog Sold Out Ratio</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-obsidian-950/80 border border-white/10">
+          <div class="text-xs text-slate-400">Daily Ad Burn Exposure</div>
+          <div id="resDailyWaste" class="text-3xl font-black text-amber-400 font-mono mt-1">₹0</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">If running Meta ads on OOS SKUs</div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <button onclick="shareAuditWhatsApp()" class="w-full px-4 py-2.5 rounded-xl bg-radar-500 hover:bg-radar-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-radar-500/25 transition-all">
+            <span>Share Audit on WhatsApp</span>
+          </button>
+          <button onclick="copyShareLink()" id="copyBtn" class="w-full px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold border border-white/15 transition-all">
+            Copy Audit Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Breakdown Metric Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="glass-card rounded-xl p-4 border border-white/10">
+          <div class="text-xs text-slate-400">Total Products</div>
+          <div id="resTotal" class="text-xl sm:text-2xl font-bold text-white font-mono mt-1">0</div>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-white/10">
+          <div class="text-xs text-slate-400">100% In Stock</div>
+          <div id="resInStock" class="text-xl sm:text-2xl font-bold text-radar-400 font-mono mt-1">0</div>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-white/10">
+          <div class="text-xs text-slate-400">Partial Stockout</div>
+          <div id="resPartial" class="text-xl sm:text-2xl font-bold text-amber-400 font-mono mt-1">0</div>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-white/10">
+          <div class="text-xs text-slate-400">100% Sold Out</div>
+          <div id="resOutOfStock" class="text-xl sm:text-2xl font-bold text-siren-400 font-mono mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- Out of Stock SKUs Table -->
+      <div class="glass-card rounded-2xl p-6 border border-white/15 space-y-4">
+        <div class="flex items-center justify-between border-b border-white/10 pb-4">
+          <div>
+            <h3 class="text-base font-bold text-white">Sold Out SKUs Detected (<span id="resOosCount">0</span>)</h3>
+            <p class="text-xs text-slate-400">If active Meta or Google ads are landing on these URLs, you are burning 100% of your budget.</p>
+          </div>
+        </div>
+
+        <div id="oosListContainer" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Action Footer Banner -->
+      <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-siren-700/40 via-obsidian-900 to-obsidian-950 border border-siren-500/30 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div>
+          <h4 class="text-lg font-bold text-white">Protect Your Store 24/7 with RoasSiren</h4>
+          <p class="text-xs text-slate-300 mt-1 max-w-xl">
+            Never let a 3 AM stockout waste your Meta ad budget. Get 60-second emergency WhatsApp sirens the moment any SKU sells out.
+          </p>
+        </div>
+        <a href="https://wa.me/919870530066?text=Hi%20RoasSiren,%20I%20want%20to%20activate%2024/7%20watchdog%20protection" target="_blank" class="px-6 py-3 rounded-xl bg-siren-500 hover:bg-siren-600 text-white font-bold text-xs whitespace-nowrap shadow-lg shadow-siren-500/30 transition-all">
+          Activate 24/7 Watchdog 🚨
+        </a>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 bg-obsidian-950 py-8 px-4 text-center text-xs text-slate-500">
+    <div>RoasSiren™ — Autonomous Meta Ad Spend & Quick Commerce Watchdog • roassiren.com</div>
+  </footer>
+
+  <script>
+    let currentReport = null;
+
+    // Check query param on load (e.g. ?store=snitch.co.in)
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const store = params.get('store');
+      if (store) {
+        document.getElementById('storeDomainInput').value = store;
+        runAudit(store);
+      }
+    });
+
+    function runSample(domain) {
+      document.getElementById('storeDomainInput').value = domain;
+      runAudit(domain);
+    }
+
+    function handleAuditSubmit(e) {
+      e.preventDefault();
+      const domain = document.getElementById('storeDomainInput').value.trim();
+      if (domain) {
+        runAudit(domain);
+      }
+    }
+
+    async function runAudit(domain) {
+      const loading = document.getElementById('auditLoading');
+      const results = document.getElementById('auditResults');
+      const btn = document.getElementById('auditBtn');
+
+      loading.classList.remove('hidden');
+      results.classList.add('hidden');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+
+      // Update URL query string without reloading
+      const url = new URL(window.location);
+      url.searchParams.set('store', domain);
+      window.history.pushState({}, '', url);
+
+      try {
+        const resp = await fetch('/api/scan-store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain })
+        });
+        const data = await resp.json();
+
+        loading.classList.add('hidden');
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+
+        if (data.success && data.report) {
+          currentReport = data.report;
+          renderAuditReport(data.report);
+        } else {
+          alert(data.error || 'Failed to audit store.');
+        }
+      } catch (err) {
+        loading.classList.add('hidden');
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    function renderAuditReport(rep) {
+      const container = document.getElementById('auditResults');
+      document.getElementById('resBrandName').textContent = rep.brandName;
+      document.getElementById('resDomain').textContent = rep.domain;
+      document.getElementById('resVulnScore').textContent = rep.vulnerabilityScorePct + '%';
+      document.getElementById('resDailyWaste').textContent = '₹' + rep.estimatedPotentialWastePerDay.toLocaleString('en-IN');
+
+      document.getElementById('resTotal').textContent = rep.totalProducts;
+      document.getElementById('resInStock').textContent = rep.inStockCount;
+      document.getElementById('resPartial').textContent = rep.partialCount;
+      document.getElementById('resOutOfStock').textContent = rep.outOfStockCount;
+      document.getElementById('resOosCount').textContent = rep.outOfStockProducts.length;
+
+      const listContainer = document.getElementById('oosListContainer');
+      if (rep.outOfStockProducts.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-8 text-center text-xs text-radar-400 font-bold border border-radar-500/20 rounded-xl bg-radar-500/5">
+            🎉 Incredible! Zero out-of-stock products detected in this catalog. All products are in stock!
+          </div>
+        `;
+      } else {
+        listContainer.innerHTML = rep.outOfStockProducts.map((p, idx) => `
+          <div class="p-4 rounded-xl bg-obsidian-950 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+              ${p.image ? `<img src="${p.image}" alt="${p.title}" class="w-12 h-12 rounded-lg object-cover bg-slate-800 shrink-0" />` : `<div class="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-xs">📦</div>`}
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate max-w-md">${p.title}</div>
+                <div class="text-[11px] text-slate-400 font-mono mt-0.5">${p.price ? `₹${p.price.toLocaleString('en-IN')}` : 'Price not set'} • ${p.variantsCount} Variant(s)</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+              <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-siren-500/10 text-siren-400 border border-siren-500/30">
+                ${p.status.replace(/_/g, ' ')}
+              </span>
+              <a 
+                href="https://wa.me/919870530066?text=monitor%20${encodeURIComponent(p.url)}" 
+                target="_blank" 
+                class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-white text-xs font-semibold transition-all whitespace-nowrap"
+              >
+                + Lock Siren 🚨
+              </a>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      container.classList.remove('hidden');
+    }
+
+    function shareAuditWhatsApp() {
+      if (!currentReport) return;
+      const text = `🚨 *[ROASSIREN AUDIT REPORT]* 🚨\nStore: ${currentReport.brandName} (${currentReport.domain})\nCatalog Vulnerability: ${currentReport.vulnerabilityScorePct}% Out-of-Stock\nEstimated Daily Ad Burn Risk: ₹${currentReport.estimatedPotentialWastePerDay.toLocaleString('en-IN')}/day\n\nView full live audit:\nhttps://keepr-bot.onrender.com/audit?store=${encodeURIComponent(currentReport.domain)}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function copyShareLink() {
+      navigator.clipboard.writeText(window.location.href);
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Link Copied! ✅';
+      setTimeout(() => {
+        btn.textContent = 'Copy Audit Link';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

@@ -25,7 +25,16 @@ if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
   });
 }
 
-export type PaidPlanKey = 'yaad_249' | 'ghar_499' | 'vault_899' | 'yaad_149' | 'ghar_399' | 'vault_799';
+export type PaidPlanKey = 
+  | 'starter_1999' 
+  | 'growth_4999' 
+  | 'agency_9999' 
+  | 'yaad_249' 
+  | 'ghar_499' 
+  | 'vault_899' 
+  | 'yaad_149' 
+  | 'ghar_399' 
+  | 'vault_799';
 
 export const paymentService = {
   /**
@@ -37,6 +46,9 @@ export const paymentService = {
 
     // Direct checkout payment links
     const directLinks: Record<string, string> = {
+      starter_1999: 'https://rzp.io/rzp/ukMXxGY',
+      growth_4999: 'https://rzp.io/rzp/OOIVXyJ',
+      agency_9999: 'https://rzp.io/rzp/SjNJKT0',
       yaad_249: 'https://rzp.io/rzp/ukMXxGY',
       ghar_499: 'https://rzp.io/rzp/OOIVXyJ',
       vault_899: 'https://rzp.io/rzp/SjNJKT0',
@@ -55,7 +67,7 @@ export const paymentService = {
         amount: plan.priceInr * 100, // Amount in paise
         currency: 'INR',
         accept_partial: false,
-        description: `AI DOST ${plan.name} - 1 Saal Subscription`,
+        description: `RoasSiren ${plan.name} - 1 Month Subscription`,
         customer: {
           name: 'AI DOST User',
           contact: `+${userPhone.replace(/\D/g, '')}`,

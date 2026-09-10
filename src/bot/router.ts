@@ -538,14 +538,51 @@ export const botRouter = {
         return;
       }
 
-      // B. Monitor URL Command: "monitor https://..." or "watch https://..."
+      // B1. Store-Wide Catalog Audit: "audit snitch.co.in" or "catalog boat-lifestyle.com"
+      if (lowerText.startsWith('audit ') || lowerText.startsWith('catalog ') || lowerText.startsWith('scanstore ')) {
+        const rawDomain = text.replace(/^(audit|catalog|scanstore)\s+/i, '').trim();
+        const cleanDomain = rawDomain.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').trim();
+
+        if (!cleanDomain.includes('.')) {
+          await whatsappService.sendTextMessage(fromPhone, '⚠️ Please provide a valid store domain, e.g.:\n`audit snitch.co.in`');
+          return;
+        }
+
+        await whatsappService.sendTextMessage(fromPhone, `🔍 *Auditing public Shopify catalog for ${cleanDomain}...*\n_Scanning products for out-of-stock ad burn risks..._`);
+        const report = await watchdogService.scanStore(cleanDomain);
+
+        if (report.totalProducts === 0) {
+          await whatsappService.sendTextMessage(fromPhone, `⚠️ Could not scan catalog for *${cleanDomain}*. Ensure the domain is powered by Shopify or try scanning an individual product link:\n\`scan https://${cleanDomain}/products/your-sku\``);
+          return;
+        }
+
+        let auditMsg = `🚨 *[ROASSIREN STORE CATALOG AUDIT]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Store:* ${report.brandName} (${report.domain})\n📦 *Total SKUs Scanned:* ${report.totalProducts}\n`;
+        auditMsg += `🔴 *Sold Out SKUs:* ${report.outOfStockCount}\n`;
+        auditMsg += `🟡 *Partial Stockout:* ${report.partialCount}\n`;
+        auditMsg += `🟢 *100% In Stock:* ${report.inStockCount}\n`;
+        auditMsg += `\n📊 *Catalog Vulnerability Score:* ${report.vulnerabilityScorePct}%\n`;
+        auditMsg += `💸 *Estimated Daily Ad Burn Risk:* ~₹${report.estimatedPotentialWastePerDay.toLocaleString('en-IN')}/day\n`;
+
+        if (report.outOfStockProducts.length > 0) {
+          auditMsg += `\n❌ *Top Out-of-Stock Products Found:*\n`;
+          report.outOfStockProducts.slice(0, 4).forEach((p, idx) => {
+            auditMsg += `${idx + 1}. *${p.title}* ${p.price ? `(₹${p.price})` : ''}\n   🔗 ${p.url}\n`;
+          });
+        }
+
+        auditMsg += `\n━━━━━━━━━━━━━━━━━━━━\n⚡ *Protect These SKUs 24/7:*\nReply: \`monitor <product-url>\` to lock them under our 60-second WhatsApp Siren!\n\n🌐 *View Interactive Audit Page:*\nhttps://keepr-bot.onrender.com/audit?store=${encodeURIComponent(report.domain)}`;
+        await whatsappService.sendTextMessage(fromPhone, auditMsg);
+        return;
+      }
+
+      // B2. Monitor URL Command: "monitor https://..." or "watch https://..."
       if (lowerText.startsWith('monitor ') || lowerText.startsWith('watch ') || lowerText.startsWith('track ')) {
         const rawUrl = text.replace(/^(monitor|watch|track)\s+/i, '').trim();
         const urlMatch = rawUrl.match(/(https?:\/\/[^\s]+)/i);
         const targetUrl = urlMatch ? urlMatch[0] : rawUrl;
 
         if (!targetUrl.includes('.')) {
-          await whatsappService.sendTextMessage(fromPhone, '⚠️ Please provide a valid store URL, e.g.:\n`monitor https://brand.com/products/summer-tee`');
+          await whatsappService.sendTextMessage(fromPhone, '⚠️ Please provide a valid store or Blinkit URL, e.g.:\n`monitor https://brand.com/products/summer-tee`');
           return;
         }
 
@@ -557,8 +594,11 @@ export const botRouter = {
           brandName: initialDiag.brandName,
         });
 
+        const isQuickCommerce = initialDiag.platform === 'BLINKIT';
         const statusEmoji = initialDiag.isAvailable ? '✅' : '🚨';
-        const msg = `🛡️ *[ROASSIREN RADAR LOCKED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Store:* ${monitored.brandName}\n📦 *Product:* ${initialDiag.productTitle}\n${statusEmoji} *Initial Status:* ${initialDiag.status}\n🔗 *Target:* ${monitored.url}\n\n🕒 *Frequency:* 24/7 Autonomous Radar (Every 15 mins)\n⚡ *Siren Protocol:* If this product goes out of stock or breaks into a 404, an emergency WhatsApp siren will alert your phone within 60 seconds!\n━━━━━━━━━━━━━━━━━━━━\n_Type \`list\` anytime to see all monitored ad destinations._`;
+        const platformLabel = isQuickCommerce ? '⚡ Blinkit Quick Commerce' : '🛍️ Shopify D2C';
+
+        const msg = `🛡️ *[ROASSIREN RADAR LOCKED]* 🚨\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Platform:* ${platformLabel}\n🏷️ *Store / Brand:* ${monitored.brandName}\n📦 *Product:* ${initialDiag.productTitle}\n${statusEmoji} *Initial Status:* ${initialDiag.status}\n🔗 *Target:* ${monitored.url}\n\n🕒 *Radar Frequency:* 24/7 Autonomous Radar (Every 15 mins)\n⚡ *Siren Protocol:* If stock drops to zero or URL hits 404, an emergency WhatsApp siren will alert your phone within 60 seconds!\n━━━━━━━━━━━━━━━━━━━━\n_Type \`list\` anytime to view all monitored destinations._`;
         await whatsappService.sendTextMessage(fromPhone, msg);
         return;
       }
@@ -567,7 +607,7 @@ export const botRouter = {
       if (['list', 'radar', 'monitors', 'my monitors', 'urls', 'status'].includes(lowerText)) {
         const userUrls = watchdogService.getMonitoredUrlsByPhone(fromPhone);
         if (userUrls.length === 0) {
-          const emptyMsg = `📡 *No URLs on your RoasSiren Radar yet.*\n\nTo lock an active Meta ad destination under 24/7 siren protection, reply with:\n\`monitor https://yourbrand.com/products/hero-sku\``;
+          const emptyMsg = `📡 *No URLs on your RoasSiren Radar yet.*\n\nTo lock an active Meta ad or Blinkit destination under 24/7 siren protection, reply with:\n\`monitor https://yourbrand.com/products/hero-sku\``;
           await whatsappService.sendTextMessage(fromPhone, emptyMsg);
           return;
         }
@@ -575,7 +615,8 @@ export const botRouter = {
         let listMsg = `📡 *Your Active RoasSiren Watchdogs (${userUrls.length}):*\n━━━━━━━━━━━━━━━━━━━━\n`;
         userUrls.forEach((item, idx) => {
           const icon = item.lastStatus === 'SAFE_IN_STOCK' ? '🟢' : item.lastStatus === 'CRITICAL_OUT_OF_STOCK' ? '🔴' : '🟡';
-          listMsg += `${idx + 1}. ${icon} *${item.brandName}*\n   🔗 ${item.url}\n   📊 Status: ${item.lastStatus}\n   🕒 Last Sweep: ${new Date(item.lastCheckedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}\n\n`;
+          const pBadge = item.platform === 'BLINKIT' ? '⚡ Blinkit' : '🛍️ Shopify';
+          listMsg += `${idx + 1}. ${icon} *${item.brandName}* [${pBadge}]\n   🔗 ${item.url}\n   📊 Status: ${item.lastStatus}\n   🕒 Last Sweep: ${new Date(item.lastCheckedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}\n\n`;
         });
         listMsg += `_To add another URL, reply: \`monitor <url>\`_`;
         await whatsappService.sendTextMessage(fromPhone, listMsg);
@@ -589,22 +630,36 @@ export const botRouter = {
         const targetUrl = urlMatch ? urlMatch[0] : text.replace(/^scan\s+/i, '').trim();
 
         if (targetUrl.startsWith('http')) {
-          await whatsappService.sendTextMessage(fromPhone, `🔍 *Scanning ad destination:* ${targetUrl} ...`);
+          await whatsappService.sendTextMessage(fromPhone, `🔍 *Scanning destination:* ${targetUrl} ...`);
           const diag = await watchdogService.scanUrl(targetUrl);
 
-          const statusBadge = diag.isAvailable ? '✅ IN STOCK (Ready for Ads)' : '🚨 CRITICAL OUT OF STOCK';
-          let scanReport = `🛡️ *[ROASSIREN DIAGNOSTIC AUDIT]*\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Store:* ${diag.brandName}\n📦 *Product:* ${diag.productTitle}\n${diag.price ? `💰 *Price:* ₹${diag.price}\n` : ''}📊 *Status:* ${statusBadge}\n`;
+          const isQuickCommerce = diag.platform === 'BLINKIT';
+          const platformName = isQuickCommerce 
+            ? '⚡ Blinkit Quick Commerce' 
+            : (diag.platform === 'WOOCOMMERCE' ? '📦 WooCommerce D2C' : '🛍️ Shopify D2C');
 
-          if (diag.totalVariants > 0) {
+          const statusBadge = diag.isAvailable 
+            ? (isQuickCommerce ? '✅ IN STOCK (10-Min Delivery Ready)' : '✅ IN STOCK (Ready for Ads)') 
+            : (isQuickCommerce ? '🚨 SOLD OUT IN DARK STORE' : '🚨 CRITICAL OUT OF STOCK');
+
+          let scanReport = `🛡️ *[ROASSIREN DIAGNOSTIC AUDIT]*\n━━━━━━━━━━━━━━━━━━━━\n🏬 *Platform:* ${platformName}\n🏷️ *Brand:* ${diag.brandName}\n📦 *Product:* ${diag.productTitle}\n${diag.price ? `💰 *Price:* ₹${diag.price} ${diag.currency}\n` : ''}📊 *Status:* ${statusBadge}\n`;
+
+          if (isQuickCommerce) {
+            scanReport += `🛡️ *Anti-Bot WAF:* Cloudflare Bypassed (Native TLS)\n`;
+          } else if (diag.totalVariants > 0) {
             scanReport += `🛒 *Inventory:* ${diag.inStockVariants}/${diag.totalVariants} variants in stock\n`;
           }
 
           if (diag.adWasteRisk.level === 'CRITICAL') {
-            scanReport += `\n💸 *ESTIMATED AD WASTE:* ~₹${diag.adWasteRisk.hourlyBurnRateInr}/hour\n⚠️ *Action:* ${diag.adWasteRisk.actionHeadline}\n${diag.adWasteRisk.actionAdvice}\n`;
+            if (isQuickCommerce) {
+              scanReport += `\n⚠️ *Quick Commerce Alert:* Product is SOLD OUT in this dark store hub! Customers cannot buy and search rank is demoting.\n`;
+            } else {
+              scanReport += `\n💸 *ESTIMATED AD WASTE:* ~₹${diag.adWasteRisk.hourlyBurnRateInr}/hour\n⚠️ *Action:* ${diag.adWasteRisk.actionHeadline}\n${diag.adWasteRisk.actionAdvice}\n`;
+            }
           } else if (diag.adWasteRisk.level === 'HIGH') {
             scanReport += `\n⚠️ *Bounce Risk:* ~${diag.adWasteRisk.estimatedWastePct}% (Some popular sizes sold out)\n`;
           } else {
-            scanReport += `\n🟢 *Verdict:* 100% safe to drive Meta ad traffic.\n`;
+            scanReport += `\n🟢 *Verdict:* 100% in stock and ready for conversion.\n`;
           }
 
           scanReport += `\n━━━━━━━━━━━━━━━━━━━━\n⚡ *Want 24/7 WhatsApp Sirens?*\nReply: \`monitor ${diag.url}\``;
@@ -613,13 +668,40 @@ export const botRouter = {
         }
       }
 
-      // 4.1 Interactive Menu Command
+      // E. Subscription Plans & Pricing Command
+      if (['pricing', 'plans', 'plan', 'price', 'upgrade', 'subscription'].includes(lowerText)) {
+        const pricingMsg = `💎 *RoasSiren™ Subscription Plans* 🚨\n━━━━━━━━━━━━━━━━━━━━\nChoose the right watchdog tier for your store or agency:\n\n1️⃣ *STARTER D2C — ₹1,999/month*\n• Up to 15 active ad landing pages monitored 24/7\n• 15-minute background radar sweeps\n• 60-second WhatsApp Siren to Founder / Buyer\n• Broken link (404) & Out-of-Stock sirens\n👉 Reply: \`buy starter\`\n\n2️⃣ *GROWTH BRAND — ₹4,999/month* (Most Popular)\n• Up to 50 active ad landing pages monitored\n• Ultra-fast 5-minute autonomous radar\n• Multi-Buyer Sirens (Up to 3 team members)\n• Size/variant level exhaustion alerts\n• Automatic Restock Recovery alerts\n👉 Reply: \`buy growth\`\n\n3️⃣ *AGENCY FLEET — ₹9,999/month*\n• Up to 200 active ad landing pages across all clients\n• Multi-client agency command dashboard\n• Slack & Discord Webhook sirens\n• Priority API access & dedicated account manager\n👉 Reply: \`buy agency\`\n━━━━━━━━━━━━━━━━━━━━\n_Save ₹25,000 to ₹1,50,000+ every month in wasted Meta ad budget._`;
+        await whatsappService.sendTextMessage(fromPhone, pricingMsg);
+        return;
+      }
 
-      // 4.3 Zero-Friction Human Greeting (NO IVR, NO brochures)
-      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'dost', 'keepr'].includes(lowerText)) {
-        const greeting = personaService.getHumanGreeting(resolvedName, activeLang);
-        await whatsappService.sendTextMessage(fromPhone, greeting);
-        await dbService.saveChatMessage(fromPhone, 'model', greeting);
+      // F. Checkout commands: "buy starter", "buy growth", "buy agency"
+      if (['buy starter', 'buy starter plan', 'get starter'].includes(lowerText)) {
+        const link = await paymentService.createPaymentLink(fromPhone, 'starter_1999');
+        const msg = `⚡ *Activate RoasSiren Starter Plan (₹1,999/mo)*\n\nClick this secure link to pay via UPI, Card, or Netbanking:\n${link}\n\nYour 24/7 radar activates instantly upon payment confirmation!`;
+        await whatsappService.sendTextMessage(fromPhone, msg);
+        return;
+      }
+
+      if (['buy growth', 'buy growth plan', 'get growth'].includes(lowerText)) {
+        const link = await paymentService.createPaymentLink(fromPhone, 'growth_4999');
+        const msg = `⚡ *Activate RoasSiren Growth Brand Plan (₹4,999/mo)*\n\nClick this secure link to pay via UPI, Card, or Netbanking:\n${link}\n\nYour 5-minute multi-buyer radar activates instantly!`;
+        await whatsappService.sendTextMessage(fromPhone, msg);
+        return;
+      }
+
+      if (['buy agency', 'buy agency plan', 'get agency'].includes(lowerText)) {
+        const link = await paymentService.createPaymentLink(fromPhone, 'agency_9999');
+        const msg = `⚡ *Activate RoasSiren Agency Fleet Plan (₹9,999/mo)*\n\nClick this secure link to pay via UPI, Card, or Netbanking:\n${link}\n\n200-URL agency dashboard & Slack webhooks will be unlocked immediately!`;
+        await whatsappService.sendTextMessage(fromPhone, msg);
+        return;
+      }
+
+      // G. Executive Greeting & Menu
+      if (['hi', 'hello', 'hey', 'namaste', 'pranam', 'start', 'shuru', 'menu', 'help', 'madad', 'roas', 'siren'].includes(lowerText)) {
+        const welcome = `🚨 *Welcome to RoasSiren™* 🚨\n━━━━━━━━━━━━━━━━━━━━\n*Autonomous Meta Ad Waste & Quick Commerce Dark Store Watchdog*\nStop burning ad spend and losing GMV when inventory drops to zero!\n\n⚡ *Quick Commands:*\n\n1️⃣ *Instant Single SKU Scan:*\n   Paste any product or Blinkit link directly:\n   e.g. \`https://snitch.co.in/products/air-mesh-oversized-tee\`\n   or \`https://blinkit.com/prn/.../prid/333324\`\n\n2️⃣ *Store Catalog Audit:*\n   Audit an entire brand catalog for sold-out ad risks:\n   Reply: \`audit <domain>\` (e.g. \`audit snitch.co.in\`)\n\n3️⃣ *Lock 24/7 Siren Radar:*\n   Reply: \`monitor <url>\`\n\n4️⃣ *Check Active Radar:*\n   Reply: \`list\`\n\n5️⃣ *Test 60-Second WhatsApp Siren:*\n   Reply: \`test\`\n\n6️⃣ *Plans & Pricing:*\n   Reply: \`pricing\`\n━━━━━━━━━━━━━━━━━━━━\n_Paste any product link right now to run a free diagnostic._`;
+        await whatsappService.sendTextMessage(fromPhone, welcome);
+        await dbService.saveChatMessage(fromPhone, 'model', welcome);
         return;
       }
 

@@ -47,6 +47,10 @@ app.get('/dashboard', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
 });
 
+app.get('/audit', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'audit.html'));
+});
+
 // =================================================================
 // 1. Health & Landing Endpoint
 // =================================================================
