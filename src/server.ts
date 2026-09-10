@@ -157,13 +157,22 @@ app.post('/api/monitor', async (req: Request, res: Response) => {
       });
     }
 
+    // Extra recipient phone validation based on plan allowance (Starter: 1, Growth: 3, Fleet: 10)
+    let validatedRecipients: string[] | undefined = undefined;
+    if (Array.isArray(alertRecipients) && alertRecipients.length > 0) {
+      const allowedExtraRecipients = Math.max(0, (planDetail.maxAlertRecipients || 1) - 1);
+      if (allowedExtraRecipients > 0) {
+        validatedRecipients = alertRecipients.slice(0, allowedExtraRecipients).map(p => String(p).trim());
+      }
+    }
+
     const item = watchdogService.registerMonitoredUrl({
       url,
       userPhone: cleanPhone,
       brandName,
       dailyAdSpend: dailyAdSpend ? Number(dailyAdSpend) : undefined,
       webhookUrl: webhookUrl || undefined,
-      alertRecipients: Array.isArray(alertRecipients) ? alertRecipients : undefined,
+      alertRecipients: validatedRecipients,
       metaAdSetId: metaAdSetId ? String(metaAdSetId).trim() : undefined,
       metaCampaignName: metaCampaignName ? String(metaCampaignName).trim() : undefined,
       autoKillEnabled: autoKillEnabled !== undefined ? Boolean(autoKillEnabled) : !!metaAdSetId,
@@ -795,6 +804,64 @@ app.post('/api/admin/growth/discover', verifyAdmin, async (_req: Request, res: R
   try {
     const prospects = await growthAgentService.discoverFreshProspects();
     return res.json({ success: true, prospects });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// =================================================================
+// 24x7 Real-Time Strike Engine Endpoints
+// =================================================================
+
+app.get('/api/admin/growth/strikes', verifyAdmin, (_req: Request, res: Response) => {
+  return res.json({
+    success: true,
+    strikes: growthAgentService.getLiveStrikes(),
+    stats: growthAgentService.getStrikeStats(),
+  });
+});
+
+app.post('/api/admin/growth/strikes/run-radar', verifyAdmin, async (_req: Request, res: Response) => {
+  try {
+    const result = await growthAgentService.runAutonomousProspectRadar();
+    return res.json({
+      success: true,
+      result,
+      strikes: growthAgentService.getLiveStrikes(),
+      stats: growthAgentService.getStrikeStats(),
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/growth/strikes/:id/dispatch', verifyAdmin, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const method = (req.body.method as 'WHATSAPP' | 'EMAIL') || 'WHATSAPP';
+    const result = await growthAgentService.dispatchStrike(id, method);
+    if (!result.success) return res.status(400).json({ error: result.error });
+    return res.json({ success: true });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/growth/strikes/:id/dismiss', verifyAdmin, (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const dismissed = growthAgentService.dismissStrike(id);
+    return res.json({ success: dismissed });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/growth/autopilot/toggle', verifyAdmin, (req: Request, res: Response) => {
+  try {
+    const { enabled } = req.body;
+    const isEnabled = growthAgentService.setAutopilotEnabled(Boolean(enabled));
+    return res.json({ success: true, autopilotEnabled: isEnabled });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }

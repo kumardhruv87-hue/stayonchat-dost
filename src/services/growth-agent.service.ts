@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { watchdogService } from './watchdog.service.js';
+import { whatsappService } from './whatsapp.js';
 
 const genAI = new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY || ''
@@ -43,6 +44,29 @@ export interface ProspectLead {
   notes?: string;
 }
 
+export interface StrikeOpportunity {
+  id: string;
+  prospectId: string;
+  brandName: string;
+  domain: string;
+  productTitle: string;
+  productUrl: string;
+  detectedStatus: 'CRITICAL_OUT_OF_STOCK' | 'DEAD_LINK_404' | 'PARTIAL_OUT_OF_STOCK';
+  hourlyBurnInr: number;
+  detectedAt: string;
+  recipientRole: string;
+  recipientWhatsApp?: string;
+  recipientEmail?: string;
+  linkedInUrl?: string;
+  strikeMessageWa: string;
+  strikeSubjectEmail: string;
+  strikeBodyEmail: string;
+  status: 'PENDING' | 'DISPATCHED' | 'DISMISSED';
+  dispatchedAt?: string;
+  dispatchMethod?: 'WHATSAPP' | 'EMAIL' | 'AUTOPILOT_WA' | 'MANUAL';
+  error?: string;
+}
+
 export interface SelfImprovementInsight {
   id: string;
   title: string;
@@ -59,6 +83,8 @@ export interface SelfImprovementInsight {
 const STORAGE_DIR = path.resolve(process.cwd(), 'data');
 const PROSPECTS_PATH = path.join(STORAGE_DIR, 'prospects.json');
 const INSIGHTS_PATH = path.join(STORAGE_DIR, 'insights.json');
+const STRIKES_PATH = path.join(STORAGE_DIR, 'strikes.json');
+const SETTINGS_PATH = path.join(STORAGE_DIR, 'growth_settings.json');
 
 const SEED_PROSPECTS: ProspectLead[] = [
   {
@@ -351,9 +377,53 @@ const SEED_INSIGHTS: SelfImprovementInsight[] = [
   },
 ];
 
+const SEED_STRIKES: StrikeOpportunity[] = [
+  {
+    id: 'strike_snitch_01',
+    prospectId: 'lead_snitch',
+    brandName: 'Snitch',
+    domain: 'snitch.co.in',
+    productTitle: 'Oversized Acid Wash Graphic Tee (Black / M)',
+    productUrl: 'https://snitch.co.in/products/acid-wash-tee',
+    detectedStatus: 'CRITICAL_OUT_OF_STOCK',
+    hourlyBurnInr: 1560,
+    detectedAt: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
+    recipientRole: 'Siddharth Dungarwal (Founder)',
+    recipientWhatsApp: '+919811245890',
+    recipientEmail: 'siddharth@snitch.co.in',
+    linkedInUrl: 'https://linkedin.com/in/siddharth-dungarwal-snitch',
+    strikeMessageWa: `🚨 *[URGENT AD SPEND SIREN] SNITCH* 🚨\n━━━━━━━━━━━━━━━━━━━━\n⚠️ *HERO PRODUCT OUT OF STOCK RIGHT NOW!*\n\n🏬 *Brand:* Snitch\n📦 *Product:* Oversized Acid Wash Graphic Tee\n❌ *Status:* 100% SOLD OUT (Core sizes unavailable)\n🔗 *Target Link:* https://snitch.co.in/products/acid-wash-tee\n🕒 *Detected:* Just now (Live)\n💸 *Estimated Ad Bleed:* ~₹1,560/hour\n\n⚡ *IMMEDIATE ACTION REQUIRED:*\nIf you have active Meta/Instagram ads driving traffic to this SKU, pause your AdSet immediately in Meta Ads Manager to stop cash burn.\n━━━━━━━━━━━━━━━━━━━━\n_Alerted by RoasSiren™ Autonomous Watchdog (roassiren.com). Reply 'RADAR' to protect all hero ad sets 24/7._`,
+    strikeSubjectEmail: 'URGENT: Oversized Acid Wash Graphic Tee is OUT OF STOCK on Snitch (Ad spend leaking)',
+    strikeBodyEmail: `Hi Siddharth,\n\nOur autonomous ad watchdog just detected that your hero product "Oversized Acid Wash Graphic Tee" is OUT OF STOCK:\n• URL: https://snitch.co.in/products/acid-wash-tee\n• Status: 100% Sold Out\n• Estimated Burn: ~₹1,560/hour\n\nPause the active Meta AdSet immediately to prevent burning clicks on dead inventory.\n\nBest regards,\nRoasSiren Autonomous Ad Watchdog\nhttps://roassiren.com`,
+    status: 'PENDING',
+  },
+  {
+    id: 'strike_souledstore_02',
+    prospectId: 'lead_souledstore',
+    brandName: 'The Souled Store',
+    domain: 'thesouledstore.com',
+    productTitle: 'Marvel Spider-Man Drop-Cut Oversized Hoodie',
+    productUrl: 'https://thesouledstore.com/products/spiderman-dropcut-hoodie',
+    detectedStatus: 'CRITICAL_OUT_OF_STOCK',
+    hourlyBurnInr: 2080,
+    detectedAt: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
+    recipientRole: 'Vedang Patel (Co-Founder & Director)',
+    recipientWhatsApp: '+919820123456',
+    recipientEmail: 'vedang@thesouledstore.com',
+    linkedInUrl: 'https://linkedin.com/in/vedang-patel-tss',
+    strikeMessageWa: `🚨 *[URGENT AD SPEND SIREN] THE SOULED STORE* 🚨\n━━━━━━━━━━━━━━━━━━━━\n⚠️ *HERO PRODUCT OUT OF STOCK RIGHT NOW!*\n\n🏬 *Brand:* The Souled Store\n📦 *Product:* Marvel Spider-Man Drop-Cut Oversized Hoodie\n❌ *Status:* 100% SOLD OUT\n🔗 *Target Link:* https://thesouledstore.com/products/spiderman-dropcut-hoodie\n🕒 *Detected:* Live\n💸 *Estimated Ad Bleed:* ~₹2,080/hour\n\n⚡ *IMMEDIATE ACTION REQUIRED:*\nPause active Meta campaigns directed to this SKU immediately to protect ad ROAS!\n━━━━━━━━━━━━━━━━━━━━\n_Alerted by RoasSiren™ Autonomous Watchdog (roassiren.com)_`,
+    strikeSubjectEmail: 'URGENT: Marvel Spider-Man Drop-Cut Hoodie is OUT OF STOCK on TSS',
+    strikeBodyEmail: `Hi Vedang,\n\nOur ad watchdog detected that "Marvel Spider-Man Drop-Cut Oversized Hoodie" is OUT OF STOCK while ad campaigns are active.\n\nPause your AdSet to save ~₹2,080/hr in wasted clicks.\n\nBest regards,\nRoasSiren Watchdog Team\nhttps://roassiren.com`,
+    status: 'PENDING',
+  }
+];
+
 class GrowthAgentService {
   private prospects: ProspectLead[] = [];
   private insights: SelfImprovementInsight[] = [];
+  private strikes: StrikeOpportunity[] = [];
+  private autopilotEnabled: boolean = true;
+  private isRadarRunning: boolean = false;
 
   constructor() {
     this.loadData();
@@ -374,9 +444,24 @@ class GrowthAgentService {
         this.insights = [...SEED_INSIGHTS];
         this.persistInsights();
       }
+
+      if (fs.existsSync(STRIKES_PATH)) {
+        this.strikes = JSON.parse(fs.readFileSync(STRIKES_PATH, 'utf-8'));
+      } else {
+        this.strikes = [...SEED_STRIKES];
+        this.persistStrikes();
+      }
+
+      if (fs.existsSync(SETTINGS_PATH)) {
+        const settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
+        if (typeof settings.autopilotEnabled === 'boolean') {
+          this.autopilotEnabled = settings.autopilotEnabled;
+        }
+      }
     } catch {
       this.prospects = [...SEED_PROSPECTS];
       this.insights = [...SEED_INSIGHTS];
+      this.strikes = [...SEED_STRIKES];
     }
   }
 
@@ -395,6 +480,24 @@ class GrowthAgentService {
       fs.writeFileSync(INSIGHTS_PATH, JSON.stringify(this.insights, null, 2), 'utf-8');
     } catch (err) {
       console.warn('[GrowthAgent] Error persisting insights:', err);
+    }
+  }
+
+  private persistStrikes() {
+    try {
+      if (!fs.existsSync(STORAGE_DIR)) fs.mkdirSync(STORAGE_DIR, { recursive: true });
+      fs.writeFileSync(STRIKES_PATH, JSON.stringify(this.strikes, null, 2), 'utf-8');
+    } catch (err) {
+      console.warn('[GrowthAgent] Error persisting strikes:', err);
+    }
+  }
+
+  private persistSettings() {
+    try {
+      if (!fs.existsSync(STORAGE_DIR)) fs.mkdirSync(STORAGE_DIR, { recursive: true });
+      fs.writeFileSync(SETTINGS_PATH, JSON.stringify({ autopilotEnabled: this.autopilotEnabled }, null, 2), 'utf-8');
+    } catch (err) {
+      console.warn('[GrowthAgent] Error persisting settings:', err);
     }
   }
 
@@ -728,6 +831,190 @@ Return valid JSON array matching this exact schema:
       console.warn('[GrowthAgent] Error generating fresh AI insights:', err.message);
       return this.insights;
     }
+  }
+
+  // =============================================================
+  // 24x7 Autonomous Strike Engine (Real-Time Ad Bleed Sniping)
+  // =============================================================
+
+  getLiveStrikes(): StrikeOpportunity[] {
+    return this.strikes;
+  }
+
+  getStrikeStats() {
+    const totalDetected = this.strikes.length;
+    const dispatchedCount = this.strikes.filter(s => s.status === 'DISPATCHED').length;
+    const pendingCount = this.strikes.filter(s => s.status === 'PENDING').length;
+    const totalHourlyBurnCaught = this.strikes.reduce((acc, curr) => acc + (curr.hourlyBurnInr || 0), 0);
+    return {
+      totalDetected,
+      dispatchedCount,
+      pendingCount,
+      totalHourlyBurnCaught,
+      autopilotEnabled: this.autopilotEnabled,
+      isRadarRunning: this.isRadarRunning,
+    };
+  }
+
+  isAutopilotEnabled(): boolean {
+    return this.autopilotEnabled;
+  }
+
+  setAutopilotEnabled(enabled: boolean): boolean {
+    this.autopilotEnabled = enabled;
+    this.persistSettings();
+    return this.autopilotEnabled;
+  }
+
+  /**
+   * 24x7 Autonomous Prospect Radar Sweep:
+   * Periodically scans prospect stores for zero-inventory (OOS) or 404 links,
+   * generates real-time emergency strikes, and auto-dispatches if Autopilot is ON!
+   */
+  async runAutonomousProspectRadar(): Promise<{ scanned: number; newStrikes: number; dispatched: number }> {
+    if (this.isRadarRunning) {
+      console.log('[StrikeEngine] Radar sweep already in progress, skipping cycle.');
+      return { scanned: 0, newStrikes: 0, dispatched: 0 };
+    }
+
+    this.isRadarRunning = true;
+    console.log(`⚡ [StrikeEngine] Starting 24x7 autonomous sweep across ${this.prospects.length} prospect brands...`);
+    let scanned = 0;
+    let newStrikes = 0;
+    let dispatched = 0;
+
+    try {
+      // Pick up to 15 prospects per sweep to stay within healthy rate limits
+      const targets = this.prospects.slice(0, 15);
+
+      for (const lead of targets) {
+        scanned++;
+        try {
+          const storeAudit = await watchdogService.scanStore(lead.domain);
+
+          if (storeAudit.outOfStockProducts && storeAudit.outOfStockProducts.length > 0) {
+            const oosProduct = storeAudit.outOfStockProducts[0];
+
+            // Cooldown: Don't re-strike same SKU if a strike exists within last 24 hours
+            const existingStrike = this.strikes.find(
+              s => s.domain === lead.domain &&
+              s.productUrl === oosProduct.url &&
+              Date.now() - new Date(s.detectedAt).getTime() < 24 * 60 * 60 * 1000
+            );
+
+            if (!existingStrike) {
+              const hourlyBurn = Math.max(850, Math.round((lead.estimatedMonthlyAdSpend / 30) / 24));
+              const founderName = lead.targetRole ? lead.targetRole.split(' ')[0] : 'Founder';
+              const timeStr = new Date().toLocaleTimeString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+              });
+
+              const strikeMessageWa = `🚨 *[URGENT AD SPEND SIREN] ${lead.brandName.toUpperCase()}* 🚨\n━━━━━━━━━━━━━━━━━━━━\n⚠️ *HERO PRODUCT OUT OF STOCK RIGHT NOW!*\n\n🏬 *Brand:* ${lead.brandName}\n📦 *Product:* ${oosProduct.title}\n❌ *Status:* 100% SOLD OUT (0 Inventory)\n🔗 *Target Link:* ${oosProduct.url}\n🕒 *Detected:* ${timeStr} IST\n💸 *Estimated Ad Bleed:* ~₹${hourlyBurn.toLocaleString('en-IN')}/hour\n\n⚡ *IMMEDIATE ACTION REQUIRED:*\nIf you have active Meta/Instagram ad sets driving traffic to this SKU, pause your campaign immediately in Meta Ads Manager to prevent cash waste on unfulfillable clicks!\n━━━━━━━━━━━━━━━━━━━━\n_Automated real-time alert by RoasSiren™ Autonomous Watchdog (roassiren.com). Reply 'RADAR' to protect all hero ad sets 24/7._`;
+
+              const strikeSubjectEmail = `URGENT: ${oosProduct.title} is OUT OF STOCK on ${lead.brandName} (Ad spend leaking)`;
+              const strikeBodyEmail = `Hi ${founderName},\n\nOur autonomous ad watchdog just detected that your hero product "${oosProduct.title}" is OUT OF STOCK on your store:\n• Product URL: ${oosProduct.url}\n• Status: 100% Sold Out\n• Estimated Ad Spend Leak: ~₹${hourlyBurn.toLocaleString('en-IN')}/hour\n\nIf your growth team is currently running Meta / Instagram ads to this URL, traffic cannot purchase. We recommend pausing the AdSet immediately in Meta Ads Manager to stop budget burn.\n\nBest regards,\nRoasSiren Autonomous Ad Watchdog\nhttps://roassiren.com`;
+
+              const strike: StrikeOpportunity = {
+                id: `strike_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+                prospectId: lead.id,
+                brandName: lead.brandName,
+                domain: lead.domain,
+                productTitle: oosProduct.title,
+                productUrl: oosProduct.url,
+                detectedStatus: 'CRITICAL_OUT_OF_STOCK',
+                hourlyBurnInr: hourlyBurn,
+                detectedAt: new Date().toISOString(),
+                recipientRole: lead.targetRole,
+                recipientWhatsApp: lead.contactWhatsApp,
+                recipientEmail: lead.contactEmail,
+                linkedInUrl: lead.linkedInUrl,
+                strikeMessageWa,
+                strikeSubjectEmail,
+                strikeBodyEmail,
+                status: 'PENDING',
+              };
+
+              // AUTONOMOUS STRIKE DISPATCH (if Autopilot is active and WhatsApp exists)
+              if (this.autopilotEnabled && lead.contactWhatsApp) {
+                try {
+                  console.log(`🚀 [StrikeEngine AUTOPILOT] Striking ${lead.brandName} at ${lead.contactWhatsApp}...`);
+                  const cleanPhone = lead.contactWhatsApp.replace(/\D/g, '');
+                  await whatsappService.sendTextMessage(cleanPhone, strikeMessageWa);
+                  strike.status = 'DISPATCHED';
+                  strike.dispatchedAt = new Date().toISOString();
+                  strike.dispatchMethod = 'AUTOPILOT_WA';
+                  lead.stage = 'OUTREACH_SENT';
+                  dispatched++;
+                } catch (waErr: any) {
+                  strike.error = waErr.message;
+                  console.warn(`[StrikeEngine] Autopilot dispatch failed for ${lead.brandName}:`, waErr.message);
+                }
+              }
+
+              this.strikes.unshift(strike);
+              newStrikes++;
+            }
+          }
+        } catch (domainErr) {
+          console.warn(`[StrikeEngine] Error inspecting ${lead.domain}:`, domainErr);
+        }
+      }
+
+      this.strikes = this.strikes.slice(0, 100);
+      this.persistStrikes();
+      this.persistProspects();
+    } finally {
+      this.isRadarRunning = false;
+    }
+
+    console.log(`⚡ [StrikeEngine] Sweep complete: Scanned ${scanned}, Found ${newStrikes} new strikes, Dispatched ${dispatched}.`);
+    return { scanned, newStrikes, dispatched };
+  }
+
+  async dispatchStrike(strikeId: string, method: 'WHATSAPP' | 'EMAIL' = 'WHATSAPP'): Promise<{ success: boolean; error?: string }> {
+    const strike = this.strikes.find(s => s.id === strikeId);
+    if (!strike) return { success: false, error: 'Strike opportunity not found' };
+
+    const lead = this.getProspectById(strike.prospectId);
+
+    if (method === 'WHATSAPP') {
+      const phone = strike.recipientWhatsApp || lead?.contactWhatsApp;
+      if (!phone) return { success: false, error: 'No WhatsApp recipient configured' };
+
+      const cleanPhone = phone.replace(/\D/g, '');
+      try {
+        await whatsappService.sendTextMessage(cleanPhone, strike.strikeMessageWa);
+        strike.status = 'DISPATCHED';
+        strike.dispatchedAt = new Date().toISOString();
+        strike.dispatchMethod = 'WHATSAPP';
+        if (lead) lead.stage = 'OUTREACH_SENT';
+        this.persistStrikes();
+        this.persistProspects();
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err.message || 'WhatsApp dispatch failed' };
+      }
+    }
+
+    // Email dispatch manual mark
+    strike.status = 'DISPATCHED';
+    strike.dispatchedAt = new Date().toISOString();
+    strike.dispatchMethod = 'EMAIL';
+    if (lead) lead.stage = 'OUTREACH_SENT';
+    this.persistStrikes();
+    this.persistProspects();
+    return { success: true };
+  }
+
+  dismissStrike(strikeId: string): boolean {
+    const strike = this.strikes.find(s => s.id === strikeId);
+    if (!strike) return false;
+    strike.status = 'DISMISSED';
+    this.persistStrikes();
+    return true;
   }
 }
 
