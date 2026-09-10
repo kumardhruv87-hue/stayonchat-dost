@@ -14,6 +14,7 @@ import { paymentService } from './services/razorpay.js';
 import { schedulerService } from './services/scheduler.js';
 import { watchdogService } from './services/watchdog.service.js';
 import { sirenService } from './services/siren.service.js';
+import { webhookService } from './services/webhook.service.js';
 import { BRAND } from './config/constants.js';
 
 dotenv.config();
@@ -40,6 +41,10 @@ app.get('/privacy', (req: Request, res: Response) => {
 
 app.get('/terms', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'public', 'terms.html'));
+});
+
+app.get('/dashboard', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
 });
 
 // =================================================================
@@ -107,9 +112,10 @@ app.post('/api/scan', async (req: Request, res: Response) => {
 });
 
 // Register an Ad URL for 24/7 Autonomous Watchdog Monitoring
+// Register an Ad URL for 24/7 Autonomous Watchdog Monitoring
 app.post('/api/monitor', (req: Request, res: Response) => {
   try {
-    const { url, phone, brandName, dailyAdSpend } = req.body;
+    const { url, phone, brandName, dailyAdSpend, webhookUrl, alertRecipients } = req.body;
     if (!url || !phone) {
       return res.status(400).json({ error: 'Both URL and WhatsApp phone number are required.' });
     }
@@ -119,12 +125,67 @@ app.post('/api/monitor', (req: Request, res: Response) => {
       userPhone: String(phone),
       brandName,
       dailyAdSpend: dailyAdSpend ? Number(dailyAdSpend) : undefined,
+      webhookUrl: webhookUrl || undefined,
+      alertRecipients: Array.isArray(alertRecipients) ? alertRecipients : undefined,
     });
 
     return res.json({ success: true, monitored: item });
   } catch (err: any) {
     console.error('Error in /api/monitor:', err);
     return res.status(500).json({ error: err.message || 'Registration failed' });
+  }
+});
+
+// Bulk Scan Array of URLs (Up to 25 simultaneous)
+app.post('/api/scan-bulk', async (req: Request, res: Response) => {
+  try {
+    const { urls, dailyAdSpend } = req.body;
+    if (!Array.isArray(urls) || urls.length === 0) {
+      return res.status(400).json({ error: 'Array of URLs is required.' });
+    }
+    const results = await watchdogService.scanBulk(urls, dailyAdSpend ? Number(dailyAdSpend) : undefined);
+    return res.json({ success: true, count: results.length, results });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Bulk scan failed' });
+  }
+});
+
+// Store-Wide Auto-Discovery (Scans entire catalog for OOS ad risks)
+app.post('/api/scan-store', async (req: Request, res: Response) => {
+  try {
+    const { domain } = req.body;
+    if (!domain || typeof domain !== 'string') {
+      return res.status(400).json({ error: 'Valid store domain or URL is required.' });
+    }
+    const report = await watchdogService.scanStore(domain);
+    return res.json({ success: true, report });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Store scan failed' });
+  }
+});
+
+// Live Dashboard Aggregated Metrics
+app.get('/api/dashboard/stats', (req: Request, res: Response) => {
+  try {
+    const phone = req.query.phone as string | undefined;
+    const stats = watchdogService.getDashboardStats(phone);
+    return res.json({ success: true, ...stats });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Test Slack / Discord Webhook Siren
+app.post('/api/test-webhook', async (req: Request, res: Response) => {
+  try {
+    const { webhookUrl } = req.body;
+    if (!webhookUrl) {
+      return res.status(400).json({ error: 'Webhook URL is required.' });
+    }
+    const result = await webhookService.sendTestWebhook(webhookUrl);
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Webhook test failed' });
   }
 });
 

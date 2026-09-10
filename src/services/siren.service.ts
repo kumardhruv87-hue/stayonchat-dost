@@ -4,6 +4,7 @@
 // =================================================================
 
 import { whatsappService } from './whatsapp.js';
+import { webhookService } from './webhook.service.js';
 import { DiagnosticResult, MonitoredUrl } from './watchdog.service.js';
 import { BRAND } from '../config/brand.js';
 import { WATCHDOG_RULES } from '../config/constants.js';
@@ -12,7 +13,7 @@ export class SirenService {
   private alertHistory: Map<string, { lastAlertTime: number; lastStatus: string }> = new Map();
 
   /**
-   * Dispatch Emergency Ad Waste Siren Alert via WhatsApp
+   * Dispatch Emergency Ad Waste Siren Alert via WhatsApp & Webhooks
    */
   public async dispatchAdWasteSiren(
     targetPhone: string,
@@ -106,6 +107,21 @@ _${BRAND.name} Autonomous Watchdog_`;
 
     console.log(`🚨 [Siren Dispatch] Sending emergency WhatsApp alert to ${cleanPhone} for ${monitored.url}`);
     const success = await whatsappService.sendTextMessage(cleanPhone, sirenBody);
+
+    // Multi-buyer phones (Growth & Agency tiers)
+    if (monitored.alertRecipients && monitored.alertRecipients.length > 0) {
+      for (const extraPhone of monitored.alertRecipients) {
+        const cleanExtra = extraPhone.replace(/[^0-9]/g, '');
+        if (cleanExtra && cleanExtra !== cleanPhone) {
+          whatsappService.sendTextMessage(cleanExtra, sirenBody).catch((e) => console.warn('Extra phone alert failed:', e));
+        }
+      }
+    }
+
+    // Omnichannel Webhook Dispatch (Slack / Discord)
+    if (monitored.webhookUrl) {
+      webhookService.dispatchWebhookAlert(monitored.webhookUrl, monitored, diag).catch((e) => console.warn('Webhook alert failed:', e));
+    }
 
     if (success) {
       this.alertHistory.set(key, { lastAlertTime: now, lastStatus: diag.status });

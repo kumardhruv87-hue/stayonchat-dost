@@ -4,6 +4,8 @@
 // =================================================================
 
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 import { WATCHDOG_RULES } from '../config/constants.js';
 
 export type DiagnosticStatus = 
@@ -63,13 +65,42 @@ export interface MonitoredUrl {
   consecutiveFailures: number;
   isActive: boolean;
   createdAt: string;
+  webhookUrl?: string;
+  alertRecipients?: string[];
 }
 
 export class WatchdogService {
   private monitoredUrls: Map<string, MonitoredUrl> = new Map();
+  private storageFilePath: string = path.join(process.cwd(), 'vault', 'monitored_urls.json');
 
   constructor() {
-    console.log('🛡️ RoasSiren Watchdog Engine initialized.');
+    this.loadPersistedUrls();
+    console.log(`🛡️ RoasSiren Watchdog Engine initialized with ${this.monitoredUrls.size} persistent watchdogs.`);
+  }
+
+  private loadPersistedUrls(): void {
+    try {
+      const dir = path.dirname(this.storageFilePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      if (fs.existsSync(this.storageFilePath)) {
+        const raw = fs.readFileSync(this.storageFilePath, 'utf8');
+        const data: MonitoredUrl[] = JSON.parse(raw);
+        data.forEach((item) => this.monitoredUrls.set(item.id, item));
+      }
+    } catch (err) {
+      console.warn('[Watchdog] Could not load persisted watchdogs:', err);
+    }
+  }
+
+  private savePersistedUrls(): void {
+    try {
+      const data = Array.from(this.monitoredUrls.values());
+      fs.writeFileSync(this.storageFilePath, JSON.stringify(data, null, 2), 'utf8');
+    } catch (err) {
+      console.error('[Watchdog] Failed to save watchdogs to file:', err);
+    }
   }
 
   /**
@@ -374,6 +405,163 @@ export class WatchdogService {
   }
 
   /**
+   * Bulk scan an array of URLs simultaneously
+   */
+  public async scanBulk(urls: string[], dailyAdSpend?: number): Promise<DiagnosticResult[]> {
+    const cleanUrls = urls.map((u) => u.trim()).filter((u) => u.length > 5).slice(0, 25);
+    const results = await Promise.allSettled(
+      cleanUrls.map((url) => this.scanUrl(url, dailyAdSpend))
+    );
+    return results
+      .filter((r): r is PromiseFulfilledResult<DiagnosticResult> => r.status === 'fulfilled')
+      .map((r) => r.value);
+  }
+
+  /**
+   * Store-Wide Auto-Discovery: Scans entire public Shopify catalog for OOS ad risks
+   */
+  public async scanStore(domainOrUrl: string): Promise<{
+    domain: string;
+    brandName: string;
+    totalProducts: number;
+    inStockCount: number;
+    outOfStockCount: number;
+    partialCount: number;
+    vulnerabilityScorePct: number;
+    estimatedPotentialWastePerDay: number;
+    outOfStockProducts: Array<{
+      id: number | string;
+      title: string;
+      handle: string;
+      url: string;
+      image?: string;
+      price?: number;
+      variantsCount: number;
+      status: string;
+    }>;
+    scannedAt: string;
+  }> {
+    const { domain } = this.parseShopifyUrl(domainOrUrl);
+    const brandName = this.extractBrandFromDomain(domain);
+    const endpoint = `https://${domain}/products.json?limit=100`;
+
+    try {
+      const resp = await axios.get(endpoint, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*',
+        },
+      });
+
+      const products: any[] = resp.data?.products || [];
+      const totalProducts = products.length;
+
+      let inStockCount = 0;
+      let outOfStockCount = 0;
+      let partialCount = 0;
+      const oosList: any[] = [];
+
+      products.forEach((p) => {
+        const variants: any[] = Array.isArray(p.variants) ? p.variants : [];
+        const inStockVariants = variants.filter((v) => v.available).length;
+        const totalV = variants.length;
+        const productUrl = `https://${domain}/products/${p.handle}`;
+        const rawPrice = variants[0]?.price ? Number(variants[0].price) : undefined;
+        const price = rawPrice && rawPrice > 10000 ? Math.round(rawPrice / 100) : rawPrice;
+
+        if (totalV === 0 || inStockVariants === 0) {
+          outOfStockCount++;
+          oosList.push({
+            id: p.id,
+            title: p.title,
+            handle: p.handle,
+            url: productUrl,
+            image: p.images?.[0]?.src || undefined,
+            price,
+            variantsCount: totalV,
+            status: 'OUT_OF_STOCK',
+          });
+        } else if (inStockVariants < totalV) {
+          partialCount++;
+          oosList.push({
+            id: p.id,
+            title: p.title,
+            handle: p.handle,
+            url: productUrl,
+            image: p.images?.[0]?.src || undefined,
+            price,
+            variantsCount: totalV,
+            status: 'PARTIAL_STOCK',
+          });
+        } else {
+          inStockCount++;
+        }
+      });
+
+      const vulnerabilityScorePct = totalProducts > 0 
+        ? Math.round((outOfStockCount / totalProducts) * 100) 
+        : 0;
+
+      const estimatedPotentialWastePerDay = outOfStockCount * 1200; // Estimated burn if even 1 adset runs per OOS SKU
+
+      return {
+        domain,
+        brandName,
+        totalProducts,
+        inStockCount,
+        outOfStockCount,
+        partialCount,
+        vulnerabilityScorePct,
+        estimatedPotentialWastePerDay,
+        outOfStockProducts: oosList,
+        scannedAt: new Date().toISOString(),
+      };
+    } catch (err: any) {
+      console.warn(`[Watchdog] Store scan failed for ${domain}:`, err.message);
+      return {
+        domain,
+        brandName,
+        totalProducts: 0,
+        inStockCount: 0,
+        outOfStockCount: 0,
+        partialCount: 0,
+        vulnerabilityScorePct: 0,
+        estimatedPotentialWastePerDay: 0,
+        outOfStockProducts: [],
+        scannedAt: new Date().toISOString(),
+      };
+    }
+  }
+
+  /**
+   * Get Live Dashboard Aggregated Metrics
+   */
+  public getDashboardStats(phone?: string) {
+    const list = phone ? this.getMonitoredUrlsByPhone(phone) : this.getAllMonitoredUrls();
+    const totalMonitored = list.length;
+    const healthyCount = list.filter((m) => m.lastStatus === 'SAFE_IN_STOCK').length;
+    const criticalCount = list.filter((m) => m.lastStatus === 'CRITICAL_OUT_OF_STOCK' || m.lastStatus === 'DEAD_LINK_404').length;
+    const warningCount = list.filter((m) => m.lastStatus === 'PARTIAL_OUT_OF_STOCK').length;
+    const totalDailySpend = list.reduce((acc, curr) => acc + (curr.dailyAdSpend || 3000), 0);
+    const totalMonthlyProtected = totalDailySpend * 30;
+    const activeHourlyBurn = list
+      .filter((m) => m.lastStatus === 'CRITICAL_OUT_OF_STOCK' || m.lastStatus === 'DEAD_LINK_404')
+      .reduce((acc, curr) => acc + Math.round((curr.dailyAdSpend || 3000) / 24), 0);
+
+    return {
+      totalMonitored,
+      healthyCount,
+      criticalCount,
+      warningCount,
+      totalDailySpend,
+      totalMonthlyProtected,
+      activeHourlyBurn,
+      items: list,
+    };
+  }
+
+  /**
    * Register a URL for 24/7 background monitoring
    */
   public registerMonitoredUrl(item: {
@@ -381,6 +569,8 @@ export class WatchdogService {
     brandName?: string;
     userPhone: string;
     dailyAdSpend?: number;
+    webhookUrl?: string;
+    alertRecipients?: string[];
   }): MonitoredUrl {
     const { domain, cleanUrl } = this.parseShopifyUrl(item.url);
     const brandName = item.brandName || this.extractBrandFromDomain(domain);
@@ -397,9 +587,12 @@ export class WatchdogService {
       consecutiveFailures: 0,
       isActive: true,
       createdAt: new Date().toISOString(),
+      webhookUrl: item.webhookUrl,
+      alertRecipients: item.alertRecipients,
     };
 
     this.monitoredUrls.set(id, monitored);
+    this.savePersistedUrls();
     console.log(`🛡️ [Watchdog] Registered URL for monitoring: ${cleanUrl} (${brandName}) for ${item.userPhone}`);
     return monitored;
   }
@@ -432,13 +625,16 @@ export class WatchdogService {
       item.lastSirenSentAt = new Date().toISOString();
     }
     this.monitoredUrls.set(id, item);
+    this.savePersistedUrls();
   }
 
   /**
    * Remove a monitored URL
    */
   public removeMonitoredUrl(id: string): boolean {
-    return this.monitoredUrls.delete(id);
+    const res = this.monitoredUrls.delete(id);
+    if (res) this.savePersistedUrls();
+    return res;
   }
 }
 
