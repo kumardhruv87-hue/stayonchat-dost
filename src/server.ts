@@ -17,6 +17,9 @@ import { sirenService } from './services/siren.service.js';
 import { webhookService } from './services/webhook.service.js';
 import { metaAdsService } from './services/meta-ads.service.js';
 import { whatsappProfileService } from './services/whatsapp-profile.service.js';
+import { supportService } from './services/support.service.js';
+import { growthAgentService } from './services/growth-agent.service.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { BRAND, PLANS } from './config/constants.js';
 
 dotenv.config();
@@ -24,7 +27,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'keepr_secure_verify_token_2026';
-
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'roassiren_admin_2026';
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'placeholder_key');
 
 // Capture raw body for Razorpay webhook signature verification
 app.use(express.json({
@@ -55,6 +59,10 @@ app.get('/audit', (req: Request, res: Response) => {
 
 app.get('/client', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'public', 'client.html'));
+});
+
+app.get('/admin', (req: Request, res: Response) => {
+  res.sendFile(path.join(process.cwd(), 'public', 'admin.html'));
 });
 
 // =================================================================
@@ -513,6 +521,271 @@ app.get('/api/admin/wa-profile', async (_req: Request, res: Response) => {
   try {
     const profile = await whatsappProfileService.getProfile();
     return res.json({ success: true, profile });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// =================================================================
+// 1d. Help Bot & Support Ticket APIs (Public Widget)
+// =================================================================
+
+app.post('/api/support/chat', async (req: Request, res: Response) => {
+  try {
+    const { message, history, contact } = req.body;
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message is required.' });
+    }
+
+    let reply = '';
+    let isIssueOrSuggestion = false;
+
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: { temperature: 0.4 },
+      });
+
+      const historyFormatted = Array.isArray(history)
+        ? history.map((h: any) => `${h.role === 'user' ? 'User' : 'Support'}: ${h.text}`).join('\n')
+        : '';
+
+      const prompt = `
+You are the RoasSiren™ Live Support & Watchdog AI Specialist (roassiren.com).
+RoasSiren is the autonomous 24/7 Meta Ad Waste & Shopify Out-of-Stock Watchdog.
+Key Information:
+- Core Job: Monitors Shopify product pages & Blinkit dark stores continuously.
+- When an SKU sells out or URL 404s, dispatches a 60-second WhatsApp siren to the buyer/founder and auto-kills the active Meta ad set via API.
+- Subscription Plans:
+  1. Starter D2C: ₹1,999/mo (up to 15 active ad URLs, 15-min sweeps)
+  2. Growth Brand: ₹4,999/mo (up to 50 active ad URLs, 5-min sweeps, multi-buyer sirens)
+  3. Agency Fleet: ₹9,999/mo (up to 200 URLs, Slack/Discord webhooks)
+- WhatsApp Watchdog Number: +91 98705 30066
+
+Tone & Instructions:
+1. Answer clearly, warmly, and crisply in 2-3 short sentences.
+2. If they ask about testing, suggest testing the 60-second siren or typing their product link into the scanner.
+3. If they report a bug, request a feature, or want custom agency onboarding, reassure them and recommend submitting an official ticket.
+
+Conversation context:
+${historyFormatted}
+
+User: "${message}"
+
+Respond strictly in this format:
+[REPLY]
+Your response here
+[ACTION]
+ISSUE_OR_SUGGESTION or NONE
+`;
+
+      const result = await model.generateContent(prompt);
+      const output = result.response.text();
+      const parts = output.split('[ACTION]');
+      reply = parts[0].replace(/\[REPLY\]/i, '').trim();
+      const action = (parts[1] || '').trim();
+      isIssueOrSuggestion = action.includes('ISSUE_OR_SUGGESTION');
+    } catch (aiErr) {
+      console.warn('AI fallback in support chat:', aiErr);
+      reply = "Hello! I'm RoasSiren's live support watchdog. You can test our 60-second sirens, scan your Shopify catalog, or submit a ticket below if you have any bugs or custom feature requests!";
+      const lower = message.toLowerCase();
+      isIssueOrSuggestion = lower.includes('bug') || lower.includes('problem') || lower.includes('issue') || lower.includes('suggest') || lower.includes('feature');
+    }
+
+    return res.json({
+      success: true,
+      reply,
+      isIssueOrSuggestion,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Support chat error' });
+  }
+});
+
+app.post('/api/support/ticket', async (req: Request, res: Response) => {
+  try {
+    const { userContact, brandName, category, subject, message, priority } = req.body;
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message description is required.' });
+    }
+
+    const ticket = supportService.createTicket({
+      userContact: userContact || 'Anonymous Founder',
+      brandName: brandName || undefined,
+      category: category || 'PROBLEM',
+      subject: subject || (category === 'PROBLEM' ? 'Reported Problem' : 'Feedback / Inquiry'),
+      message: message.trim(),
+      priority: priority || undefined,
+    });
+
+    return res.json({ success: true, ticket });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Failed to submit ticket' });
+  }
+});
+
+// =================================================================
+// 1e. Admin Protected APIs (Command Center & Agent SirenGrowth)
+// =================================================================
+
+const verifyAdmin = (req: Request, res: Response, next: express.NextFunction) => {
+  const headerKey = req.headers['x-admin-key'] as string;
+  const queryKey = req.query.key as string;
+  const bearer = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+
+  if (headerKey === ADMIN_SECRET || queryKey === ADMIN_SECRET || bearer === ADMIN_SECRET) {
+    return next();
+  }
+  return res.status(401).json({ error: 'Unauthorized: Invalid Admin Secret Key' });
+};
+
+// Admin Login / Verify Key
+app.post('/api/admin/auth', (req: Request, res: Response) => {
+  const { secret } = req.body;
+  if (secret === ADMIN_SECRET) {
+    return res.json({ success: true, token: ADMIN_SECRET });
+  }
+  return res.status(401).json({ success: false, error: 'Invalid admin credentials' });
+});
+
+// Admin Aggregated Platform Metrics
+app.get('/api/admin/metrics', verifyAdmin, (_req: Request, res: Response) => {
+  try {
+    const allMonitored = watchdogService.getAllMonitoredUrls();
+    const criticalCount = allMonitored.filter(u => u.lastStatus === 'CRITICAL_OUT_OF_STOCK' || u.lastStatus === 'DEAD_LINK_404').length;
+    const safeCount = allMonitored.filter(u => u.lastStatus === 'SAFE_IN_STOCK').length;
+    const totalDailySpend = allMonitored.reduce((acc, u) => acc + (u.dailyAdSpend || 3000), 0);
+    const monthlyProtectedSpend = totalDailySpend * 30;
+
+    const tickets = supportService.getAllTickets();
+    const ticketStats = supportService.getStats();
+
+    const prospects = growthAgentService.getAllProspects();
+    const auditedProspects = prospects.filter(p => p.stage !== 'PROSPECT');
+    const totalPipelineBleed = prospects.reduce((acc, p) => acc + (p.dailyBleedRiskInr || 0), 0);
+
+    const insights = growthAgentService.getAllInsights();
+
+    return res.json({
+      success: true,
+      metrics: {
+        totalMonitoredSkus: allMonitored.length,
+        criticalAlerts: criticalCount,
+        safeSkus: safeCount,
+        dailyProtectedSpend: totalDailySpend,
+        monthlyProtectedSpend,
+        ticketStats,
+        prospectStats: {
+          total: prospects.length,
+          audited: auditedProspects.length,
+          totalPipelineBleed,
+        },
+        insightsCount: insights.length,
+      },
+      monitoredUrls: allMonitored,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Support Desk Tickets Management
+app.get('/api/admin/tickets', verifyAdmin, (_req: Request, res: Response) => {
+  return res.json({
+    success: true,
+    tickets: supportService.getAllTickets(),
+    stats: supportService.getStats(),
+  });
+});
+
+app.patch('/api/admin/tickets/:id', verifyAdmin, (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { status, adminReply } = req.body;
+    const ticket = supportService.updateTicketStatus(id, status, adminReply);
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    return res.json({ success: true, ticket });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admin/tickets/:id', verifyAdmin, (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const deleted = supportService.deleteTicket(id);
+    return res.json({ success: deleted });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Autonomous Sales & Marketing Agent (Agent SirenGrowth)
+app.get('/api/admin/growth/prospects', verifyAdmin, (_req: Request, res: Response) => {
+  return res.json({
+    success: true,
+    prospects: growthAgentService.getAllProspects(),
+  });
+});
+
+app.post('/api/admin/growth/audit-prospect', verifyAdmin, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ error: 'Prospect ID is required' });
+    const prospect = await growthAgentService.auditProspectAndGenerateOutreach(id);
+    if (!prospect) return res.status(404).json({ error: 'Prospect not found' });
+    return res.json({ success: true, prospect });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/growth/add-prospect', verifyAdmin, (req: Request, res: Response) => {
+  try {
+    const { brandName, domain, category, estimatedMonthlyAdSpend, targetRole, contactEmail, contactWhatsApp, linkedInUrl } = req.body;
+    if (!brandName || !domain) {
+      return res.status(400).json({ error: 'Brand name and domain are required.' });
+    }
+    const prospect = growthAgentService.addProspect({
+      brandName,
+      domain,
+      category,
+      estimatedMonthlyAdSpend: Number(estimatedMonthlyAdSpend) || 500000,
+      targetRole: targetRole || 'Founder / Performance Marketing Lead',
+      contactEmail,
+      contactWhatsApp,
+      linkedInUrl,
+    });
+    return res.json({ success: true, prospect });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/admin/growth/prospects/:id/stage', verifyAdmin, (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { stage, notes } = req.body;
+    const prospect = growthAgentService.updateProspectStage(id, stage, notes);
+    if (!prospect) return res.status(404).json({ error: 'Prospect not found' });
+    return res.json({ success: true, prospect });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Autonomous Strategy & Self-Improvement Engine
+app.get('/api/admin/growth/insights', verifyAdmin, (_req: Request, res: Response) => {
+  return res.json({
+    success: true,
+    insights: growthAgentService.getAllInsights(),
+  });
+});
+
+app.post('/api/admin/growth/insights/generate', verifyAdmin, async (_req: Request, res: Response) => {
+  try {
+    const insights = await growthAgentService.generateFreshAiInsights();
+    return res.json({ success: true, insights });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
