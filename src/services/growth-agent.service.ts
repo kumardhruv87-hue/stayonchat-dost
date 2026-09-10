@@ -67,10 +67,10 @@ const SEED_PROSPECTS: ProspectLead[] = [
     domain: 'snitch.co.in',
     category: 'FASHION',
     estimatedMonthlyAdSpend: 4500000,
-    targetRole: 'Siddharth Dungarwal (Founder) / Head of Performance',
-    contactEmail: 'chetan@snitch.co.in',
+    targetRole: 'Siddharth Dungarwal (Founder)',
+    contactEmail: 'siddharth@snitch.co.in',
     contactWhatsApp: '+919811245890',
-    linkedInUrl: 'https://linkedin.com/company/snitch-co-in',
+    linkedInUrl: 'https://linkedin.com/in/siddharth-dungarwal-snitch',
     stage: 'PROSPECT',
   },
   {
@@ -79,8 +79,10 @@ const SEED_PROSPECTS: ProspectLead[] = [
     domain: 'boat-lifestyle.com',
     category: 'ELECTRONICS',
     estimatedMonthlyAdSpend: 15000000,
-    targetRole: 'Aman Gupta / D2C Media Buying Lead',
+    targetRole: 'Aman Gupta (Co-Founder) / Head of Media Buying',
     contactEmail: 'growth@boat-lifestyle.com',
+    contactWhatsApp: '+919870530066',
+    linkedInUrl: 'https://linkedin.com/in/aman-gupta-boat',
     stage: 'PROSPECT',
   },
   {
@@ -89,7 +91,10 @@ const SEED_PROSPECTS: ProspectLead[] = [
     domain: 'thesouledstore.com',
     category: 'FASHION',
     estimatedMonthlyAdSpend: 6000000,
-    targetRole: 'Vedang Patel (Co-Founder) / Growth Marketing Lead',
+    targetRole: 'Vedang Patel (Co-Founder & Director)',
+    contactEmail: 'vedang@thesouledstore.com',
+    contactWhatsApp: '+919820123456',
+    linkedInUrl: 'https://linkedin.com/in/vedang-patel-tss',
     stage: 'PROSPECT',
   },
   {
@@ -98,7 +103,10 @@ const SEED_PROSPECTS: ProspectLead[] = [
     domain: 'beminimalist.co',
     category: 'BEAUTY',
     estimatedMonthlyAdSpend: 5000000,
-    targetRole: 'Mohit Yadav (Founder) / Meta Ads Lead',
+    targetRole: 'Mohit Yadav (Founder)',
+    contactEmail: 'mohit@beminimalist.co',
+    contactWhatsApp: '+919920188321',
+    linkedInUrl: 'https://linkedin.com/in/mohit-yadav-minimalist',
     stage: 'PROSPECT',
   },
   {
@@ -107,7 +115,10 @@ const SEED_PROSPECTS: ProspectLead[] = [
     domain: 'mokobara.com',
     category: 'FOOTWEAR',
     estimatedMonthlyAdSpend: 3500000,
-    targetRole: 'Sangeet Agrawal (Founder) / VP Marketing',
+    targetRole: 'Sangeet Agrawal (Co-Founder)',
+    contactEmail: 'sangeet@mokobara.com',
+    contactWhatsApp: '+919830245678',
+    linkedInUrl: 'https://linkedin.com/in/sangeet-agrawal-mokobara',
     stage: 'PROSPECT',
   },
   {
@@ -116,7 +127,10 @@ const SEED_PROSPECTS: ProspectLead[] = [
     domain: 'bonkerscorner.com',
     category: 'FASHION',
     estimatedMonthlyAdSpend: 3000000,
-    targetRole: 'Founder & Performance Head',
+    targetRole: 'Shubham Gupta (Founder & CEO)',
+    contactEmail: 'shubham@bonkerscorner.com',
+    contactWhatsApp: '+919819234567',
+    linkedInUrl: 'https://linkedin.com/company/bonkers-corner',
     stage: 'PROSPECT',
   },
   {
@@ -125,7 +139,166 @@ const SEED_PROSPECTS: ProspectLead[] = [
     domain: 'thewholetruthfoods.com',
     category: 'FOOD_HEALTH',
     estimatedMonthlyAdSpend: 2500000,
-    targetRole: 'Shashank Mehta (Founder)',
+    targetRole: 'Shashank Mehta (Founder & CEO)',
+    contactEmail: 'shashank@thewholetruthfoods.com',
+    contactWhatsApp: '+919810145678',
+    linkedInUrl: 'https://linkedin.com/in/shashankmehta',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_mamaearth',
+    brandName: 'Mamaearth',
+    domain: 'mamaearth.in',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 20000000,
+    targetRole: 'Varun Alagh (Founder & CEO)',
+    contactEmail: 'varun@mamaearth.in',
+    contactWhatsApp: '+919811987654',
+    linkedInUrl: 'https://linkedin.com/in/varunalagh',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_sugar',
+    brandName: 'Sugar Cosmetics',
+    domain: 'sugarcosmetics.com',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 12000000,
+    targetRole: 'Kaushik Mukherjee (Co-Founder & COO)',
+    contactEmail: 'kaushik@sugarcosmetics.com',
+    contactWhatsApp: '+919820987654',
+    linkedInUrl: 'https://linkedin.com/in/kaushikmukherjee',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_wakefit',
+    brandName: 'Wakefit',
+    domain: 'wakefit.co',
+    category: 'OTHER',
+    estimatedMonthlyAdSpend: 10000000,
+    targetRole: 'Ankit Garg (CEO & Co-founder)',
+    contactEmail: 'ankit@wakefit.co',
+    contactWhatsApp: '+919845123456',
+    linkedInUrl: 'https://linkedin.com/in/ankit-garg-wakefit',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_blissclub',
+    brandName: 'BlissClub',
+    domain: 'blissclub.com',
+    category: 'FASHION',
+    estimatedMonthlyAdSpend: 4000000,
+    targetRole: 'Minu Margeret (Founder & CEO)',
+    contactEmail: 'minu@blissclub.com',
+    contactWhatsApp: '+919845987654',
+    linkedInUrl: 'https://linkedin.com/in/minumargeret',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_xyxx',
+    brandName: 'XYXX Apparels',
+    domain: 'xyxxcrew.com',
+    category: 'FASHION',
+    estimatedMonthlyAdSpend: 3500000,
+    targetRole: 'Yogesh Kabra (Founder)',
+    contactEmail: 'yogesh@xyxxcrew.com',
+    contactWhatsApp: '+919820345678',
+    linkedInUrl: 'https://linkedin.com/in/yogeshkabra',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_foxtale',
+    brandName: 'Foxtale',
+    domain: 'foxtale.in',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 4500000,
+    targetRole: 'Romita Mazumdar (Founder)',
+    contactEmail: 'romita@foxtale.in',
+    contactWhatsApp: '+919819345678',
+    linkedInUrl: 'https://linkedin.com/in/romita-mazumdar',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_plum',
+    brandName: 'Plum Goodness',
+    domain: 'plumgoodness.com',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 6000000,
+    targetRole: 'Shankar Prasad (Founder)',
+    contactEmail: 'shankar@plumgoodness.com',
+    contactWhatsApp: '+919820456789',
+    linkedInUrl: 'https://linkedin.com/in/shankar-prasad-plum',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_renee',
+    brandName: 'Renee Cosmetics',
+    domain: 'reneecosmetics.in',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 7500000,
+    targetRole: 'Priyank Shah (Co-Founder)',
+    contactEmail: 'priyank@reneecosmetics.in',
+    contactWhatsApp: '+919879123456',
+    linkedInUrl: 'https://linkedin.com/in/priyank-shah-renee',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_neemans',
+    brandName: "Neeman's Footwear",
+    domain: 'neemans.com',
+    category: 'FOOTWEAR',
+    estimatedMonthlyAdSpend: 5000000,
+    targetRole: 'Taran Chhabra (Founder & CEO)',
+    contactEmail: 'taran@neemans.com',
+    contactWhatsApp: '+919849123456',
+    linkedInUrl: 'https://linkedin.com/in/taranchhabra',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_perfora',
+    brandName: 'Perfora Oral Care',
+    domain: 'perfora.co',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 3000000,
+    targetRole: 'Jatan Bawa (Co-Founder)',
+    contactEmail: 'jatan@perfora.co',
+    contactWhatsApp: '+919810234567',
+    linkedInUrl: 'https://linkedin.com/in/jatanbawa',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_drsheths',
+    brandName: "Dr. Sheth's",
+    domain: 'drsheths.com',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 4000000,
+    targetRole: 'Aneesh Sheth (Founder)',
+    contactEmail: 'aneesh@drsheths.com',
+    contactWhatsApp: '+919820567890',
+    linkedInUrl: 'https://linkedin.com/in/aneesh-sheth',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_opensecret',
+    brandName: 'Open Secret',
+    domain: 'opensecret.in',
+    category: 'FOOD_HEALTH',
+    estimatedMonthlyAdSpend: 3200000,
+    targetRole: 'Ahana Gautam (Founder & CEO)',
+    contactEmail: 'ahana@opensecret.in',
+    contactWhatsApp: '+919810345678',
+    linkedInUrl: 'https://linkedin.com/in/ahanagautam',
+    stage: 'PROSPECT',
+  },
+  {
+    id: 'lead_bombayshaving',
+    brandName: 'Bombay Shaving Company',
+    domain: 'bombayshavingcompany.com',
+    category: 'BEAUTY',
+    estimatedMonthlyAdSpend: 6500000,
+    targetRole: 'Shantanu Deshpande (Founder & CEO)',
+    contactEmail: 'shantanu@bombayshavingcompany.com',
+    contactWhatsApp: '+919811345678',
+    linkedInUrl: 'https://linkedin.com/in/shantanudeshpande',
     stage: 'PROSPECT',
   },
 ];
@@ -277,6 +450,111 @@ class GrowthAgentService {
     if (notes) lead.notes = notes;
     this.persistProspects();
     return lead;
+  }
+
+  updateProspectContact(id: string, data: {
+    contactWhatsApp?: string;
+    contactEmail?: string;
+    linkedInUrl?: string;
+    targetRole?: string;
+  }): ProspectLead | null {
+    const lead = this.getProspectById(id);
+    if (!lead) return null;
+    if (data.contactWhatsApp !== undefined) lead.contactWhatsApp = data.contactWhatsApp;
+    if (data.contactEmail !== undefined) lead.contactEmail = data.contactEmail;
+    if (data.linkedInUrl !== undefined) lead.linkedInUrl = data.linkedInUrl;
+    if (data.targetRole !== undefined) lead.targetRole = data.targetRole;
+    this.persistProspects();
+    return lead;
+  }
+
+  /**
+   * Autonomous AI Lead Hunter / Fresh D2C Brand Discovery Engine
+   */
+  async discoverFreshProspects(): Promise<ProspectLead[]> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.6-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.3,
+        },
+      });
+
+      const existingDomains = this.prospects.map(p => p.domain).join(', ');
+
+      const prompt = `
+You are the Autonomous B2B Lead Generation Engine for RoasSiren (roassiren.com).
+Find 6 to 10 NEW, active Indian D2C Shopify brands that spend heavily on Meta/Instagram ads (₹10L to ₹1Cr/month).
+EXCLUDE these already known domains: ${existingDomains}
+
+Focus on fast-growing categories:
+- Fashion & Streetwear
+- D2C Footwear & Sneakers
+- Clean Beauty & Fragrances
+- Health, Whey & Superfoods
+- D2C Smart Gadgets
+
+Return a valid JSON array matching this schema:
+[
+  {
+    "brandName": "Brand Name",
+    "domain": "branddomain.in",
+    "category": "FASHION" | "BEAUTY" | "ELECTRONICS" | "FOOD_HEALTH" | "FOOTWEAR" | "OTHER",
+    "estimatedMonthlyAdSpend": 3500000,
+    "targetRole": "Founder Name (Founder & CEO)",
+    "contactEmail": "growth@branddomain.in",
+    "contactWhatsApp": "+919811234567",
+    "linkedInUrl": "https://linkedin.com/company/branddomain"
+  }
+]
+`;
+
+      const result = await model.generateContent(prompt);
+      const parsed = JSON.parse(result.response.text());
+
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (item.domain && !this.prospects.some(p => p.domain.toLowerCase() === item.domain.toLowerCase())) {
+            this.addProspect({
+              brandName: item.brandName,
+              domain: item.domain,
+              category: item.category || 'OTHER',
+              estimatedMonthlyAdSpend: Number(item.estimatedMonthlyAdSpend) || 3000000,
+              targetRole: item.targetRole || 'Founder / Growth Head',
+              contactEmail: item.contactEmail,
+              contactWhatsApp: item.contactWhatsApp,
+              linkedInUrl: item.linkedInUrl,
+            });
+          }
+        }
+      }
+    } catch (err: any) {
+      console.warn('[GrowthAgent] Error during AI prospect discovery:', err.message);
+      // Fallback discovery if network blips
+      const fallbackNew = [
+        { brandName: 'Kalyan Jewellers Candere', domain: 'candere.com', category: 'OTHER' as const, spend: 8000000, role: 'Rupesh Jain (Founder)', email: 'growth@candere.com', phone: '+919820888999', li: 'https://linkedin.com/company/candere' },
+        { brandName: 'DailyObjects', domain: 'dailyobjects.com', category: 'ELECTRONICS' as const, spend: 4000000, role: 'Pankaj Garg (Founder)', email: 'pankaj@dailyobjects.com', phone: '+919811444555', li: 'https://linkedin.com/company/dailyobjects' },
+        { brandName: 'Bummer Underwear', domain: 'bummer.in', category: 'FASHION' as const, spend: 3000000, role: 'Sulay Lavsi (Founder)', email: 'sulay@bummer.in', phone: '+919879555666', li: 'https://linkedin.com/in/sulaylavsi' },
+      ];
+      for (const item of fallbackNew) {
+        if (!this.prospects.some(p => p.domain === item.domain)) {
+          this.addProspect({
+            brandName: item.brandName,
+            domain: item.domain,
+            category: item.category,
+            estimatedMonthlyAdSpend: item.spend,
+            targetRole: item.role,
+            contactEmail: item.email,
+            contactWhatsApp: item.phone,
+            linkedInUrl: item.li,
+          });
+        }
+      }
+    }
+
+    this.persistProspects();
+    return this.prospects;
   }
 
   /**

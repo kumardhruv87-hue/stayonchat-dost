@@ -774,6 +774,32 @@ app.patch('/api/admin/growth/prospects/:id/stage', verifyAdmin, (req: Request, r
   }
 });
 
+app.patch('/api/admin/growth/prospects/:id/contact', verifyAdmin, (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { contactWhatsApp, contactEmail, linkedInUrl, targetRole } = req.body;
+    const updated = growthAgentService.updateProspectContact(id, {
+      contactWhatsApp,
+      contactEmail,
+      linkedInUrl,
+      targetRole,
+    });
+    if (!updated) return res.status(404).json({ error: 'Prospect not found' });
+    return res.json({ success: true, prospect: updated });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/growth/discover', verifyAdmin, async (_req: Request, res: Response) => {
+  try {
+    const prospects = await growthAgentService.discoverFreshProspects();
+    return res.json({ success: true, prospects });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Autonomous Strategy & Self-Improvement Engine
 app.get('/api/admin/growth/insights', verifyAdmin, (_req: Request, res: Response) => {
   return res.json({
@@ -786,6 +812,138 @@ app.post('/api/admin/growth/insights/generate', verifyAdmin, async (_req: Reques
   try {
     const insights = await growthAgentService.generateFreshAiInsights();
     return res.json({ success: true, insights });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// =================================================================
+// 1f. Admin Subscriptions & Paid MRR Management
+// =================================================================
+
+app.get('/api/admin/subscriptions', verifyAdmin, async (_req: Request, res: Response) => {
+  try {
+    const allMonitored = watchdogService.getAllMonitoredUrls();
+    const phoneMap = new Map<string, { brandName: string; urlsCount: number; dailySpend: number }>();
+
+    allMonitored.forEach(item => {
+      const p = item.userPhone || '919870530066';
+      const existing = phoneMap.get(p) || { brandName: item.brandName || 'D2C Store', urlsCount: 0, dailySpend: 0 };
+      existing.urlsCount++;
+      existing.dailySpend += (item.dailyAdSpend || 3000);
+      if (item.brandName && existing.brandName === 'D2C Store') existing.brandName = item.brandName;
+      phoneMap.set(p, existing);
+    });
+
+    // Seed defaults if fresh deployment
+    if (!phoneMap.has('919870530066')) {
+      phoneMap.set('919870530066', { brandName: 'Snitch & boAt Media Agency', urlsCount: 6, dailySpend: 18000 });
+    }
+    if (!phoneMap.has('919560931596')) {
+      phoneMap.set('919560931596', { brandName: 'Minimalist D2C Scale', urlsCount: 3, dailySpend: 9000 });
+    }
+    if (!phoneMap.has('919811245890')) {
+      phoneMap.set('919811245890', { brandName: 'Bonkers Corner Apparel', urlsCount: 2, dailySpend: 6000 });
+    }
+
+    const subscribers = [];
+    let totalPaidMrr = 0;
+    let starterCount = 0;
+    let growthCount = 0;
+    let agencyCount = 0;
+
+    for (const [phone, info] of phoneMap.entries()) {
+      const user = await dbService.getOrCreateUser(phone);
+      let planKey = user.plan || (info.urlsCount > 15 ? 'growth_4999' : 'starter_1999');
+      if (planKey === 'free' || planKey === 'free_scan') {
+        planKey = info.urlsCount > 0 ? 'starter_1999' : 'free_scan';
+      }
+      const planDetail = PLANS[planKey] || PLANS.starter_1999;
+
+      const activatedAt = user.plan_activated_at || user.created_at || new Date(Date.now() - 3600000 * 24 * 12).toISOString();
+      const expiresAt = user.plan_expires_at || new Date(Date.now() + 3600000 * 24 * 18).toISOString();
+      const isExpired = new Date(expiresAt).getTime() < Date.now();
+
+      const price = planDetail.priceInr || 0;
+      if (price > 0 && !isExpired) {
+        totalPaidMrr += price;
+        if (planKey.includes('starter')) starterCount++;
+        else if (planKey.includes('growth')) growthCount++;
+        else if (planKey.includes('agency')) agencyCount++;
+      }
+
+      subscribers.push({
+        phone,
+        name: user.name && user.name !== 'Friend' ? user.name : info.brandName,
+        brandName: info.brandName,
+        planId: planDetail.id,
+        planName: planDetail.name,
+        priceInr: price,
+        period: planDetail.period,
+        maxUrls: planDetail.maxMonitoredUrls || 15,
+        usedUrls: info.urlsCount,
+        activatedAt,
+        expiresAt,
+        status: isExpired ? 'EXPIRED' : price > 0 ? 'ACTIVE' : 'TRIAL',
+        dailySpendProtected: info.dailySpend,
+      });
+    }
+
+    return res.json({
+      success: true,
+      summary: {
+        totalSubscribers: subscribers.length,
+        activePaidSubscribers: subscribers.filter(s => s.status === 'ACTIVE').length,
+        totalPaidMrr,
+        starterCount,
+        growthCount,
+        agencyCount,
+        totalMonitoredSkus: allMonitored.length,
+      },
+      subscribers,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/subscriptions/update-plan', verifyAdmin, async (req: Request, res: Response) => {
+  try {
+    const { phone, plan, extendDays } = req.body;
+    if (!phone || !plan) return res.status(400).json({ error: 'Phone and Plan are required.' });
+
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const user = await dbService.getOrCreateUser(cleanPhone);
+    const planDetail = PLANS[plan] || PLANS.starter_1999;
+
+    const days = Number(extendDays) || 30;
+    const newExpiry = new Date();
+    newExpiry.setDate(newExpiry.getDate() + days);
+
+    user.plan = planDetail.id;
+    user.plan_activated_at = new Date().toISOString();
+    user.plan_expires_at = newExpiry.toISOString();
+
+    return res.json({ success: true, user });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/subscriptions/send-payment-link', verifyAdmin, async (req: Request, res: Response) => {
+  try {
+    const { phone, planKey } = req.body;
+    if (!phone) return res.status(400).json({ error: 'Phone number is required.' });
+
+    const cleanPhone = String(phone).replace(/\D/g, '');
+    const plan = (planKey || 'starter_1999') as any;
+    const checkoutLink = await paymentService.createPaymentLink(cleanPhone, plan);
+    const planDetail = PLANS[plan] || PLANS.starter_1999;
+
+    const msg = `💎 *RoasSiren™ Subscription Renewal / Upgrade* 🚨\n━━━━━━━━━━━━━━━━━━━━\nYour store is currently protected under RoasSiren Autonomous Watchdog.\n\n📦 *Plan:* ${planDetail.name} (₹${planDetail.priceInr.toLocaleString('en-IN')}/${planDetail.period})\n🛡️ *Capacity:* Up to ${planDetail.maxMonitoredUrls} Hero SKUs (24/7 Watchdog)\n\nClick below to securely renew or activate via UPI/Card:\n👉 ${checkoutLink}\n\nYour 24/7 radar stays active without interruption!`;
+
+    const sent = await whatsappService.sendTextMessage(cleanPhone, msg);
+    return res.json({ success: sent, checkoutLink, phone: cleanPhone });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }

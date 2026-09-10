@@ -429,14 +429,6 @@ export const botRouter = {
         return;
       }
 
-      // C1.3. Shareable Client Transparency Portal: "portal", "share", "client link"
-      if (['portal', 'share', 'client link', 'client portal', 'share link'].includes(lowerText)) {
-        const cleanPhone = fromPhone.replace(/\D/g, '');
-        const portalMsg = `🌐 *[ROASSIREN CLIENT TRANSPARENCY PORTAL]* 🛡️\n━━━━━━━━━━━━━━━━━━━━\nShare this live, read-only ad spend protection report with your brand clients or executive team:\n\n👉 *Direct Client Link:*\nhttps://keepr-bot.onrender.com/client?phone=${cleanPhone}\n\n✨ *Features:*\n• Live 24/7 inventory integrity score\n• Zero login required for the client\n• Monthly ad spend protected proof\n• Real-time stock status beacons\n━━━━━━━━━━━━━━━━━━━━\n_Show your clients you are actively preventing ad waste!_`;
-        await whatsappService.sendTextMessage(fromPhone, portalMsg);
-        return;
-      }
-
       // C1.4. Manual Meta Killswitch Command: "killswitch <adSetId>" or "pause <adSetId>"
       if (lowerText.startsWith('killswitch ') || lowerText.startsWith('pause ') || lowerText.startsWith('pausead ')) {
         const rawId = text.replace(/^(killswitch|pause|pausead)\s+/i, '').trim();
