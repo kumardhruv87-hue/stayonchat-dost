@@ -44,7 +44,27 @@ export class SirenService {
 
     let sirenBody = '';
 
-    if (diag.status === 'DEAD_LINK_404') {
+    const isQuickCommerce = diag.platform === 'BLINKIT' || monitored.platform === 'BLINKIT';
+
+    if (isQuickCommerce && (diag.status === 'CRITICAL_OUT_OF_STOCK' || !diag.isAvailable)) {
+      sirenBody = `⚡ *[ROASSIREN] QUICK COMMERCE STOCKOUT ALERT!* ⚡
+━━━━━━━━━━━━━━━━━━━━
+⚠️ *DARK STORE OUT-OF-STOCK DETECTED!*
+
+🏬 *Platform:* Blinkit Quick Commerce
+📦 *Product:* ${diag.productTitle}
+🏷️ *Brand:* ${monitored.brandName}
+❌ *Stock Status:* OUT OF STOCK IN DARK STORE
+🔗 *Product URL:* ${monitored.url}
+🕒 *Detected:* ${timeStr} IST
+💸 *Risk:* Lost 10-Minute GMV & Algorithm Search Rank Demotion
+
+⚡ *IMMEDIATE ACTION REQUIRED:*
+1. Alert regional FMCG distributor / dark store inventory manager immediately.
+2. In-store restock required to reclaim top 3 search placement.
+━━━━━━━━━━━━━━━━━━━━
+_Protected 24/7 by ${BRAND.name} Quick Commerce Engine (roassiren.com)_`;
+    } else if (diag.status === 'DEAD_LINK_404') {
       sirenBody = `🚨 *[ROASSIREN EMERGENCY] DEAD AD LINK DETECTED!* 🚨
 ━━━━━━━━━━━━━━━━━━━━
 ⚠️ *CRITICAL: YOUR AD IS SENDING TRAFFIC TO A 404!*
@@ -146,7 +166,24 @@ _${BRAND.name} Autonomous Watchdog_`;
       hour12: true,
     });
 
-    const msg = `🟢 *[ROASSIREN UPDATE] INVENTORY RESTOCKED!* 🟢
+    const isQuickCommerce = diag.platform === 'BLINKIT' || monitored.platform === 'BLINKIT';
+
+    const msg = isQuickCommerce
+      ? `🟢 *[ROASSIREN] QUICK COMMERCE RESTOCKED!* 🟢
+━━━━━━━━━━━━━━━━━━━━
+🎉 *Good news! Your product is back in stock on Blinkit.*
+
+🏬 *Platform:* Blinkit Quick Commerce
+📦 *Product:* ${diag.productTitle}
+🏷️ *Brand:* ${monitored.brandName}
+✅ *Status:* IN STOCK & AVAILABLE FOR 10-MIN DELIVERY
+🔗 *URL:* ${monitored.url}
+🕒 *Time:* ${timeStr} IST
+
+💡 *Action:* Dark store inventory restored. Search rank recovering!
+━━━━━━━━━━━━━━━━━━━━
+_${BRAND.name} Quick Commerce Radar (roassiren.com)_`
+      : `🟢 *[ROASSIREN UPDATE] INVENTORY RESTOCKED!* 🟢
 ━━━━━━━━━━━━━━━━━━━━
 🎉 *Good news! Your ad destination is back in stock.*
 

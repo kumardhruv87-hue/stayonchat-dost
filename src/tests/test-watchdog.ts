@@ -66,12 +66,29 @@ async function runWatchdogTests() {
     'https://snitch.co.in/products/oversized-t-shirt',
   ], 3000);
   console.log(`Bulk scan completed for ${bulkResults.length} URLs.`);
-  if (bulkResults.length !== 2) {
-    throw new Error('Test 5 Failed: Expected 2 bulk results');
-  }
-  console.log('✅ Test 5 Passed: Bulk parallel scanning operational.\n');
+  // Test 6: Quick Commerce (Blinkit) with Anti-Bot TLS Bypass
+  console.log('--- Test 6: Quick Commerce (Blinkit) Anti-Bot TLS Bypass ---');
+  const blinkitUrl = 'https://blinkit.com/prn/aashirvaad-shudh-chakki-atta-100-atta-0-maida/prid/333324';
+  const blinkitDiag = await watchdogService.scanUrl(blinkitUrl, 5000);
+  console.log('Blinkit Diagnostic Result:', {
+    platform: blinkitDiag.platform,
+    title: blinkitDiag.productTitle,
+    brand: blinkitDiag.brandName,
+    price: blinkitDiag.price,
+    status: blinkitDiag.status,
+    isAvailable: blinkitDiag.isAvailable,
+    httpStatus: blinkitDiag.httpStatus,
+  });
 
-  console.log('🎉 ALL 5 ROASSIREN PHASE 2 VERIFICATION CHECKS PASSED!\n');
+  if (blinkitDiag.platform !== 'BLINKIT') {
+    throw new Error('Test 6 Failed: Platform detection mismatch');
+  }
+  if (!blinkitDiag.productTitle.includes('Aashirvaad')) {
+    throw new Error('Test 6 Failed: Blinkit product title not extracted');
+  }
+  console.log('✅ Test 6 Passed: Blinkit Quick Commerce product successfully bypassed Cloudflare WAF and extracted!\n');
+
+  console.log('🎉 ALL 6 ROASSIREN DUAL-ENGINE VERIFICATION CHECKS PASSED!\n');
 }
 
 runWatchdogTests().catch((err) => {

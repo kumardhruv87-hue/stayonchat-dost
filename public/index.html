@@ -242,6 +242,9 @@
           <!-- Quick Try Store Chips -->
           <div class="flex flex-wrap items-center gap-2 pt-1">
             <span class="text-xs text-slate-400">Quick Test Stores:</span>
+            <button type="button" onclick="pasteSampleUrl('https://blinkit.com/prn/aashirvaad-shudh-chakki-atta-100-atta-0-maida/prid/333324')" class="text-xs bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5 font-medium">
+              <span>⚡</span> Blinkit Quick Commerce (Atta)
+            </button>
             <button type="button" onclick="pasteSampleUrl('https://snitch.co.in/products/air-mesh-oversized-tee')" class="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-2.5 py-1 rounded-lg transition-colors">
               Snitch Apparel
             </button>
@@ -824,6 +827,17 @@
       let statusColor = isCritical ? 'text-siren-400 bg-siren-500/10 border-siren-500/30' : isPartial ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' : 'text-radar-400 bg-radar-500/10 border-radar-500/30';
       let statusIcon = isCritical ? '🚨' : isPartial ? '⚠️' : '✅';
 
+      let platformBadge = '';
+      if (diag.platform === 'BLINKIT') {
+        platformBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚡ Quick Commerce (Blinkit)</span>';
+      } else if (diag.platform === 'SHOPIFY') {
+        platformBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🛍️ Shopify D2C</span>';
+      } else if (diag.platform === 'WOOCOMMERCE') {
+        platformBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">📦 WooCommerce D2C</span>';
+      } else {
+        platformBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">🌐 E-Commerce</span>';
+      }
+
       let variantHtml = '';
       if (diag.variants && diag.variants.length > 0) {
         variantHtml = `
@@ -846,7 +860,11 @@
             <div class="flex items-center gap-3">
               <span class="text-2xl">${statusIcon}</span>
               <div>
-                <h4 class="text-base font-extrabold text-white">${diag.adWasteRisk.actionHeadline}</h4>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="text-base font-extrabold text-white">${diag.adWasteRisk.actionHeadline}</h4>
+                  ${platformBadge}
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-radar-500/10 text-radar-400 border border-radar-500/20">🛡️ Anti-Bot Bypass Active</span>
+                </div>
                 <p class="text-xs text-slate-300 mt-0.5">${diag.brandName} • ${diag.productTitle} ${diag.price ? `(₹${diag.price})` : ''}</p>
               </div>
             </div>

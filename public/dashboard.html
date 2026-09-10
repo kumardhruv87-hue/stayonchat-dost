@@ -239,8 +239,8 @@
 
       <form onsubmit="handleAddUrlSubmit(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Shopify Product / Landing Page URL</label>
-          <input type="url" id="addUrlTarget" required placeholder="https://brand.com/products/summer-tee" class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-siren-500 font-mono" />
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Product / Ad Destination URL (Shopify, Blinkit Quick Commerce, WooCommerce)</label>
+          <input type="url" id="addUrlTarget" required placeholder="https://snitch.co.in/products/... or https://blinkit.com/prn/..." class="w-full bg-obsidian-950 border border-white/15 text-xs rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-siren-500 font-mono" />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -420,16 +420,24 @@
         const beaconColor = isCritical ? 'bg-siren-500 animate-ping' : isSafe ? 'bg-radar-500' : 'bg-amber-400';
         const badgeBorder = isCritical ? 'border-siren-500/30 bg-siren-500/10 text-siren-400' : isSafe ? 'border-radar-500/30 bg-radar-500/10 text-radar-400' : 'border-amber-500/30 bg-amber-500/10 text-amber-400';
         const hourlyBurn = Math.round((item.dailyAdSpend || 3000) / 24);
+        const isBlinkit = item.platform === 'BLINKIT' || (item.url && item.url.includes('blinkit.com'));
+        const isWoo = item.platform === 'WOOCOMMERCE' || (item.url && item.url.includes('woocommerce'));
+        const platformBadge = isBlinkit 
+          ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚡ Blinkit</span>'
+          : (isWoo 
+              ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">📦 Woo</span>' 
+              : '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">🛍️ Shopify</span>');
 
         return `
           <div class="glass-card rounded-2xl p-5 border border-white/10 space-y-4 hover:border-white/20 transition-all">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
                 <span class="relative flex h-2.5 w-2.5">
                   <span class="${beaconColor} absolute inline-flex h-full w-full rounded-full opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2.5 w-2.5 ${isCritical ? 'bg-siren-500' : isSafe ? 'bg-radar-500' : 'bg-amber-400'}"></span>
                 </span>
                 <span class="text-xs font-bold text-white">${item.brandName || 'Brand'}</span>
+                ${platformBadge}
               </div>
               <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${badgeBorder}">
                 ${item.lastStatus.replace(/_/g, ' ')}

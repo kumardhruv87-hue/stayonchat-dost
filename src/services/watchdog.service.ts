@@ -6,6 +6,7 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import { execFile } from 'child_process';
 import { WATCHDOG_RULES } from '../config/constants.js';
 
 export type DiagnosticStatus = 
@@ -16,6 +17,8 @@ export type DiagnosticStatus =
   | 'REDIRECT_RISK'
   | 'SERVER_ERROR'
   | 'UNKNOWN';
+
+export type PlatformType = 'SHOPIFY' | 'BLINKIT' | 'WOOCOMMERCE' | 'CUSTOM';
 
 export interface VariantDetail {
   id: string | number;
@@ -29,6 +32,7 @@ export interface DiagnosticResult {
   url: string;
   domain: string;
   brandName: string;
+  platform: PlatformType;
   handle?: string;
   httpStatus: number;
   status: DiagnosticStatus;
@@ -57,6 +61,7 @@ export interface MonitoredUrl {
   id: string;
   url: string;
   brandName: string;
+  platform?: PlatformType;
   userPhone: string;
   dailyAdSpend: number;
   lastStatus: DiagnosticStatus;
@@ -132,17 +137,201 @@ export class WatchdogService {
   }
 
   /**
-   * Execute full diagnostic scan on any Shopify product or landing page URL
+   * Detect e-commerce or quick commerce platform from URL/domain
+   */
+  public detectPlatform(url: string, domain: string): PlatformType {
+    const lowerUrl = url.toLowerCase();
+    const lowerDomain = domain.toLowerCase();
+
+    if (lowerDomain.includes('blinkit.com')) {
+      return 'BLINKIT';
+    }
+    if (lowerDomain.includes('myshopify.com') || lowerUrl.includes('/products/')) {
+      return 'SHOPIFY';
+    }
+    if (lowerUrl.includes('wp-content') || lowerUrl.includes('woocommerce') || lowerUrl.includes('/product/')) {
+      return 'WOOCOMMERCE';
+    }
+    return 'CUSTOM';
+  }
+
+  /**
+   * Anti-Bot TLS Fingerprint Bypass Engine
+   * Executes curl with realistic Chrome headers to bypass Cloudflare WAF, Akamai, and Bot Blockers.
+   * Cross-platform: Uses curl.exe on Windows, curl on Linux/macOS.
+   */
+  public async fetchWithAntiBotBypass(targetUrl: string, timeoutSec: number = 12): Promise<{ html: string; status: number }> {
+    return new Promise((resolve) => {
+      const curlBin = process.platform === 'win32' ? 'curl.exe' : 'curl';
+      const args = [
+        '-s',
+        '-L',
+        '-w', '\n%{http_code}',
+        '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        '-H', 'Accept-Language: en-US,en;q=0.9',
+        '-H', 'sec-ch-ua: "Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+        '-H', 'sec-ch-ua-mobile: ?0',
+        '-H', 'sec-ch-ua-platform: "Windows"',
+        '--max-time', timeoutSec.toString(),
+        targetUrl,
+      ];
+
+      execFile(curlBin, args, { maxBuffer: 10 * 1024 * 1024 }, async (error, stdout) => {
+        if (!error && stdout) {
+          const lines = stdout.trimEnd().split('\n');
+          const lastLine = lines[lines.length - 1].trim();
+          const statusCode = parseInt(lastLine, 10);
+
+          if (!isNaN(statusCode) && statusCode > 0) {
+            const html = lines.slice(0, -1).join('\n');
+            return resolve({ html, status: statusCode });
+          }
+          return resolve({ html: stdout, status: 200 });
+        }
+
+        // Fallback to Axios if curl fails or is missing
+        try {
+          const fallbackResp = await axios.get(targetUrl, {
+            timeout: timeoutSec * 1000,
+            validateStatus: () => true,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            },
+          });
+          return resolve({ html: String(fallbackResp.data || ''), status: fallbackResp.status });
+        } catch (axiosErr: any) {
+          return resolve({ html: '', status: axiosErr.response?.status || 500 });
+        }
+      });
+    });
+  }
+
+  /**
+   * Parse structured Quick Commerce product data from Blinkit
+   */
+  public parseBlinkitProduct(
+    html: string,
+    base: DiagnosticResult,
+    dailyAdSpend: number,
+    startTime: number
+  ): DiagnosticResult {
+    base.platform = 'BLINKIT';
+    const hourlyBurn = Math.round(dailyAdSpend / 24);
+
+    // 1. Extract JSON-LD Schema.org product data
+    const regex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+    let match;
+    let productFound = false;
+
+    while ((match = regex.exec(html)) !== null) {
+      try {
+        const data = JSON.parse(match[1]);
+        if (data['@type'] === 'Product') {
+          productFound = true;
+          base.productTitle = data.name || base.productTitle;
+          if (data.brand?.name) {
+            base.brandName = data.brand.name;
+          }
+          if (data.image) {
+            base.productImage = Array.isArray(data.image) ? data.image[0] : data.image;
+          }
+          if (data.offers?.price) {
+            base.price = Number(data.offers.price);
+          }
+          if (data.offers?.priceCurrency) {
+            base.currency = data.offers.priceCurrency;
+          }
+
+          const availabilityStr = String(data.offers?.availability || '');
+          const isInStock = availabilityStr.includes('InStock');
+          base.isAvailable = isInStock;
+          base.totalVariants = 1;
+          base.inStockVariants = isInStock ? 1 : 0;
+          base.outOfStockVariants = isInStock ? 0 : 1;
+          base.variants = [
+            {
+              id: 'blinkit_default',
+              title: data.name || 'Standard SKU',
+              available: isInStock,
+              price: base.price || 0,
+            },
+          ];
+
+          if (isInStock) {
+            base.status = 'SAFE_IN_STOCK';
+            base.adWasteRisk = {
+              level: 'SAFE',
+              estimatedDailySpend: dailyAdSpend,
+              hourlyBurnRateInr: 0,
+              estimatedWastePct: 0,
+              actionHeadline: '⚡ BLINKIT DARK STORE: IN STOCK',
+              actionAdvice: 'SKU is available for 10-minute delivery in this dark store hub. 24/7 Dark Store Watchdog active.',
+            };
+          } else {
+            base.status = 'CRITICAL_OUT_OF_STOCK';
+            base.adWasteRisk = {
+              level: 'CRITICAL',
+              estimatedDailySpend: dailyAdSpend,
+              hourlyBurnRateInr: hourlyBurn,
+              estimatedWastePct: 100,
+              actionHeadline: '⚡ BLINKIT DARK STORE SOLD OUT',
+              actionAdvice: 'Product is 100% OUT OF STOCK in this dark store hub! Customers cannot order and organic rank is dropping. Alert FMCG distributor or restock now.',
+            };
+          }
+          break;
+        }
+      } catch (e) {}
+    }
+
+    if (!productFound) {
+      // Fallback heuristics for Blinkit HTML
+      const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
+      if (titleMatch) {
+        base.productTitle = titleMatch[1].replace(/ \| Blinkit.*$/i, '').trim();
+      }
+      const imgMatch = html.match(/<meta property="og:image" content="([^"]+)"/i);
+      if (imgMatch) {
+        base.productImage = imgMatch[1];
+      }
+
+      const hasSoldOut = /Out of stock|Currently unavailable|sold out/i.test(html);
+      base.isAvailable = !hasSoldOut;
+      base.status = hasSoldOut ? 'CRITICAL_OUT_OF_STOCK' : 'SAFE_IN_STOCK';
+      base.totalVariants = 1;
+      base.inStockVariants = hasSoldOut ? 0 : 1;
+      base.outOfStockVariants = hasSoldOut ? 1 : 0;
+      base.adWasteRisk = {
+        level: hasSoldOut ? 'CRITICAL' : 'SAFE',
+        estimatedDailySpend: dailyAdSpend,
+        hourlyBurnRateInr: hasSoldOut ? hourlyBurn : 0,
+        estimatedWastePct: hasSoldOut ? 100 : 0,
+        actionHeadline: hasSoldOut ? '⚡ BLINKIT DARK STORE SOLD OUT' : '⚡ BLINKIT DARK STORE: IN STOCK',
+        actionAdvice: hasSoldOut
+          ? 'Product is out of stock in this dark store hub. Restock immediately.'
+          : 'Product is available for 10-minute delivery.',
+      };
+    }
+
+    base.responseTimeMs = Date.now() - startTime;
+    return base;
+  }
+
+  /**
+   * Execute full diagnostic scan on any Shopify, Blinkit Quick Commerce, or D2C URL
    */
   public async scanUrl(targetUrl: string, dailyAdSpend: number = WATCHDOG_RULES.DEFAULT_ESTIMATED_DAILY_BUDGET): Promise<DiagnosticResult> {
     const startTime = Date.now();
     const { domain, handle, cleanUrl } = this.parseShopifyUrl(targetUrl);
     const scannedAt = new Date().toISOString();
+    const platform = this.detectPlatform(targetUrl, domain);
 
     const baseResult: DiagnosticResult = {
       url: targetUrl,
       domain,
       brandName: this.extractBrandFromDomain(domain),
+      platform,
       handle,
       httpStatus: 0,
       status: 'UNKNOWN',
@@ -165,17 +354,55 @@ export class WatchdogService {
       responseTimeMs: 0,
     };
 
-    // 1. If we have a Shopify product handle, check native Shopify endpoint: https://domain/products/handle.js
-    if (handle) {
+    // Platform Engine 1: Blinkit Quick Commerce (Protected by Anti-Bot TLS Bypass)
+    if (platform === 'BLINKIT') {
+      const fetched = await this.fetchWithAntiBotBypass(targetUrl);
+      baseResult.httpStatus = fetched.status;
+
+      if (fetched.status === 404) {
+        baseResult.status = 'DEAD_LINK_404';
+        baseResult.isAvailable = false;
+        baseResult.adWasteRisk = {
+          level: 'CRITICAL',
+          estimatedDailySpend: dailyAdSpend,
+          hourlyBurnRateInr: Math.round(dailyAdSpend / 24),
+          estimatedWastePct: 100,
+          actionHeadline: '🚨 BLINKIT PRODUCT NOT FOUND (404)',
+          actionAdvice: 'Blinkit product link is broken or delisted. Remove link or fix URL.',
+        };
+        baseResult.responseTimeMs = Date.now() - startTime;
+        return baseResult;
+      }
+
+      if (fetched.status >= 500) {
+        baseResult.status = 'SERVER_ERROR';
+        baseResult.isAvailable = false;
+        baseResult.adWasteRisk = {
+          level: 'CRITICAL',
+          estimatedDailySpend: dailyAdSpend,
+          hourlyBurnRateInr: Math.round(dailyAdSpend / 24),
+          estimatedWastePct: 100,
+          actionHeadline: '🚨 QUICK COMMERCE SERVER ERROR',
+          actionAdvice: 'Blinkit server temporarily unresponsive. Re-checking shortly.',
+        };
+        baseResult.responseTimeMs = Date.now() - startTime;
+        return baseResult;
+      }
+
+      return this.parseBlinkitProduct(fetched.html, baseResult, dailyAdSpend, startTime);
+    }
+
+    // Platform Engine 2: Shopify Direct API Check
+    if (platform === 'SHOPIFY' && handle) {
       try {
         const jsonEndpoint = `https://${domain}/products/${handle}.js`;
         const resp = await axios.get(jsonEndpoint, {
           timeout: 8000,
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
             'Accept': 'application/json, text/plain, */*',
           },
-          validateStatus: () => true, // Don't throw on 404/redirects so we can inspect status
+          validateStatus: () => true,
         });
 
         baseResult.httpStatus = resp.status;
@@ -199,25 +426,16 @@ export class WatchdogService {
           return baseResult;
         }
       } catch (err: any) {
-        console.warn(`[Watchdog] Native JSON check failed for ${targetUrl}: ${err.message}. Falling back to HTML inspection.`);
+        console.warn(`[Watchdog] Native Shopify JSON check failed for ${targetUrl}: ${err.message}. Falling back to Anti-Bot HTML inspection.`);
       }
     }
 
-    // 2. HTML Fallback Inspection (for non-standard URLs, collections, or headless setups)
+    // Platform Engine 3: Anti-Bot HTML Fallback (WooCommerce, Custom, or Shopify themes with custom routing)
     try {
-      const htmlResp = await axios.get(targetUrl, {
-        timeout: 10000,
-        maxRedirects: 5,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        },
-        validateStatus: () => true,
-      });
+      const fetched = await this.fetchWithAntiBotBypass(targetUrl);
+      baseResult.httpStatus = fetched.status;
 
-      baseResult.httpStatus = htmlResp.status;
-
-      if (htmlResp.status === 404) {
+      if (fetched.status === 404) {
         baseResult.status = 'DEAD_LINK_404';
         baseResult.isAvailable = false;
         baseResult.adWasteRisk = {
@@ -232,7 +450,7 @@ export class WatchdogService {
         return baseResult;
       }
 
-      if (htmlResp.status >= 500) {
+      if (fetched.status >= 500) {
         baseResult.status = 'SERVER_ERROR';
         baseResult.isAvailable = false;
         baseResult.adWasteRisk = {
@@ -241,13 +459,13 @@ export class WatchdogService {
           hourlyBurnRateInr: Math.round(dailyAdSpend / 24),
           estimatedWastePct: 100,
           actionHeadline: '🚨 SERVER CRASH (5XX ERROR)',
-          actionAdvice: 'Shopify store or host is returning server errors. Check store uptime.',
+          actionAdvice: 'E-commerce store or host is returning server errors. Check store uptime.',
         };
         baseResult.responseTimeMs = Date.now() - startTime;
         return baseResult;
       }
 
-      return this.parseHtmlFallback(htmlResp.data, baseResult, dailyAdSpend, startTime);
+      return this.parseHtmlFallback(fetched.html, baseResult, dailyAdSpend, startTime);
     } catch (err: any) {
       baseResult.httpStatus = 500;
       baseResult.status = 'SERVER_ERROR';
@@ -352,19 +570,81 @@ export class WatchdogService {
   ): DiagnosticResult {
     const hourlyBurn = Math.round(dailyAdSpend / 24);
 
-    // 1. Extract Title
+    // 1. First attempt: Schema.org Product JSON-LD extraction
+    const regex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+    let match;
+
+    while ((match = regex.exec(html)) !== null) {
+      try {
+        const data = JSON.parse(match[1]);
+        const productData = data['@type'] === 'Product' 
+          ? data 
+          : (Array.isArray(data['@graph']) ? data['@graph'].find((item: any) => item['@type'] === 'Product') : null);
+
+        if (productData) {
+          if (productData.name) base.productTitle = productData.name;
+          if (productData.image) {
+            base.productImage = Array.isArray(productData.image) ? productData.image[0] : productData.image;
+          }
+          if (productData.offers?.price) {
+            base.price = Number(productData.offers.price);
+          }
+          if (productData.offers?.priceCurrency) {
+            base.currency = productData.offers.priceCurrency;
+          }
+
+          const avail = String(productData.offers?.availability || '');
+          if (avail.includes('OutOfStock') || avail.includes('SoldOut')) {
+            base.isAvailable = false;
+            base.status = 'CRITICAL_OUT_OF_STOCK';
+            base.totalVariants = 1;
+            base.inStockVariants = 0;
+            base.outOfStockVariants = 1;
+            base.variants = [{ id: 'default', title: 'Default', available: false, price: base.price || 0 }];
+            base.adWasteRisk = {
+              level: 'CRITICAL',
+              estimatedDailySpend: dailyAdSpend,
+              hourlyBurnRateInr: hourlyBurn,
+              estimatedWastePct: 100,
+              actionHeadline: '🚨 PRODUCT SOLD OUT (SCHEMA DETECTED)',
+              actionAdvice: `Destination product is Out of Stock. Burning ~₹${hourlyBurn}/hour on dead ad clicks. PAUSE ADSET IMMEDIATELY.`,
+            };
+            base.responseTimeMs = Date.now() - startTime;
+            return base;
+          } else if (avail.includes('InStock')) {
+            base.isAvailable = true;
+            base.status = 'SAFE_IN_STOCK';
+            base.totalVariants = 1;
+            base.inStockVariants = 1;
+            base.outOfStockVariants = 0;
+            base.variants = [{ id: 'default', title: 'Default', available: true, price: base.price || 0 }];
+            base.adWasteRisk = {
+              level: 'SAFE',
+              estimatedDailySpend: dailyAdSpend,
+              hourlyBurnRateInr: 0,
+              estimatedWastePct: 0,
+              actionHeadline: '✅ 100% IN STOCK & READY FOR ADS',
+              actionAdvice: 'Product is verified In-Stock via Schema.org structured data. 24/7 Siren watchdog active.',
+            };
+            base.responseTimeMs = Date.now() - startTime;
+            return base;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 2. Fallback: OpenGraph and Title
     const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
     if (titleMatch) {
       base.productTitle = titleMatch[1].replace(/ - [^-]+$/, '').trim();
     }
 
-    // 2. Extract Image
     const imgMatch = html.match(/<meta property="og:image" content="([^"]+)"/i);
     if (imgMatch) {
       base.productImage = imgMatch[1];
     }
 
-    // 3. Look for Out of Stock signals
+    // 3. Fallback: HTML Out of Stock heuristics
     const hasSoldOutText = /("availability"\s*:\s*"https?:\/\/schema.org\/OutOfStock"|Sold Out|Out of stock|Currently unavailable|sold_out)/i.test(html);
     const hasInStockText = /("availability"\s*:\s*"https?:\/\/schema.org\/InStock"|Add to Cart|Buy Now|in_stock)/i.test(html);
 
@@ -576,10 +856,13 @@ export class WatchdogService {
     const brandName = item.brandName || this.extractBrandFromDomain(domain);
     const id = `mon_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
+    const platform = this.detectPlatform(cleanUrl, domain);
+
     const monitored: MonitoredUrl = {
       id,
       url: cleanUrl,
       brandName,
+      platform,
       userPhone: item.userPhone,
       dailyAdSpend: item.dailyAdSpend || WATCHDOG_RULES.DEFAULT_ESTIMATED_DAILY_BUDGET,
       lastStatus: 'UNKNOWN',

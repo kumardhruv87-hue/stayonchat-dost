@@ -223,6 +223,7 @@ export class WebhookService {
         url: mockMonitored.url,
         domain: 'snitch.co.in',
         brandName: 'Snitch',
+        platform: 'SHOPIFY',
         httpStatus: 200,
         status: 'CRITICAL_OUT_OF_STOCK',
         isAvailable: false,
