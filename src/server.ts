@@ -38,6 +38,16 @@ app.use(express.json({
 }));
 app.use(cors());
 
+// System Pause Flag: defaults to true (can be unpaused anytime via ROASSIREN_PAUSED=false)
+const IS_PAUSED = process.env.ROASSIREN_PAUSED !== 'false';
+
+// Intercept public pages with paused maintenance screen if paused
+if (IS_PAUSED) {
+  app.get(['/', '/index.html', '/audit', '/client'], (req: Request, res: Response) => {
+    res.sendFile(path.join(process.cwd(), 'public', 'paused.html'));
+  });
+}
+
 // Serve public static website (Landing Page on usekeepr.com)
 app.use(express.static(path.join(process.cwd(), 'public')));
 
@@ -74,7 +84,7 @@ app.get('/api/info', (req: Request, res: Response) => {
     tagline: BRAND.tagline,
     domain: BRAND.domain,
     support: BRAND.supportEmail,
-    status: 'ONLINE',
+    status: IS_PAUSED ? 'PAUSED' : 'ONLINE',
     time: new Date().toISOString(),
   });
 });
@@ -1339,6 +1349,10 @@ app.listen(PORT, () => {
   console.log(`📡 Webhook URL: http://localhost:${PORT}/webhook`);
   console.log(`=================================================`);
 
-  // Start daily 9:00 AM IST automated expiry check
-  schedulerService.startScheduler();
+  // Start daily automated checks and sweeps only if active
+  if (!IS_PAUSED) {
+    schedulerService.startScheduler();
+  } else {
+    console.log(`⏸️ [PAUSE MODE ACTIVE] RoasSiren website and background sweeps are paused.`);
+  }
 });

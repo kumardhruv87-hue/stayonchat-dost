@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoasSiren™ 🚨 — Platform Temporarily Paused</title>
+  
+  <meta name="description" content="RoasSiren operations are temporarily paused for platform maintenance and architecture upgrades." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#030712',
+              900: '#090d16',
+              850: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+            },
+            siren: {
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              glow: 'rgba(244, 63, 94, 0.35)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-obsidian-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-siren-500 selection:text-white antialiased">
+
+  <!-- Background decorative glows -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-siren-600/10 rounded-full blur-[160px]"></div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="border-b border-slate-800/80 bg-obsidian-900/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-siren-600 to-amber-500 p-0.5 shadow-lg shadow-siren-glow">
+          <div class="w-full h-full bg-obsidian-950 rounded-[10px] flex items-center justify-center font-black text-white text-lg">
+            🚨
+          </div>
+        </div>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight text-white">RoasSiren<span class="text-siren-400">™</span></span>
+        </div>
+      </div>
+
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+        Platform Paused
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Hero Content -->
+  <main class="flex-1 flex items-center justify-center px-6 py-16">
+    <div class="max-w-2xl mx-auto text-center space-y-8">
+      
+      <!-- Status Icon & Pill -->
+      <div class="flex flex-col items-center justify-center space-y-4">
+        <div class="w-20 h-20 rounded-2xl bg-obsidian-850 border border-slate-700/80 flex items-center justify-center shadow-2xl relative">
+          <span class="text-4xl">⏸️</span>
+          <span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full border-2 border-obsidian-950"></span>
+        </div>
+        
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-mono uppercase tracking-wider">
+          System Notice • Under Scheduled Review
+        </div>
+      </div>
+
+      <!-- Headline & Explanation -->
+      <div class="space-y-4">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+          RoasSiren is Currently <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-400 to-siren-500">Paused</span>
+        </h1>
+        <p class="text-base sm:text-lg text-slate-400 leading-relaxed max-w-xl mx-auto">
+          We have temporarily suspended public operations and automated store radars while we review system architecture, evaluate customer feedback, and refine our platform.
+        </p>
+      </div>
+
+      <!-- Status Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+        <div class="p-4 rounded-xl bg-obsidian-900/80 border border-slate-800/90">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase mb-1">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span> New Signups
+          </div>
+          <p class="text-sm font-bold text-slate-200">Temporarily Closed</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-obsidian-900/80 border border-slate-800/90">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase mb-1">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Watchdog Sweeps
+          </div>
+          <p class="text-sm font-bold text-slate-200">Suspended</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-obsidian-900/80 border border-slate-800/90">
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-400 uppercase mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Direct Contact
+          </div>
+          <p class="text-sm font-bold text-slate-200">Founder Direct Open</p>
+        </div>
+      </div>
+
+      <!-- CTA / Contact Options -->
+      <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="https://wa.me/919560931596?text=Hi%20Dhruv%2C%20I%20visited%20RoasSiren%20and%20wanted%20to%20connect" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition shadow-lg shadow-emerald-950/50">
+          <span>💬</span> Chat with Founder on WhatsApp
+        </a>
+        <a href="mailto:support@usekeepr.com" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-slate-700 text-slate-200 font-semibold text-sm transition">
+          <span>✉️</span> support@usekeepr.com
+        </a>
+      </div>
+
+      <!-- Admin Access Notice -->
+      <div class="pt-4 text-xs text-slate-500">
+        Administrator? 
+        <a href="/dashboard" class="text-slate-400 hover:text-white underline decoration-slate-600 underline-offset-4 font-mono ml-1">Access Console</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-500 font-mono">
+    &copy; 2026 RoasSiren Technologies Inc. All systems secured.
+  </footer>
+
+</body>
+</html>
